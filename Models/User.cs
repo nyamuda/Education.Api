@@ -15,4 +15,6 @@ public class User
     public UserRole Role { get; set; } = UserRole.User;
 
     public bool IsVerified { get; set; } = false;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
