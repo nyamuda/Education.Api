@@ -1,7 +1,7 @@
 ﻿using Education.Api.Enums;
 using Education.Api.Models;
 
-namespace Education.API.Services.Abstractions.Auth;
+namespace Education.Api.Services.Abstractions.Auth;
 
 public interface IJwtService
 {

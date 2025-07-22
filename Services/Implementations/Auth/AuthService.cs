@@ -1,13 +1,5 @@
-﻿using DrivingSchool.API.Data;
-using DrivingSchool.API.Dtos;
-using DrivingSchool.API.Dtos.Account;
-using DrivingSchool.API.Helpers;
-using DrivingSchool.API.Models;
-using DrivingSchool.API.Services.Abstractions.Auth;
-using DrivingSchool.API.Services.Abstractions.Emails;
-using Microsoft.EntityFrameworkCore;
+﻿
 
-namespace DrivingSchool.API.Services.Implementations.Auth;
 
 public class AuthService : IAuthService
 {

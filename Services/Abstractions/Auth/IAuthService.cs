@@ -1,7 +1,4 @@
-﻿using DrivingSchool.API.Dtos;
-using DrivingSchool.API.Dtos.Account;
-
-namespace DrivingSchool.API.Services.Abstractions.Auth;
+﻿namespace Education.Api.Services.Abstractions.Auth;
 
 public interface IAuthService
 {
