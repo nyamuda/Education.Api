@@ -1,3 +1,5 @@
+using Education.Api.Dtos.Contact;
+
 namespace Education.Api.Services.Abstractions.Email;
 
 public interface IEmailTemplateBuilder

@@ -1,7 +1,195 @@
+using Education.Api.Models;
+using Education.Api.Services.Abstractions.Email;
+using Microsoft.Extensions.Options;
+
 namespace Education.Api.Services.Implementations.Email;
 
-
-public class EmailTemplateBuilder 
+public class EmailTemplateBuilder : IEmailTemplateBuilder
 {
-    
+    private readonly Company _company;
+
+    public EmailTemplateBuilder(IOptions<Company> options)
+    {
+        _company = options.Value;
+    }
+
+    public string BuildPasswordResetRequestTemplate(string recipientName, string otp)
+    {
+        return $@"
+<!DOCTYPE html>
+<html lang=""en"">
+  <head>
+    <meta charset=""UTF-8"" />
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+    <title>Password Reset</title>
+    <style>
+      body {{
+        margin: 0;
+        padding: 0;
+        background-color: #f7fafc;
+        font-family: Helvetica, Arial, sans-serif;
+      }}
+
+      .wrapper {{
+        padding: 40px 16px;
+      }}
+
+      .container {{
+        max-width: 600px;
+        margin: 0 auto;
+        width: 100%;
+      }}
+
+      .logo,
+      .footer-logo {{
+        display: block;
+        margin: auto;
+      }}
+
+      .spacer-40 {{
+        height: 40px;
+      }}
+
+      .spacer-24 {{
+        height: 24px;
+      }}
+
+      .card {{
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 40px;
+      }}
+
+      h1 {{
+        margin-top: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }}
+
+      .otp-box {{
+        margin: 32px 0;
+        text-align: center;
+      }}
+
+      .otp {{
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #edf2f7;
+        border-radius: 6px;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 4px;
+      }}
+
+      .footer-note {{
+        font-size: 14px;
+        color: #6c757d;
+        margin-top: 32px;
+      }}
+
+      .footer-info {{
+        color: #718096;
+        font-size: 14px;
+        text-align: center;
+      }}
+    </style>
+  </head>
+  <body>
+    <table
+      role=""presentation""
+      border=""0""
+      cellpadding=""0""
+      cellspacing=""0""
+      width=""100%""
+      bgcolor=""#f7fafc""
+    >
+      <tr>
+        <td align=""center"" class=""wrapper"">
+          <table
+            role=""presentation""
+            border=""0""
+            cellpadding=""0""
+            cellspacing=""0""
+            class=""container""
+          >
+            <!-- Logo -->
+            <tr>
+              <td align=""center"">
+                <img
+                  src=""https://assets.bootstrapemail.com/logos/light/square.png""
+                  alt=""Company Logo""
+                  width=""96""
+                  class=""logo""
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td class=""spacer-40"">&nbsp;</td>
+            </tr>
+
+            <!-- Main Card -->
+            <tr>
+              <td class=""card"">
+                <h1>Password Reset Request</h1>
+                <p>Hi {recipientName},</p>
+                <p>
+                  We received a request to reset your password. Please use the
+                  one-time password (OTP) below to continue:
+                </p>
+
+                <div class=""otp-box"">
+                  <span class=""otp"">{otp}</span>
+                </div>
+
+                <p>Thank you,</p>
+                <p>The {_company.Name} Team</p>
+
+                <p class=""footer-note"">
+                  If you did not request a password reset, you can safely ignore
+                  this email.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td class=""spacer-40"">&nbsp;</td>
+            </tr>
+
+            <!-- Footer Logo -->
+            <tr>
+              <td align=""center"">
+                <img
+                  src=""https://assets.bootstrapemail.com/logos/light/text.png""
+                  width=""160""
+                  class=""footer-logo""
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td class=""spacer-24"">&nbsp;</td>
+            </tr>
+
+            <!-- Footer Info -->
+            <tr>
+              <td class=""footer-info"">
+                {_company.Email}<br />
+                {_company.WebsiteUrl}
+              </td>
+            </tr>
+
+            <tr>
+              <td class=""spacer-24"">&nbsp;</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
+";
+    }
 }
