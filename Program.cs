@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Education.Api.Data;
+using Education.Api.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +24,10 @@ string connectionString =
 builder
     .Services
     .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+
+// Binds the "Company" section from appsettings.json to the Company class
+// This allows you to access company config settings in a strongly-typed way
+builder.Services.Configure<Company>(builder.Configuration.GetSection("Company"));
 
 //Configure JWT Authentication
 string jwtIssuer =
