@@ -15,13 +15,16 @@ public class OtpService : IOtpService
         _context = context;
     }
 
-    //Generate a secure six figure random one time password (OTP)
-    public string GenerateRandomOtp()
+    /// <summary>
+    /// Generates a cryptographically secure 6-digit one-time password (OTP).
+    /// </summary>
+    /// <returns>A 6-character numeric OTP as a string, padded with leading zeros if necessary.</returns>
+    public string Generate()
     {
         // Generate a cryptographically secure random integer number between 0 and 999 999
         int randomNumber = RandomNumberGenerator.GetInt32(0, 1_000_000);
 
-        //Make sure the OTP always has six digits
+        // Convert the number to a 6-digit string with leading zeros if needed (e.g., "004582")
         string optValue = randomNumber.ToString("D6");
 
         return optValue;
