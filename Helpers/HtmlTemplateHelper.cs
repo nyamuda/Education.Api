@@ -2,12 +2,14 @@ namespace Education.Api.Helpers;
 
 public static class HtmlTemplateHelper
 {
-    //Template for resetting password
-    public static string PasswordResetRequestTemplate(
+  
+
+    public static string EmailVerificationRequestTemplate(
+        string verificationUrl,
         string recipientName,
-        string otp,
         string companyName,
-        string companyEmail
+        string companyEmail,
+        string companyAddress
     )
     {
         return $@"
@@ -16,7 +18,7 @@ public static class HtmlTemplateHelper
   <head>
     <meta charset=""UTF-8"" />
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
-    <title>Password Reset</title>
+    <title>Email Verification Code</title>
     <style>
       body {{
         margin: 0;
@@ -127,23 +129,23 @@ public static class HtmlTemplateHelper
             <!-- Main Card -->
             <tr>
               <td class=""card"">
-                <h1>Password Reset Request</h1>
-                <p>Hi {recipientName},</p>
+                <h1>Email Verification Code</h1>
+                <p>Hi {{recipientName}},</p>
                 <p>
-                  We received a request to reset your password. Please use the
-                  one-time password (OTP) below to continue:
+                  We received a request to verify your email address. Please use
+                  the one-time password (OTP) below to continue:
                 </p>
 
                 <div class=""otp-box"">
-                  <span class=""otp"">{otp}</span>
+                  <span class=""otp"">{{otp}}</span>
                 </div>
 
                 <p>Thank you,</p>
-                <p>The {_appName} Team</p>
+                <p>The {{companyName}} Team</p>
 
                 <p class=""footer-note"">
-                  If you did not request a password reset, you can safely ignore
-                  this email.
+                  If you did not request a verification code, please ignore this
+                  email.
                 </p>
               </td>
             </tr>
@@ -188,161 +190,8 @@ public static class HtmlTemplateHelper
 ";
     }
 
-    public static string EmailVerificationRequestTemplate(
-        string verificationUrl,
-        string recipientName,
-        string companyName,
-        string companyEmail,
-        string companyAddress
-    )
-    {
-        return $@"
-<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">
-<html>
-  <head>
-    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
-    <meta http-equiv=""x-ua-compatible"" content=""ie=edge"">
-    <meta name=""x-apple-disable-message-reformatting"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
-    <meta name=""format-detection"" content=""telephone=no, date=no, address=no, email=no"">
-    <style type=""text/css"">
-      body,table,td{{font-family:Helvetica,Arial,sans-serif !important}}.ExternalClass{{width:100%}}.ExternalClass,.ExternalClass p,.ExternalClass span,.ExternalClass font,.ExternalClass td,.ExternalClass div{{line-height:150%}}a{{text-decoration:none}}*{{color:inherit}}a[x-apple-data-detectors],u+#body a,#MessageViewBody a{{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit}}img{{-ms-interpolation-mode:bicubic}}table:not([class^=s-]){{font-family:Helvetica,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;border-spacing:0px;border-collapse:collapse}}table:not([class^=s-]) td{{border-spacing:0px;border-collapse:collapse}}@media screen and (max-width: 600px){{.w-full,.w-full>tbody>tr>td{{width:100% !important}}.w-24,.w-24>tbody>tr>td{{width:96px !important}}.w-40,.w-40>tbody>tr>td{{width:160px !important}}.p-lg-10:not(table),.p-lg-10:not(.btn)>tbody>tr>td,.p-lg-10.btn td a{{padding:0 !important}}.p-3:not(table),.p-3:not(.btn)>tbody>tr>td,.p-3.btn td a{{padding:12px !important}}.p-6:not(table),.p-6:not(.btn)>tbody>tr>td,.p-6.btn td a{{padding:24px !important}}*[class*=s-lg-]>tbody>tr>td{{font-size:0 !important;line-height:0 !important;height:0 !important}}.s-4>tbody>tr>td{{font-size:16px !important;line-height:16px !important;height:16px !important}}.s-6>tbody>tr>td{{font-size:24px !important;line-height:24px !important;height:24px !important}}.s-10>tbody>tr>td{{font-size:40px !important;line-height:40px !important;height:40px !important}}}}
-    </style>
-  </head>
-  <body bgcolor=""#f7fafc"" style=""margin: 0; padding: 0;"">
-    <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" bgcolor=""#f7fafc"">
-      <tr>
-        <td align=""center"" style=""padding: 40px 16px;"">
-          <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""max-width: 600px;"">
-            <tr>
-              <td align=""center"">
-                <img src=""https://assets.bootstrapemail.com/logos/light/square.png"" alt=""Company Logo"" width=""96"" style=""display: block; margin: auto;"">
-              </td>
-            </tr>
-            <tr>
-              <td height=""40"">&#160;</td>
-            </tr>
-            <tr>
-              <td bgcolor=""#ffffff"" style=""border: 1px solid #e2e8f0; border-radius: 6px; padding: 40px;"">
-                <h1 style=""margin-top: 0; font-size: 24px; font-weight: 700;"">Password Reset Request</h1>
-                <p>Hi {recipientName},</p>
-                <p>To ensure continued access to your account, please verify your email address using the button below.</p>
-                <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" style=""margin: 24px 0;"">
-                  <tr>
-                    <td align=""center"" bgcolor=""#0d6efd"" style=""border-radius: 6px;"">
-                      <a href=""{verificationUrl}"" style=""display: inline-block; padding: 12px 24px; color: #ffffff; background-color: #0d6efd; font-weight: 700; text-decoration: none; border-radius: 6px;"">Confirm Email</a>
-                    </td>
-                  </tr>
-                </table>
-                <p>Thank you,</p>
-                <p>The {companyName} Team</p>
-                <p style=""font-size: 14px; color: #6c757d; margin-top: 32px;"">
-                  If this wasn’t you, please disregard this message.
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td height=""40"">&#160;</td>
-            </tr>
-            <tr>
-              <td align=""center"">
-                <img src=""https://assets.bootstrapemail.com/logos/light/text.png"" width=""160"" style=""display: block; margin: auto;"">
-              </td>
-            </tr>
-            <tr>
-              <td height=""24"">&#160;</td>
-            </tr>
-            <tr>
-              <td align=""center"" style=""color: #718096; font-size: 14px;"">
-                {companyEmail}<br>
-                {companyAddress}
-              </td>
-            </tr>
-            <tr>
-              <td height=""24"">&#160;</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
-";
-    }
-
     //Template for contact us
-    public static string ContactFormMessageTemplate(
-        ContactDto contactDto,
-        string companyEmail,
-        string companyAddress
-    )
-    {
-        return $@"
-<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">
-<html>
-  <head>
-    <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
-    <meta http-equiv=""x-ua-compatible"" content=""ie=edge"">
-    <meta name=""x-apple-disable-message-reformatting"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
-    <meta name=""format-detection"" content=""telephone=no, date=no, address=no, email=no"">
-    <style type=""text/css"">
-      body,table,td{{font-family:Helvetica,Arial,sans-serif !important}}.ExternalClass{{width:100%}}.ExternalClass,.ExternalClass p,.ExternalClass span,.ExternalClass font,.ExternalClass td,.ExternalClass div{{line-height:150%}}a{{text-decoration:none}}*{{color:inherit}}a[x-apple-data-detectors],u+#body a,#MessageViewBody a{{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit}}img{{-ms-interpolation-mode:bicubic}}table:not([class^=s-]){{font-family:Helvetica,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;border-spacing:0px;border-collapse:collapse}}table:not([class^=s-]) td{{border-spacing:0px;border-collapse:collapse}}@media screen and (max-width: 600px){{.w-full,.w-full>tbody>tr>td{{width:100% !important}}.w-24,.w-24>tbody>tr>td{{width:96px !important}}.w-40,.w-40>tbody>tr>td{{width:160px !important}}.p-lg-10:not(table),.p-lg-10:not(.btn)>tbody>tr>td,.p-lg-10.btn td a{{padding:0 !important}}.p-3:not(table),.p-3:not(.btn)>tbody>tr>td,.p-3.btn td a{{padding:12px !important}}.p-6:not(table),.p-6:not(.btn)>tbody>tr>td,.p-6.btn td a{{padding:24px !important}}*[class*=s-lg-]>tbody>tr>td{{font-size:0 !important;line-height:0 !important;height:0 !important}}.s-4>tbody>tr>td{{font-size:16px !important;line-height:16px !important;height:16px !important}}.s-6>tbody>tr>td{{font-size:24px !important;line-height:24px !important;height:24px !important}}.s-10>tbody>tr>td{{font-size:40px !important;line-height:40px !important;height:40px !important}}}}
-    </style>
-  </head>
-  <body bgcolor=""#f7fafc"" style=""margin: 0; padding: 0;"">
-    <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" bgcolor=""#f7fafc"">
-      <tr>
-        <td align=""center"" style=""padding: 40px 16px;"">
-          <table role=""presentation"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""max-width: 600px;"">
-            <tr>
-              <td align=""center"">
-                <img src=""https://assets.bootstrapemail.com/logos/light/square.png"" alt=""Company Logo"" width=""96"" style=""display: block; margin: auto;"">
-              </td>
-            </tr>
-            <tr>
-              <td height=""40"">&#160;</td>
-            </tr>
-            <tr>
-              <td bgcolor=""#ffffff"" style=""border: 1px solid #e2e8f0; border-radius: 6px; padding: 40px;"">
-                <h1 style=""margin-top: 0; font-size: 24px; font-weight: 700;"">New Contact Form Message</h1>
-                <p><strong>From:</strong> {contactDto.Name}</p>
-                <p><strong>Email:</strong> <a href=""mailto:{contactDto.Email}"" style=""color: #0d6efd;"">{contactDto.Email}</a></p>
-                <p><strong>Message:</strong><br>{contactDto.Message}</p>
-                <p style=""font-size: 14px; color: #6c757d; margin-top: 32px;"">
-                   This message was sent via the contact form on your website.
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td height=""40"">&#160;</td>
-            </tr>
-            <tr>
-              <td align=""center"">
-                <img src=""https://assets.bootstrapemail.com/logos/light/text.png"" width=""160"" style=""display: block; margin: auto;"">
-              </td>
-            </tr>
-            <tr>
-              <td height=""24"">&#160;</td>
-            </tr>
-            <tr>
-              <td align=""center"" style=""color: #718096; font-size: 14px;"">
-                {companyEmail}<br>
-                {companyAddress}
-              </td>
-            </tr>
-            <tr>
-              <td height=""24"">&#160;</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
-";
-    }
-
+  
     // Template for booking-related notifications
     public static string BookingNotificationTemplate(BookingNotificationData data)
     {
