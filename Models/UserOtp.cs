@@ -7,9 +7,11 @@ public class UserOtp
 
     public User? User { get; set; }
 
-    public required int OtpCode { get; set; }
+    public required string Otp { get; set; }
 
     public required DateTime ExpirationTime { get; set; }
 
     public required bool IsUsed { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

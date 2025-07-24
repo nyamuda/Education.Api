@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Education.Api.Data;
 using Education.Api.Dtos.Auth;
 using Education.Api.Services.Abstractions.Auth;
+using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Auth;
 
@@ -36,36 +37,37 @@ public class OtpService : IOtpService
     /// <remarks>
     /// This method ensures that only the latest unused and unexpired OTP is checked. Stored OTPs are hashed for security.
     /// </remarks>
-    public async Task VerifyUserOtp(VerifyOtpDto dto)
+    public async Task VerifyAsync(VerifyOtpDto dto)
     {
         // Retrieve the most recent valid OTP that hasn't expired or been used
-        var userOtp = await _context
-            .UserOtps
-            .Where(
-                o =>
-                    o.Email.Equals(otpVerificationDto.Email)
-                    && o.ExpirationTime > DateTime.UtcNow
-                    && !o.IsUsed
-            )
-            .OrderByDescending(o => o.CreatedAt)
-            .FirstOrDefaultAsync();
-
-        if (userOtp is null)
-            throw new InvalidOperationException(
+        var userOtp =
+            await _context
+                .UserOtps
+                .Where(
+                    uo =>
+                        uo.Email.Equals(dto.Email)
+                        && uo.ExpirationTime > DateTime.UtcNow
+                        && !uo.IsUsed
+                )
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefaultAsync()
+            ?? throw new InvalidOperationException(
                 "Your code has expired or is invalid. Please request a new one."
             );
 
         //The saved OTP code is hashed
         //Check if the provided OTP matched the saved one
-        bool isOptCorrect = BCrypt.Net.BCrypt.Verify(otpVerificationDto.OtpCode, userOtp.OtpCode);
-        if (!isOptCorrect)
-            throw new UnauthorizedAccessException(
-                "We couldn't verify your OTP. Double-check the code and try again."
-            );
+        bool isOptCorrect = BCrypt.Net.BCrypt.Verify(dto.Otp, userOtp.Otp);
+        if (isOptCorrect)
+        {
+            //mark the OTP as used
+            userOtp.IsUsed = true;
 
-        //mark the OTP as used
-        userOtp.IsUsed = true;
+            await _context.SaveChangesAsync();
+        }
 
-        await _context.SaveChangesAsync();
+        throw new UnauthorizedAccessException(
+            "We couldn't verify your OTP. Double-check the code and try again."
+        );
     }
 }
