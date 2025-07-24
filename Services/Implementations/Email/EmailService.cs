@@ -1,6 +1,6 @@
-using System.Net.Mail;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Email;
+using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
@@ -32,7 +32,7 @@ public class EmailService : IEmailService
         messageToSend.Body = new TextPart("html") { Text = emailMessage.HtmlBody };
 
         //Connect to the SMTP server
-        using var client = new MailKit.Net.Smtp.SmtpClient();
+        using var client = new SmtpClient();
         await client.ConnectAsync(_smtpSettings.Host, 587, false);
 
         //authenticate with the SMTP server using the sender email and password

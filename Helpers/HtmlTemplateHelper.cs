@@ -1,44 +1,13 @@
 namespace Education.Api.Helpers;
 
-public class HtmlTemplateHelper
+public static class HtmlTemplateHelper
 {
-    public string AppName { get; }
-    public string AppEmail { get; }
-    public string AppWebsiteUrl { get; }
-    public string AppPhone { get;}
-
-    public HtmlTemplateHelper(IConfiguration config)
-    {
-        AppName =
-            config.GetValue<string>("AppInfo:Name")
-            ?? throw new InvalidOperationException(
-                "Missing configuration: 'AppInfo:Name' is not set."
-            );
-
-        AppEmail =
-            config.GetValue<string>("AppInfo:Email")
-            ?? throw new InvalidOperationException(
-                "Missing configuration: 'AppInfo:Email' is not set."
-            );
-        AppWebsiteUrl =
-            config.GetValue<string>("AppInfo:WebsiteUrl")
-            ?? throw new InvalidOperationException(
-                "Missing configuration: 'AppInfo:WebsiteUrl' is not set."
-            );
-
-       AppPhone =
-            config.GetValue<string>("AppInfo:Phone")
-            ?? throw new InvalidOperationException(
-                "Missing configuration: 'AppInfo:Phone' is not set."
-            );
-    }
-
     //Template for resetting password
     public static string PasswordResetRequestTemplate(
-       
         string recipientName,
-        string otp
-       
+        string otp,
+        string companyName,
+        string companyEmail
     )
     {
         return $@"
