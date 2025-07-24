@@ -29,9 +29,22 @@ builder
 // This allows you to access company config settings in a strongly-typed way
 builder.Services.Configure<Company>(builder.Configuration.GetSection("Company"));
 
+
+
+
 // Binds the "SmtpSettings" section from appsettings.json to the SmtpSettings class
 // This allows you to access SMTP config settings in a strongly-typed way
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+
+
+
+
+
+
+
+
+
 
 //Configure JWT Authentication
 string jwtIssuer =
