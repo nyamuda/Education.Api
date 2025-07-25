@@ -1,4 +1,7 @@
-﻿namespace Education.Api.Services.Abstractions.Auth;
+﻿using Education.Api.Dtos.Auth;
+using Education.Api.Dtos.Users;
+
+namespace Education.Api.Services.Abstractions.Auth;
 
 public interface IAuthService
 {
@@ -8,11 +11,11 @@ public interface IAuthService
 
     Task RequestPasswordResetAsync(string email);
 
-    Task ResetPasswordAsync(string email, string newPassword);
+    Task ResetPasswordAsync(ResetPasswordDto dto);
 
-    Task RequestEmailVerificationAsync(string emailToBeVerified);
+    Task RequestEmailVerificationAsync(EmailVerificationRequestDto dto);
 
-    Task VerifyEmailAsync(int userId, string verifiedEmail);
+    Task VerifyEmailAsync(VerifyOtpDto verifyOtpDto);
 
     Task<string> RefreshTokenAsync(int userId);
 }

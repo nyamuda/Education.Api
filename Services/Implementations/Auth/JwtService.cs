@@ -1,10 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using DrivingSchool.API.Enums;
-using DrivingSchool.API.Helpers;
-using DrivingSchool.API.Models;
-using DrivingSchool.API.Services.Abstractions.Auth;
+using Education.Api.Models;
+using Education.Api.Services.Abstractions.Auth;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DrivingSchool.API.Services.Implementations.Auth;
@@ -42,13 +40,13 @@ public class JwtService : IJwtService
         var token = new JwtSecurityToken(
             issuer: _jwtIssuer,
             audience: _jwtAudience,
-            claims: new[]
-            {
+            claims:
+            [
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim("isVerified", user.IsVerified.ToString())
-            },
+            ],
             //default token lifespan is  = 10 minutes
             expires: DateTime.UtcNow.AddMinutes(expiresInMinutes),
             signingCredentials: credentials
