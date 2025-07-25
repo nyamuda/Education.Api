@@ -12,11 +12,9 @@ public class User
 
     public required string Password { get; set; }
 
-    public UserRole Role { get; set; } = UserRole.User;
+    public UserRole Role { get; set; } = UserRole.Student;
 
     public bool IsVerified { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-
 }

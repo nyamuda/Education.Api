@@ -1,30 +1,35 @@
-﻿
-
+﻿using Education.Api.Data;
+using Education.Api.Dtos.Auth;
+using Education.Api.Dtos.Users;
+using Education.Api.Models;
+using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Email;
+using Microsoft.EntityFrameworkCore;
 
 public class AuthService : IAuthService
 {
     protected readonly ApplicationDbContext _context;
     protected readonly IJwtService _jwtService;
     private readonly IEmailService _emailService;
-    private readonly string _frontendUrl;
+    
+    private readonly IEmailTemplateBuilder _emailTemplateBuilder;
+    private readonly IOtpService _otpService;
+    
+    
 
     public AuthService(
         ApplicationDbContext context,
         IJwtService jwtService,
-        IConfiguration config,
-        IEmailService emailService
+        IOtpService otpService,
+        IEmailService emailService,
+        IEmailTemplateBuilder emailTemplateBuilder,
     )
     {
         _context = context;
         _jwtService = jwtService;
         _emailService = emailService;
-
-        //get the frontend url
-        _frontendUrl =
-            config.GetValue<string>("Frontend:BaseUrl")
-            ?? throw new KeyNotFoundException(
-                "Frontend URL is missing in application config settings."
-            );
+        _emailTemplateBuilder = emailTemplateBuilder;
+        _otpService = otpService;
     }
 
     public async Task<UserDto> RegisterAsync(RegisterDto userRegisterDto)
@@ -42,9 +47,8 @@ public class AuthService : IAuthService
 
         var user = new User
         {
-            Name = userRegisterDto.Name,
+            Username = userRegisterDto.UserName,
             Email = userRegisterDto.Email,
-            Phone = userRegisterDto.Phone,
             Password = hashedPassword,
             IsVerified = false,
         };
@@ -64,13 +68,9 @@ public class AuthService : IAuthService
         var refreshTokenLifespan = 10080;
 
         //check if user exists
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
-
-        if (user == null)
-        {
-            var message = "User with the provided email does not exist.";
-            throw new KeyNotFoundException(message);
-        }
+        var user =
+            await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email)
+            ?? throw new KeyNotFoundException("User with the provided email does not exist.");
 
         // Compare the provided password with the stored hashed password
         string hashedPassword = user.Password;
@@ -78,8 +78,7 @@ public class AuthService : IAuthService
 
         if (!isCorrectPassword)
         {
-            var message = "The provided password is incorrect.";
-            throw new UnauthorizedAccessException(message);
+            throw new UnauthorizedAccessException("The provided password is incorrect.");
         }
 
         //create token since the provided password is correct
@@ -109,30 +108,21 @@ public class AuthService : IAuthService
         //generate reset token
         var token = _jwtService.GenerateJwtToken(user: existingUser);
 
-        //create the reset URL
-        string resetUrl = $"{_frontendUrl}/auth/password-reset/reset?token={token}";
+        //create the password reset OTP
+        string resetOtp = _otpService.Generate();
 
-        // Fetch the company details for branding and contact information
-        Company company =
-            await _context.Companies.AsNoTracking().FirstOrDefaultAsync()
-            ?? throw new KeyNotFoundException("Missing company details. Unable to proceed.");
-
-        string htmlTemplate = HtmlTemplatesHelper.PasswordResetRequestTemplate(
-            resetUrl: resetUrl,
-            recipientName: existingUser.Name,
-            companyName: company.Name,
-            companyEmail: company.Email,
-            companyAddress: company.Address
-        );
-
+        //generate the email template
+        string emailTemplate = _emailTemplateBuilder.BuildPasswordResetRequestTemplate(recipientName: existingUser.Username, otp: resetOtp);
+        
+        
         //send email to reset password
         EmailMessage emailMessage =
             new()
             {
-                RecipientName = existingUser.Name,
+                RecipientName = existingUser.Username,
                 RecipientEmail = existingUser.Email,
                 Subject = "Password Reset Request",
-                HtmlBody = htmlTemplate,
+                HtmlBody = emailTemplate,
             };
         await _emailService.SendAsync(emailMessage);
     }
