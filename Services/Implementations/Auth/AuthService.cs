@@ -118,14 +118,15 @@ public class AuthService : IAuthService
             Email = existingUser.Email,
             UserId = existingUser.Id,
             Otp = hashedOtp,
-            ExpirationTime = DateTime.UtcNow.AddMinutes(10),
-            IsUsed = false
+            IsUsed=false,
+            ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes            IsUsed = false
         };
 
         await _context.UserOtps.AddAsync(userOtp);
 
         //generate the email template
-        string emailTemplate = _emailTemplateBuilder.BuildPasswordResetRequestTemplate(recipientName: existingUser.Username, otp: resetOtp);
+        string emailTemplate = _emailTemplateBuilder
+ .BuildPasswordResetRequestTemplate(recipientName: existingUser.Username, otp: resetOtp);
         
         
         //send email to reset password
@@ -143,16 +144,16 @@ public class AuthService : IAuthService
     //Resets password by validating the reset token
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
-        //check if user with the provided email already exists
-        var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.));
-        if (userExists == null)
-        {
-            var message = "User with the provided email does not exists.";
-            throw new InvalidOperationException(message);
-        }
+        //Validate the reset token and extract the user details associated with it
+        (_, string userEmail, _) = _jwtService.ValidateTokenAndExtractUser(dto.ResetToken);
+        
+        
+        //check if user with the given email exists
+        var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.ResetToken))
+        ??  throw new InvalidOperationException("Unable to reset password: no user found for the provided reset token.");
 
-        //hash the password
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        //hash the new password
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         //update the password
         userExists.Password = hashedPassword;
