@@ -32,14 +32,11 @@ public class AuthController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
@@ -65,22 +62,15 @@ public class AuthController : ControllerBase
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new ErrorResponse { Message = ex.Message });
+            return Unauthorized(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
