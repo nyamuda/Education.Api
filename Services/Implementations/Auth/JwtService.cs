@@ -1,6 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Education.Api.Enums;
+using Education.Api.Helpers;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
 using Microsoft.IdentityModel.Tokens;
@@ -92,11 +94,7 @@ public class JwtService : IJwtService
 
         // Validate and decode the JWT
         ClaimsPrincipal claimsPrincipal =
-            tokenHandler.ValidateToken(
-                token,
-                validationParameters,
-                out SecurityToken validatedToken
-            )
+            tokenHandler.ValidateToken(token, validationParameters, out SecurityToken _)
             ?? throw new InvalidOperationException("The provided token is invalid or has expired.");
 
         // Extract the user ID from the claims
@@ -121,7 +119,7 @@ public class JwtService : IJwtService
         {
             var role = userRole.Equals("Admin", StringComparison.OrdinalIgnoreCase)
                 ? UserRole.Admin
-                : UserRole.User;
+                : UserRole.Student;
 
             return (id, userEmail, role);
         }
