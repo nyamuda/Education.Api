@@ -13,5 +13,284 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-    
+
+    // POST api/<AccountController>/register
+    [HttpPost("register")]
+    public async Task<IActionResult> Post(RegisterDto registerDto)
+    {
+        try
+        {
+            var user = await _authService.RegisterAsync(registerDto);
+
+            return CreatedAtRoute(
+                routeName: "GetUserById",
+                routeValues: new { id = user.Id },
+                value: user
+            );
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    // POST api/<AccountController>/login
+    [HttpPost("login")]
+    public async Task<IActionResult> Post(LoginDto loginDto)
+    {
+        try
+        {
+            var (accessToken, refreshToken) = await _authService.LoginAsync(loginDto);
+
+            //Create an HTTP-Only cookie to store the refresh token
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            };
+
+            HttpContext.Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+
+            return Ok(new { token = accessToken });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    //email user who has forgotten their password
+    [HttpPost("password-reset/request")]
+    public async Task<IActionResult> PasswordResetRequest(PasswordResetRequestDto dto)
+    {
+        try
+        {
+            await _authService.RequestPasswordResetAsync(dto.Email);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    [HttpPost("password-reset/reset")]
+    public async Task<IActionResult> ResetPassword(PasswordResetDto dto)
+    {
+        try
+        {
+            // Validate the password reset token and retrieve the user details associated with it
+            (_, string userEmail, _) = _jwtService.ValidateTokenAndExtractUser(dto.Token);
+
+            //reset the password of the user
+            await _authService.ResetPasswordAsync(email: userEmail, newPassword: dto.Password);
+
+            return Ok();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    //Send email verification email
+    [HttpPost("email-verification/request")]
+    public async Task<IActionResult> EmailVerificationRequest(EmailVerificationRequestDto dto)
+    {
+        try
+        {
+            await _authService.RequestEmailVerificationAsync(
+                userId: dto.UserId,
+                emailToBeVerified: dto.Email
+            );
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    //verify email by validating token
+    [HttpPut("email-verification/verify")]
+    public async Task<IActionResult> VerifyEmail(TokenDto tokenDto)
+    {
+        try
+        {
+            // Validate the email verification token and retrieve the user details associated with it
+            (int tokenUserId, string tokenUserEmail, _) = _jwtService.ValidateTokenAndExtractUser(
+                tokenDto.Token
+            );
+
+            //verify the user email
+            await _authService.VerifyEmailAsync(userId: tokenUserId, verifiedEmail: tokenUserEmail);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    // POST api/<AccountController>/refresh-token
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        try
+        {
+            //Get the refresh token from the HTTP-Only cookie
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                throw new UnauthorizedAccessException(
+                    "Access denied: refresh token is missing from the request."
+                );
+
+            // Validate the refresh token and retrieve the user details associated with it
+            (int tokenUserId, _, _) = _jwtService.ValidateTokenAndExtractUser(refreshToken);
+
+            //generate a new access token for the user
+            string token = await _authService.RefreshTokenAsync(userId: tokenUserId);
+
+            return Ok(token);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new ErrorResponse { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.ForbiddenErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetMyDetails()
+    {
+        try
+        {
+            // First, get the access token for the authorized user
+            var token = HttpContext.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+            // Validate the token and retrieve the user details associated with it
+            (int tokenUserId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            //fetch all the details about the user
+            UserDto user = await _userService.GetByIdAsync(tokenUserId);
+
+            return Ok(user);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new ErrorResponse { Message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new ErrorResponse { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                500,
+                new ErrorResponse
+                {
+                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
+                    Details = ex.Message
+                }
+            );
+        }
+    }
 }
