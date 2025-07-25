@@ -1,6 +1,9 @@
 using Education.Api.Dtos.Auth;
+using Education.Api.Dtos.Users;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
@@ -12,10 +15,17 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IJwtService _jwtService;
 
-    public AuthController(IAuthService authService, IJwtService jwtService)
+    private readonly IUserService _userService;
+
+    public AuthController(
+        IAuthService authService,
+        IJwtService jwtService,
+        IUserService userService
+    )
     {
         _authService = authService;
         _jwtService = jwtService;
+        _userService = userService;
     }
 
     // POST api/<AccountController>/register
@@ -226,14 +236,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
 }

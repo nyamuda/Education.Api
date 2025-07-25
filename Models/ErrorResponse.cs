@@ -1,6 +1,11 @@
 namespace Education.Api.Models;
 
-// A simple model used to represent error responses in the API
+/// <summary>
+/// Represents a standardized error response returned by the API.
+/// </summary>
+/// <remarks>
+/// This class is commonly used to return consistent error messages from controller actions.
+/// </remarks>
 public class ErrorResponse
 {
     // A short message describing the error
