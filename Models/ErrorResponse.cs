@@ -9,6 +9,10 @@ public class ErrorResponse
     // Optional detailed explanation
     public string? Details { get; set; }
 
+    // General-purpose factory method for creating a custom error response
+    public static ErrorResponse Create(string message, string? details = null) =>
+        new() { Message = message, Details = details };
+
     // Factory method for generating a general unexpected error response
     public static ErrorResponse Unexpected(string? details) =>
         new()

@@ -1,3 +1,5 @@
+using Education.Api.Dtos.Auth;
+using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,11 +38,7 @@ public class AuthController : ControllerBase
         {
             return StatusCode(
                 500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
+                
             );
         }
     }
