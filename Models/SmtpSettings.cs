@@ -1,8 +1,12 @@
 namespace Education.Api.Models;
 
 /// <summary>
-/// Represents the configuration settings required to send emails via SMTP.
+/// Represents the details required to send emails via SMTP loaded
+/// from the application's configuration settings.
 /// </summary>
+/// <remarks>
+/// This is used to bind the "SmtpSettings" section using IOptions.
+/// </remarks>
 public class SmtpSettings
 {
     public required string SenderName { get; set; }

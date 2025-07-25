@@ -1,5 +1,4 @@
-﻿using BCrypt.Net;
-using Education.Api.Data;
+﻿using Education.Api.Data;
 using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;

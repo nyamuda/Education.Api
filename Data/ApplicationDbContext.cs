@@ -5,7 +5,7 @@ namespace Education.Api.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
     public DbSet<User> Users { get; set; } = default!;

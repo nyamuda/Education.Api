@@ -1,8 +1,14 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DrivingSchool.API.Services.Implementations.Auth;
 using Education.Api.Data;
 using Education.Api.Models;
+using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Email;
+using Education.Api.Services.Abstractions.Users;
+using Education.Api.Services.Implementations.Auth;
+using Education.Api.Services.Implementations.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,10 +16,12 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-
-
-
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddSingleton<IEmailTemplateBuilder, EmailTemplateBuilder>();
 
 //Configure the database
 string connectionString =
@@ -35,21 +43,21 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpS
 
 //Configure JWT Authentication
 string jwtIssuer =
-    builder.Configuration.GetValue<string>("Authentication:Jwt:Issuer")
+    builder.Configuration.GetValue<string>("Authentication:JwtSettings:Issuer")
     ?? throw new InvalidOperationException(
-        "Missing configuration: 'Authentication:Jwt:Issuer' is not set."
+        "Missing configuration: 'Authentication:JwtSettings:Issuer' is not set."
     );
 
 string jwtAudience =
-    builder.Configuration.GetValue<string>("Authentication:Jwt:Audience")
+    builder.Configuration.GetValue<string>("Authentication:JwtSettings:Audience")
     ?? throw new InvalidOperationException(
-        "Missing configuration: 'Authentication:Jwt:Audience' is not set."
+        "Missing configuration: 'Authentication:JwtSettings:Audience' is not set."
     );
 
 string jwtKey =
-    builder.Configuration.GetValue<string>("Authentication:Jwt:Key")
+    builder.Configuration.GetValue<string>("Authentication:JwtSettings:Key")
     ?? throw new InvalidOperationException(
-        "Missing configuration: 'Authentication:Jwt:Key' is not set."
+        "Missing configuration: 'Authentication:JwtSettings:Key' is not set."
     );
 
 builder

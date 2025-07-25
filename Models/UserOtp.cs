@@ -2,6 +2,7 @@ namespace Education.Api.Models;
 
 public class UserOtp
 {
+    public required int Id { get; set; }
     public required string Email { get; set; }
     public required int UserId { get; set; }
 
