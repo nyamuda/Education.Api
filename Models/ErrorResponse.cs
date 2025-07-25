@@ -6,18 +6,33 @@ public class ErrorResponse
 
     public string? Details { get; set; }
 
-    public static string UnexpectedErrorMessage { get; } =
-        "The server encountered an unexpected issue. Please try again later.";
+    public static ErrorResponse Unexpected(string? details) => new() 
+    {
+        Message="The server encountered an unexpected issue. Please try again later.";
+        Details=details;
+    };
 
-    public static string ForbiddenErrorMessage { get; } =
-        "You do not have permission to access this resource.";
+    public static ErrorResponse Forbidden(string? details) => new()
+    {
+        Message = "You do not have permission to access this resource.",
+        Details = details
+    };
+    
+     public static ErrorResponse MissingNameIdentifierClaim(string? details) => new()
+    {
+        Message = "Access denied. Token lacks a valid name identifier claim.",
+        Details = details
+    };
+    public static ErrorResponse MissingEmailClaimMessage(string? details) => new()
+    {
+        Message = "Access denied. Token lacks a valid email claim.",
+        Details = details
+    };
+    
+    public static ErrorResponse MissingRoleClaimMessage(string? details) => new()
+    {
+        Message = "Access denied. Token lacks a valid role claim.",
+        Details = details
+    };
 
-    public static string MissingNameIdentifierClaimMessage { get; } =
-        "Access denied. Token lacks a valid name identifier claim.";
-
-    public static string MissingEmailClaimMessage { get; } =
-        "Access denied. Token lacks a valid email claim.";
-
-    public static string MissingRoleClaimMessage { get; } =
-        "Access denied. Token lacks a valid role claim.";
 }
