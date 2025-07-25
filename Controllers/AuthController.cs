@@ -10,10 +10,12 @@ namespace Education.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IJwtService _jwtService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IJwtService jwtService)
     {
         _authService = authService;
+        _jwtService = jwtService;
     }
 
     // POST api/<AccountController>/register
@@ -137,7 +139,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    //verify email by validating token
+    //verify email by validating otp code
     [HttpPut("email-verification/verify")]
     public async Task<IActionResult> VerifyEmail(VerifyOtpDto dto)
     {
@@ -181,26 +183,19 @@ public class AuthController : ControllerBase
         }
         catch (KeyNotFoundException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new ErrorResponse { Message = ex.Message });
+            return Unauthorized(ErrorResponse.Create(ex.Message));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.ForbiddenErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
 
