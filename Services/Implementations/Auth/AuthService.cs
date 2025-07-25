@@ -1,4 +1,5 @@
-﻿using Education.Api.Data;
+﻿using BCrypt.Net;
+using Education.Api.Data;
 using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
@@ -105,11 +106,23 @@ public class AuthService : IAuthService
             await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.Equals(email))
             ?? throw new KeyNotFoundException($@"User with email ""{email}"" does not exist.");
 
-        //generate reset token
-        var token = _jwtService.GenerateJwtToken(user: existingUser);
 
         //create the password reset OTP
         string resetOtp = _otpService.Generate();
+        //hash the OTP
+        string hashedOtp = BCrypt.Net.BCrypt.HashPassword(resetOtp);
+
+        //store the hashed OTP to the database
+        UserOtp userOtp = new()
+        {
+            Email = existingUser.Email,
+            UserId = existingUser.Id,
+            Otp = hashedOtp,
+            ExpirationTime = DateTime.UtcNow.AddMinutes(10),
+            IsUsed = false
+        };
+
+        await _context.UserOtps.AddAsync(userOtp);
 
         //generate the email template
         string emailTemplate = _emailTemplateBuilder.BuildPasswordResetRequestTemplate(recipientName: existingUser.Username, otp: resetOtp);
@@ -127,11 +140,11 @@ public class AuthService : IAuthService
         await _emailService.SendAsync(emailMessage);
     }
 
-    //Reset password by validating token
-    public async Task ResetPasswordAsync(string email, string newPassword)
+    //Resets password by validating the reset token
+    public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
         //check if user with the provided email already exists
-        var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email));
+        var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.));
         if (userExists == null)
         {
             var message = "User with the provided email does not exists.";
