@@ -123,60 +123,38 @@ public class AuthController : ControllerBase
     {
         try
         {
-            await _authService.RequestEmailVerificationAsync(
-                userId: dto.UserId,
-                emailToBeVerified: dto.Email
-            );
+            await _authService.RequestEmailVerificationAsync(dto);
 
             return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
     //verify email by validating token
     [HttpPut("email-verification/verify")]
-    public async Task<IActionResult> VerifyEmail(TokenDto tokenDto)
+    public async Task<IActionResult> VerifyEmail(VerifyOtpDto dto)
     {
         try
         {
-            // Validate the email verification token and retrieve the user details associated with it
-            (int tokenUserId, string tokenUserEmail, _) = _jwtService.ValidateTokenAndExtractUser(
-                tokenDto.Token
-            );
-
             //verify the user email
-            await _authService.VerifyEmailAsync(userId: tokenUserId, verifiedEmail: tokenUserEmail);
+            await _authService.VerifyEmailAsync(dto);
 
             return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
