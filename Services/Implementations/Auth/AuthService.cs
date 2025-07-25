@@ -160,80 +160,75 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
     }
 
-    public async Task RequestEmailVerificationAsync(string emailToBeVerified)
+    public async Task RequestEmailVerificationAsync(EmailVerificationRequestDto dto)
     {
         //check to see if user with the given email exists
         var existingUser =
             await _context
                 .Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email.Equals(emailToBeVerified))
+                .FirstOrDefaultAsync(u => u.Email.Equals(dto.Email))
             ?? throw new KeyNotFoundException(
-                $"User with email {emailToBeVerified} does not exist."
+                $@"User with email ""{dto.Email}"" does not exist."
             );
+            
+    
+    //create the verification OTP
+        string verificationOtp = _otpService.Generate();
+        //hash the OTP
+        string hashedOtp = BCrypt.Net.BCrypt.HashPassword(verificationOtp);
 
-        // Temporarily assign the new email address to the user's record.
-        // This is necessary in cases where the user is updating their existing email address and need to verify the new one.
-        // This allows us to include it in the verification token without saving it to the database yet.
-        // Once the user clicks the verification link, we will confirm the token, extract that new email and then persist it to the database .
-        existingUser.Email = emailToBeVerified;
+        //store the hashed OTP to the database
+        UserOtp userOtp = new()
+        {
+            Email = existingUser.Email,
+            UserId = existingUser.Id,
+            Otp = hashedOtp,
+            IsUsed=false,
+            ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes            IsUsed = false
+        };
 
-        //generate reset token
-        //expires in 24 hours
-        float tokenExpirationInMinutes = 1440F;
-        var token = _jwtService.GenerateJwtToken(
-            user: existingUser,
-            expiresInMinutes: tokenExpirationInMinutes
-        );
+        await _context.UserOtps.AddAsync(userOtp);
+  //generate the email template
+string emailTemplate = _emailTemplateBuilder.BuildEmailVerificationRequestTemplate(recipientName: existingUser.Username, otp: verificationOtp);
 
-        //create the verificationUrl URL
-        string verificationUrl = $"{_frontendUrl}/auth/email-verification/verify?token={token}";
-
-        // Fetch the company details for branding and contact information
-        Company company =
-            await _context.Companies.AsNoTracking().FirstOrDefaultAsync()
-            ?? new Company
-            {
-                Name = "Loyd School of Driving",
-                Email = "helloworld@gmail.com",
-                Phone = "0815896615",
-                DateFounded = DateTime.UtcNow,
-                Address = "South Africa"
-            };
-
-        string htmlTemplate = HtmlTemplatesHelper.EmailVerificationRequestTemplate(
-            verificationUrl: verificationUrl,
-            recipientName: existingUser.Name,
-            companyName: company.Name,
-            companyEmail: company.Email,
-            companyAddress: company.Address
-        );
-
-        //send email to reset password
+       
+        //send email to verify email
         EmailMessage emailMessage =
             new()
             {
-                RecipientName = existingUser.Name,
+                RecipientName = existingUser.Username,
                 RecipientEmail = existingUser.Email,
                 Subject = "Email Confirmation",
-                HtmlBody = htmlTemplate,
+                HtmlBody = emailTemplate,
             };
         await _emailService.SendAsync(emailMessage);
     }
 
-    public async Task VerifyEmailAsync(int userId, string verifiedEmail)
-    {
-        //check to see if user with the given ID exists
-        var userExists =
-            await _context.Users.FirstOrDefaultAsync(u => u.Id.Equals(userId))
-            ?? throw new KeyNotFoundException("User with the provided ID does not exist.");
+/// <summary>
+/// Verifies a user's email by validating the provided OTP (One-Time Password).
+/// If the OTP is valid, the user's email is marked as verified in the database.
+/// </summary>
+/// <param name="verifyOtpDto">The DTO containing the email and OTP to verify.</param>
+/// <exception cref="KeyNotFoundException">Thrown if no user with the given email is found.</exception>
+public async Task VerifyEmailAsync(VerifyOtpDto verifyOtpDto)
+{
+    // Validate the OTP using the OTP service
+    await _otpService.VerifyAsync(verifyOtpDto);
+    
+    // If validation passes, proceed to find the corresponding user
 
-        //mark the user as verified
-        userExists.IsVerified = true;
-        //save the verified email (in case this was an email update and the new email needed to be updated)
-        userExists.Email = verifiedEmail;
-        await _context.SaveChangesAsync();
-    }
+    // Retrieve the user from the database using the provided email
+    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.Equals(verifyOtpDto.Email))
+        ?? throw new KeyNotFoundException(@$"User with email ""{verifyOtpDto.Email}"" does not exist.");
+
+    // Mark the user as verified
+    user.IsVerified = true;
+    
+    // Save the changes to the database
+    await _context.SaveChangesAsync();
+}
+
 
     //Generate a new token for a user with a given ID
     public async Task<string> RefreshTokenAsync(int userId)

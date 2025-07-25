@@ -6,7 +6,7 @@ public interface IEmailTemplateBuilder
 {
     string BuildPasswordResetRequestTemplate(string recipientName, string otp);
 
-    string BuildEmailVerificationRequestTemplate(string verificationUrl, string recipientName);
+    string BuildEmailVerificationRequestTemplate(string recipientName, string otp);
 
     string BuildContactFormMessageTemplate(ContactDto contactDto);
 }
