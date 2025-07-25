@@ -74,9 +74,8 @@ public class AuthController : ControllerBase
         }
     }
 
-    //email user who has forgotten their password
     [HttpPost("password-reset/request")]
-    public async Task<IActionResult> PasswordResetRequest(PasswordResetRequestDto dto)
+    public async Task<IActionResult> RequestPasswordReset(PasswordResetRequestDto dto)
     {
         try
         {
@@ -86,52 +85,35 @@ public class AuthController : ControllerBase
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
     [HttpPost("password-reset/reset")]
-    public async Task<IActionResult> ResetPassword(PasswordResetDto dto)
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
     {
         try
         {
-            // Validate the password reset token and retrieve the user details associated with it
-            (_, string userEmail, _) = _jwtService.ValidateTokenAndExtractUser(dto.Token);
-
             //reset the password of the user
-            await _authService.ResetPasswordAsync(email: userEmail, newPassword: dto.Password);
+            await _authService.ResetPasswordAsync(dto);
 
             return Ok();
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new ErrorResponse { Message = ex.Message });
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new ErrorResponse { Message = ex.Message });
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(
-                500,
-                new ErrorResponse
-                {
-                    Message = ErrorMessageHelper.UnexpectedErrorMessage,
-                    Details = ex.Message
-                }
-            );
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
         }
     }
 
