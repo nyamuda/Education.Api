@@ -25,4 +25,9 @@ public class PostFlag
     /// The type or category of the flag (e.g., Spam, Offensive).
     /// </summary>
     public required PostFlagType FlagType { get; set; }
+
+    /// <summary>
+    /// The current status of the flag (e.g., Pending, Resolved, Rejected).
+    /// </summary>
+    public FlagStatus Status { get; set; } = FlagStatus.Pending;
 }
