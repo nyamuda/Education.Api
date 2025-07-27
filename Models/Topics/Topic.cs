@@ -12,5 +12,7 @@ public class Topic
 
     public Curriculum? Curriculum { get; set; }
 
+    public List<Subtopic> Subtopics { get; set; } = [];
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
