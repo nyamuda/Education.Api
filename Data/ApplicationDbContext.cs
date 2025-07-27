@@ -23,5 +23,14 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(uo => uo.UserId)
             .OnDelete(DeleteBehavior.Cascade); //Delete User -> delete UserOtps for that user
+
+        //A Curriculum can have multiple ExamBoards while an ExamBoard can only belong to one Curriculum.
+        //Hence, there is a one-to-many relationship between Curriculum and ExamBoard
+        modelBuilder
+            .Entity<ExamBoard>()
+            .HasOne(eb => eb.Curriculum)
+            .WithMany()
+            .HasForeignKey(eb => eb.CurriculumId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
     }
 }
