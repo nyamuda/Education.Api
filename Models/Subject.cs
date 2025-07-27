@@ -1,3 +1,4 @@
+using Education.Api.Models.Topics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Models;
@@ -7,6 +8,10 @@ public class Subject
 {
     public int Id { get; set; }
     public required string Name { get; set; }
+
+    public List<Topic> Topics { get; set; } = [];
     public List<Curriculum> Curriculums { get; set; } = [];
+
+    public List<ExamBoard> ExamBoards { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

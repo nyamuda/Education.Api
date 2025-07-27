@@ -34,15 +34,19 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
 
         //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
-        //Hence, there is a many-to-many relationship between Curriculum and Subject
+        //Hence, there is a many-to-many relationship between Curriculum and Subject.
         modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
+
+        //An ExamBoard can have multiple Subjects and a Subject can exist in multiple ExamBoards.
+        //Hence, there is a many-to-many relationship between ExamBoard and Subject.
+        modelBuilder.Entity<ExamBoard>().HasMany(eb => eb.Subjects).WithMany(s => s.ExamBoards);
 
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
 
         //A User can have multiple Likes while a Like can only belong to one User.
-        //Hence, there is a one-to-many relationship between User and Like
+        //Hence, there is a one-to-many relationship between User and Like.
         modelBuilder
             .Entity<Like>()
             .HasOne(l => l.User)

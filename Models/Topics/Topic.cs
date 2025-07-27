@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Education.Api.Models.Topics;
 
+[Index(nameof(Name), IsUnique = true)]
 public class Topic
 {
     public int Id { get; set; }
@@ -7,10 +10,6 @@ public class Topic
 
     public required int SubjectId { get; set; }
     public Subject? Subject { get; set; }
-
-    public required int CurriculumId { get; set; }
-
-    public Curriculum? Curriculum { get; set; }
 
     public List<Subtopic> Subtopics { get; set; } = [];
 
