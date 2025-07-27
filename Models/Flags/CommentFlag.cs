@@ -1,6 +1,6 @@
 using Education.Api.Enums;
 
-namespace Education.Api.Models;
+namespace Education.Api.Models.Flags;
 
 /// <summary>
 /// Represents a flag raised by a user on a comment, typically for moderation purposes.
@@ -10,7 +10,9 @@ public class CommentFlag
     public int Id { get; set; }
 
     /// <summary>
-    /// Optional description or note provided by the user when flagging the comment.
+    /// Optional description provided by the user when flagging a comment.
+    /// This is only required when the selected <see cref="CommentFlagType"/> is <c>Other</c>,
+    /// allowing the user to describe the issue in their own words.
     /// </summary>
     public string? Content { get; set; }
 
@@ -35,4 +37,6 @@ public class CommentFlag
     /// The current status of the flag (e.g., pending review, resolved).
     /// </summary>
     public FlagStatus Status { get; set; } = FlagStatus.Pending;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

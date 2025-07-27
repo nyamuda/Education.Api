@@ -1,4 +1,4 @@
-namespace Education.Api.Models;
+namespace Education.Api.Models.Users;
 
 public class UserOtp
 {
