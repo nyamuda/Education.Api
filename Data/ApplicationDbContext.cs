@@ -32,5 +32,9 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(eb => eb.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
+
+        //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
+        //Hence, there is a many-to-many relationship between Curriculum and Subject
+        modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
     }
 }
