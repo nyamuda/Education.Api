@@ -117,8 +117,7 @@ public class AuthService : IAuthService
                 Email = existingUser.Email,
                 UserId = existingUser.Id,
                 Otp = hashedOtp,
-                IsUsed = false,
-                ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes            IsUsed = false
+                ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes
             };
 
         await _context.UserOtps.AddAsync(userOtp);
@@ -181,8 +180,7 @@ public class AuthService : IAuthService
                 Email = existingUser.Email,
                 UserId = existingUser.Id,
                 Otp = hashedOtp,
-                IsUsed = false,
-                ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes            IsUsed = false
+                ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes
             };
 
         await _context.UserOtps.AddAsync(userOtp);
