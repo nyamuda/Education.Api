@@ -36,5 +36,9 @@ public class ApplicationDbContext : DbContext
         //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
         //Hence, there is a many-to-many relationship between Curriculum and Subject
         modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
+
+        //A Question can have multiple Tags and a Tag can exist in multiple Questions.
+        //Hence, there is a many-to-many relationship between Question and Tag
+        modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
     }
 }
