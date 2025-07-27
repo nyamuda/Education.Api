@@ -67,5 +67,14 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(upv => upv.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set the foreign UserId key to null
+
+        //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and Upvote
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Upvotes)
+            .WithOne(upv => upv.Question)
+            .HasForeignKey(upv => upv.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Upvotes for that question
     }
 }

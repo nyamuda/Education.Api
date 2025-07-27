@@ -8,6 +8,8 @@ public class Question
     public List<Tag> Tags { get; set; } = [];
     public List<Like> Likes { get; set; } = [];
 
+    public List<Upvote> Upvotes { get; set; } = [];
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
