@@ -49,5 +49,14 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set the foreign UserId key to null
+
+        //A Question can have multiple Likes while a Like can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and Like
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Likes)
+            .WithOne(l => l.Question)
+            .HasForeignKey(l => l.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Likes for that question
     }
 }

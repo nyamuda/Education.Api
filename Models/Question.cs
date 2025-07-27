@@ -6,6 +6,7 @@ public class Question
     public required string Content { get; set; }
     public int? Marks { get; set; }
     public List<Tag> Tags { get; set; } = [];
+    public List<Like> Likes { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
