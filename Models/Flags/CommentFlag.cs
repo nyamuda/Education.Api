@@ -1,4 +1,5 @@
 using Education.Api.Enums;
+using Education.Api.Models.Users;
 
 namespace Education.Api.Models.Flags;
 
@@ -14,6 +15,7 @@ public class CommentFlag
     /// This is only required when the selected <see cref="CommentFlagType"/> is <c>Other</c>,
     /// allowing the user to describe the issue in their own words.
     /// </summary>
+
     public string? Content { get; set; }
 
     /// <summary>
