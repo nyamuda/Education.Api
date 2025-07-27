@@ -1,8 +1,6 @@
-using Education.Api.Models;
+namespace Education.Api.Models;
 
-namespace Education;
-
-public class Like
+public class Upvote
 {
     public int Id { get; set; }
 
