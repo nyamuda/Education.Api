@@ -40,5 +40,14 @@ public class ApplicationDbContext : DbContext
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
+
+        //A User can have multiple Likes while a Like can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and Like
+        modelBuilder
+            .Entity<Like>()
+            .HasOne(l => l.User)
+            .WithMany()
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set the foreign UserId key to null
     }
 }
