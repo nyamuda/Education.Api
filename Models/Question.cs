@@ -13,7 +13,9 @@ public class Question
     public List<Like> Likes { get; set; } = [];
     public List<Upvote> Upvotes { get; set; } = [];
 
-    public List<Flag<PostFlagType>> Flags { get; set; } = [];
+    public List<PostFlag> Flags { get; set; } = [];
+    public List<Curriculum> Curriculums { get; set; } = [];
+    public List<ExamBoard> ExamBoards { get; set; } = [];
 
     public List<Answer> Answers { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
