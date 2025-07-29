@@ -127,5 +127,14 @@ public class ApplicationDbContext : DbContext
             .WithOne(upv => upv.Question)
             .HasForeignKey(upv => upv.QuestionId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Upvotes for that question
+
+        //A Question can have multiple Answers while an Answer can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and Answer
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Answers)
+            .WithOne(a => a.Question)
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
