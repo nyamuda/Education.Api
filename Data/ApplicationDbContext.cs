@@ -209,7 +209,7 @@ public class ApplicationDbContext : DbContext
             .HasOne(pf => pf.Question)
             .WithMany(q => q.Flags)
             .HasForeignKey(pf => pf.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete PostFlags for that question
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete flags for that question
 
         //An Answer can have multiple PostFlags while a PostFlag can only belong to one Answer.
         //Hence, there is a one-to-many relationship between Answer and PostFlag
@@ -218,6 +218,15 @@ public class ApplicationDbContext : DbContext
             .HasOne(pf => pf.Answer)
             .WithMany(a => a.Flags)
             .HasForeignKey(pf => pf.AnswerId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete PostFlags for that answer
+            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete flags for that answer
+
+        //A Comment can have multiple CommentFlags while a CommentFlag can only belong to one Comment.
+        //Hence, there is a one-to-many relationship between Comment and CommentFlag
+        modelBuilder
+            .Entity<CommentFlag>()
+            .HasOne(cf => cf.Comment)
+            .WithMany(c => c.Flags)
+            .HasForeignKey(cf => cf.CommentId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete comment -> delete flags for that comment
     }
 }

@@ -1,3 +1,6 @@
+using Education.Api.Models.Flags;
+using Education.Api.Models.Users;
+
 namespace Education.Api.Models;
 
 public class Comment
@@ -6,6 +9,8 @@ public class Comment
     public required string Content { get; set; }
     public required int UserId { get; set; }
     public User? User { get; set; }
+
+    public List<CommentFlag> Flags { get; set; } = [];
 
     public required int AnswerId { get; set; }
     public Answer? Answer { get; set; }
