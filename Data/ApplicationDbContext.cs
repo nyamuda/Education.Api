@@ -98,7 +98,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder
             .Entity<Question>()
             .HasOne(q => q.Curriculum)
-            .WithMany(c => c.Questions)
+            .WithMany()
             .HasForeignKey(q => q.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade);
 

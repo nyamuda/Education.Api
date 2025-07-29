@@ -11,6 +11,4 @@ public class Curriculum
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<Subject> Subjects { get; set; } = [];
-
-    public List<Question> Questions { get; set; } = [];
 }
