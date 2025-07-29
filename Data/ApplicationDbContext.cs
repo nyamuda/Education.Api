@@ -24,6 +24,16 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(uo => uo.UserId)
             .OnDelete(DeleteBehavior.Cascade); //Delete User -> delete UserOtps for that user
 
+        //CURRICULUM
+
+        //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
+        //Hence, there is a many-to-many relationship between Curriculum and Subject.
+        modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
+
+        //One same Question can exist in multiple Curriculums and a Curriculum can have multiple Questions.
+        //Hence, there is a many-to-many relationship between Question and Curriculum
+        modelBuilder.Entity<Question>().HasMany(q => q.Curriculums).WithMany(c => c.Questions);
+
         //A Curriculum can have multiple ExamBoards while an ExamBoard can only belong to one Curriculum.
         //Hence, there is a one-to-many relationship between Curriculum and ExamBoard
         modelBuilder
@@ -33,10 +43,6 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(eb => eb.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
 
-        //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
-        //Hence, there is a many-to-many relationship between Curriculum and Subject.
-        modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
-
         //An ExamBoard can have multiple Subjects and a Subject can exist in multiple ExamBoards.
         //Hence, there is a many-to-many relationship between ExamBoard and Subject.
         modelBuilder.Entity<ExamBoard>().HasMany(eb => eb.Subjects).WithMany(s => s.ExamBoards);
@@ -44,9 +50,15 @@ public class ApplicationDbContext : DbContext
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
-        //One same Question can exist in multiple Curriculums and a Curriculum can have multiple Questions.
-        //Hence, there is a many-to-many relationship between Question and Curriculum
-        modelBuilder.Entity<Question>().HasMany(q => q.Curriculums).WithMany(c => c.Questions);
+
+        //A Subject can have multiple Questions while a Question can only belong to one Subject.
+        //Hence, there is a one-to-many relationship between Subject and Question.
+        modelBuilder
+            .Entity<Question>()
+            .HasOne(q => q.Subject)
+            .WithMany(s => s.Questions)
+            .HasForeignKey(q => q.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         //A User can have multiple Likes while a Like can only belong to one User.
         //Hence, there is a one-to-many relationship between User and Like.

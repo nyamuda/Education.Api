@@ -9,6 +9,11 @@ public class Question
     public required string Content { get; set; }
 
     public int? Marks { get; set; }
+
+    public required int SubjectId { get; set; }
+
+    public Subject? Subject { get; set; }
+
     public List<Tag> Tags { get; set; } = [];
     public List<Like> Likes { get; set; } = [];
     public List<Upvote> Upvotes { get; set; } = [];

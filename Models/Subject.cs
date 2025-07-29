@@ -9,6 +9,8 @@ public class Subject
     public int Id { get; set; }
     public required string Name { get; set; }
 
+    public List<Question> Questions { get; set; } = [];
+
     public List<Topic> Topics { get; set; } = [];
     public List<Curriculum> Curriculums { get; set; } = [];
 
