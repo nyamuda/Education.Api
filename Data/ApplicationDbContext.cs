@@ -156,6 +156,15 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(l => l.AnswerId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Likes for that answer
 
+        //An Answer can have multiple Comments while a Comment can only belong to one Answer.
+        //Hence, there is a one-to-many relationship between Answer and Comment
+        modelBuilder
+            .Entity<Answer>()
+            .HasMany(a => a.Comments)
+            .WithOne(c => c.Answer)
+            .HasForeignKey(c => c.AnswerId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete comments for that answer
+
         //An User can have multiple Question while a Question can only belong to one User.
         //Hence, there is a one-to-many relationship between User and Question
         modelBuilder
@@ -163,6 +172,15 @@ public class ApplicationDbContext : DbContext
             .HasOne(q => q.User)
             .WithMany()
             .HasForeignKey(q => q.UserId)
-            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign to null
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
+
+        //An User can have multiple Answers while an Answer can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and Answer
+        modelBuilder
+            .Entity<Answer>()
+            .HasOne(a => a.User)
+            .WithMany()
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
     }
 }
