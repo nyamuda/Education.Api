@@ -1,4 +1,5 @@
 ﻿using Education.Api.Models;
+using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
 using Microsoft.EntityFrameworkCore;
@@ -181,6 +182,24 @@ public class ApplicationDbContext : DbContext
             .HasOne(a => a.User)
             .WithMany()
             .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
+
+        //An User can have multiple PostFlags while a PostFlag can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and PostFlag
+        modelBuilder
+            .Entity<PostFlag>()
+            .HasOne(pf => pf.User)
+            .WithMany()
+            .HasForeignKey(pf => pf.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
+
+        //An User can have multiple CommentFlags while a CommentFlag can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and CommentFlag
+        modelBuilder
+            .Entity<CommentFlag>()
+            .HasOne(cf => cf.User)
+            .WithMany()
+            .HasForeignKey(cf => cf.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
     }
 }
