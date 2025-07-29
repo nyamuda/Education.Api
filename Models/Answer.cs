@@ -1,3 +1,5 @@
+using Education.Api.Models.Users;
+
 namespace Education.Api.Models;
 
 public class Answer
@@ -13,6 +15,9 @@ public class Answer
     public required int UserId { get; set; }
 
     public User? User { get; set; }
+
+    public List<Upvote> Upvotes { get; set; } = [];
+    public List<Like> Likes { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

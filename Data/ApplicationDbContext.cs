@@ -136,5 +136,14 @@ public class ApplicationDbContext : DbContext
             .WithOne(a => a.Question)
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        //An Answer can have multiple Upvotes while an Upvote can only belong to one Answer.
+        //Hence, there is a one-to-many relationship between Answer and Upvote
+        modelBuilder
+            .Entity<Answer>()
+            .HasMany(a => a.Upvotes)
+            .WithOne(upv => upv.Answer)
+            .HasForeignKey(upv => upv.AnswerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
