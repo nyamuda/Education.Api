@@ -144,6 +144,15 @@ public class ApplicationDbContext : DbContext
             .HasMany(a => a.Upvotes)
             .WithOne(upv => upv.Answer)
             .HasForeignKey(upv => upv.AnswerId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Upvotes for that answer
+
+        //An Answer can have multiple Likes while a Like can only belong to one Answer.
+        //Hence, there is a one-to-many relationship between Answer and Like
+        modelBuilder
+            .Entity<Answer>()
+            .HasMany(a => a.Likes)
+            .WithOne(l => l.Answer)
+            .HasForeignKey(l => l.AnswerId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Likes for that answer
     }
 }

@@ -1,4 +1,5 @@
 using Education.Api.Models;
+using Education.Api.Models.Users;
 
 namespace Education;
 
@@ -11,6 +12,9 @@ public class Like
 
     public int? QuestionId { get; set; }
     public Question? Question { get; set; }
+
+    public int? AnswerId { get; set; }
+    public Answer? Answer { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
