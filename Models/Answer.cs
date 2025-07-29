@@ -1,3 +1,4 @@
+using Education.Api.Models.Flags;
 using Education.Api.Models.Users;
 
 namespace Education.Api.Models;
@@ -20,6 +21,8 @@ public class Answer
     public List<Like> Likes { get; set; } = [];
 
     public List<Comment> Comments { get; set; } = [];
+
+    public List<PostFlag> Flags { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
