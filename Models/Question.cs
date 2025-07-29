@@ -1,6 +1,7 @@
 using Education.Api.Enums;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
+using Education.Api.Models.Users;
 
 namespace Education.Api.Models;
 
@@ -22,6 +23,9 @@ public class Question
 
     public required int TopicId { get; set; }
     public Topic? Topic { get; set; }
+
+    public required int UserId { get; set; }
+    public User? User { get; set; }
 
     public List<Tag> Tags { get; set; } = [];
     public List<Like> Likes { get; set; } = [];

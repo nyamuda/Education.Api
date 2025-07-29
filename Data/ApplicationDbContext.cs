@@ -1,5 +1,6 @@
 ﻿using Education.Api.Models;
 using Education.Api.Models.Topics;
+using Education.Api.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Data;
@@ -154,5 +155,14 @@ public class ApplicationDbContext : DbContext
             .WithOne(l => l.Answer)
             .HasForeignKey(l => l.AnswerId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Likes for that answer
+
+        //An User can have multiple Question while a Question can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and Question
+        modelBuilder
+            .Entity<Question>()
+            .HasOne(q => q.User)
+            .WithMany()
+            .HasForeignKey(q => q.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign to null
     }
 }
