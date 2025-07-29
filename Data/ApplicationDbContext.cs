@@ -1,4 +1,5 @@
 ﻿using Education.Api.Models;
+using Education.Api.Models.Topics;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Data;
@@ -58,6 +59,23 @@ public class ApplicationDbContext : DbContext
             .HasOne(q => q.Subject)
             .WithMany(s => s.Questions)
             .HasForeignKey(q => q.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+        //A Topic can have multiple Questions while a Question can only belong to one Topic.
+        //Hence, there is a one-to-many relationship between Topic and Question.
+        modelBuilder
+            .Entity<Question>()
+            .HasOne(q => q.Topic)
+            .WithMany(t => t.Questions)
+            .HasForeignKey(q => q.TopicId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        //A Topic can have multiple Subtopics while a Subtopic can only belong to one Topic.
+        //Hence, there is a one-to-many relationship between Topic and Subtopic.
+        modelBuilder
+            .Entity<Subtopic>()
+            .HasOne(st => st.Topic)
+            .WithMany(t => t.Subtopics)
+            .HasForeignKey(st => st.TopicId)
             .OnDelete(DeleteBehavior.Cascade);
 
         //A User can have multiple Likes while a Like can only belong to one User.
