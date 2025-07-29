@@ -11,12 +11,16 @@ public class Question
 
     public int? Marks { get; set; }
 
-    public required int SubjectId { get; set; }
+    public required int CurriculumId { get; set; }
+    public Curriculum? Curriculum { get; set; }
 
+    public required int ExamBoardId { get; set; }
+    public ExamBoard? ExamBoard { get; set; }
+
+    public required int SubjectId { get; set; }
     public Subject? Subject { get; set; }
 
     public required int TopicId { get; set; }
-
     public Topic? Topic { get; set; }
 
     public List<Tag> Tags { get; set; } = [];
@@ -24,8 +28,6 @@ public class Question
     public List<Upvote> Upvotes { get; set; } = [];
 
     public List<PostFlag> Flags { get; set; } = [];
-    public List<Curriculum> Curriculums { get; set; } = [];
-    public List<ExamBoard> ExamBoards { get; set; } = [];
 
     public List<Answer> Answers { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

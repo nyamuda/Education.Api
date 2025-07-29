@@ -48,6 +48,14 @@ public class ApplicationDbContext : DbContext
         //Hence, there is a many-to-many relationship between ExamBoard and Subject.
         modelBuilder.Entity<ExamBoard>().HasMany(eb => eb.Subjects).WithMany(s => s.ExamBoards);
 
+        //An ExamBoard can have multiple Question and a Question can only belong to one ExamBoard.
+        //Hence, there is a one-to-many relationship between ExamBoard and Question.
+        modelBuilder
+            .Entity<ExamBoard>()
+            .HasMany(eb => eb.Questions)
+            .WithOne(q => q.ExamBoard)
+            .HasForeignKey(q => q.ExamBoardId);
+
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
