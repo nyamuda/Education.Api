@@ -201,5 +201,14 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(cf => cf.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
+
+        //An Question can have multiple PostFlags while a PostFlag can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and PostFlag
+        modelBuilder
+            .Entity<PostFlag>()
+            .HasOne(pf => pf.Question)
+            .WithMany(q => q.Flags)
+            .HasForeignKey(pf => pf.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete PostFlags for that question
     }
 }
