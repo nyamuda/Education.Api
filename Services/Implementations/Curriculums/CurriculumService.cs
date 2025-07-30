@@ -11,6 +11,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
 {
     private readonly ApplicationDbContext _context = context;
 
+    //Gets a curriculum with a given ID
     public async Task<CurriculumDto> GetByIdAsync(int id)
     {
         return await _context
@@ -68,8 +69,18 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
             Items = items
         };
     }
+
     //Updates a curriculum with a given ID
-    public async Task UpdateAs
+    public async Task UpdateAsync(int id, UpdateCurriculumDto dto)
+    {
+        var curriculum =
+            await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
+            ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+
+        curriculum.Name = dto.Name;
+
+        await _context.SaveChangesAsync();
+    }
 
     //Deletes a curriculum with a given ID
     public async Task DeleteAsync(int id)
