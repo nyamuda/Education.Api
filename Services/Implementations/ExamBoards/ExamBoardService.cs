@@ -96,7 +96,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
     public async Task<ExamBoardDto> AddAsync(AddExamBoardDto dto)
     {
         //Exam board name is unique.
-        //check if there isn't already another exam board with the given name
+        //Check if there isn't already another exam board with the given name.
         bool alreadyExists = await _context
             .ExamBoards
             .AnyAsync(eb => eb.Name.ToLower().Equals(dto.Name.ToLower()));
