@@ -1,7 +1,9 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Curriculums;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -71,10 +73,16 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
     }
 
     /// <summary>
-    /// Adds a new curriculum to the database after validating its uniqueness
+    /// Adds a new curriculum to the database after verifying that its name is unique.
     /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <param name="dto">The DTO containing the curriculum's name.</param>
+    /// <returns>
+    /// A <see cref="CurriculumDto"/> representing the newly created curriculum.
+    /// </returns>
+    /// <exception cref="ConflictException">
+    /// Thrown if a curriculum with the same name already exists (case-insensitive).
+    /// </exception>
+
     public async Task<CurriculumDto> AddAsync(AddCurriculumDto dto)
     {
         //Curriculum name is unique.
@@ -82,11 +90,18 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
         bool alreadyExists = await _context
             .Curriculums
             .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()));
-            
-    if(alreadyExists) 
-    {
-        throw new Conflict
-    }
+
+        if (alreadyExists)
+        {
+            throw new ConflictException($"Curriculum with name '{dto.Name}' already exists.");
+        }
+
+        //add the new curriculum to the database
+        Curriculum curriculum = new() { Name = dto.Name };
+
+        await _context.Curriculums.AddAsync(curriculum);
+
+        return CurriculumDto.MapFrom(curriculum);
     }
 
     //Updates a curriculum with a given ID
