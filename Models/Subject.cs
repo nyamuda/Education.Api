@@ -12,7 +12,6 @@ public class Subject
     public List<Question> Questions { get; set; } = [];
 
     public List<Topic> Topics { get; set; } = [];
-    public List<Curriculum> Curriculums { get; set; } = [];
 
     public List<ExamBoard> ExamBoards { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

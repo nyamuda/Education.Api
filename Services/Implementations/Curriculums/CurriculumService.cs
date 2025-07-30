@@ -3,9 +3,7 @@ using Education.Api.Dtos.Curriculums;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Curriculums;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Education.Api.Services.Implementations.Curriculums;
 
@@ -29,7 +27,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
                         }
                 )
                 .FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"Curriculum with ID '{id}' does not exist.");
     }
 
     /// <summary>
@@ -120,7 +118,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
     {
         var curriculum =
             await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"Curriculum with ID '{id}' does not exist.");
 
         //curriculum name is unique.
         //check if there isn't already an existing curriculum with the new updated name
@@ -143,7 +141,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
     {
         var curriculum =
             await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"Curriculum with ID '{id}' does not exist.");
 
         _context.Curriculums.Remove(curriculum);
 

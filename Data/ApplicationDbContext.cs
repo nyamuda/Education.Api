@@ -40,10 +40,6 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(uo => uo.UserId)
             .OnDelete(DeleteBehavior.Cascade); //Delete User -> delete UserOtps for that user
 
-        //A Curriculum can have multiple Subjects and a Subject can exist in multiple Curriculums.
-        //Hence, there is a many-to-many relationship between Curriculum and Subject.
-        modelBuilder.Entity<Curriculum>().HasMany(c => c.Subjects).WithMany(s => s.Curriculums);
-
         //A Curriculum can have multiple ExamBoards while an ExamBoard can only belong to one Curriculum.
         //Hence, there is a one-to-many relationship between Curriculum and ExamBoard
         modelBuilder
