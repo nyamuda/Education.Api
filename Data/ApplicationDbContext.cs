@@ -66,6 +66,10 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(q => q.ExamBoardId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        //A Subject can have multiple Topics and the a Topic can exist in multiple Subjects.
+        //Hence, there is a many-to-many relationship between Subject and Topic.
+        modelBuilder.Entity<Subject>().HasMany(s => s.Topics).WithMany(t => t.Subjects);
+
         //A Topic can have multiple Subtopics while a Subtopic can only belong to one Topic.
         //Hence, there is a one-to-many relationship between Topic and Subtopic.
         modelBuilder
