@@ -80,6 +80,19 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         };
     }
 
+    /// <summary>
+    /// Adds a new exam board to the database after validating its uniqueness and associated curriculum.
+    /// </summary>
+    /// <param name="dto">The DTO containing the exam board's name and related curriculum ID.</param>
+    /// <returns>
+    /// An <see cref="ExamBoardDto"/> representing the newly created exam board.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if an exam board with the same name already exists (case-insensitive).
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified curriculum ID does not exist in the database.
+    /// </exception>
     public async Task<ExamBoardDto> AddAsync(AddExamBoardDto dto)
     {
         //Exam board name is unique.
@@ -93,7 +106,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
                 $"Exam board with name '{dto.Name}' already exists."
             );
         }
-        //check if curriculum with the given ID exist
+        //check if the curriculum with the given ID exists
         var _ =
             await _context
                 .Curriculums
@@ -104,10 +117,10 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
             );
 
         //add the new exam board to the database
-        ExamBoard examBoard = new() { Name = dto.Name, CurriculumId = dto.CurriculumId, };
+        ExamBoard examBoard = new() { Name = dto.Name, CurriculumId = dto.CurriculumId };
         await _context.ExamBoards.AddAsync(examBoard);
-        
-        return 
+
+        return ExamBoardDto.MapFrom(examBoard);
     }
 
     //Updates a exam board with a given ID
