@@ -15,6 +15,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
     {
         return await _context
                 .Curriculums
+                .AsNoTracking()
                 .Select(
                     c =>
                         new CurriculumDto
@@ -66,5 +67,19 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
             HasMore = hasMore,
             Items = items
         };
+    }
+    //Updates a curriculum with a given ID
+    public async Task UpdateAs
+
+    //Deletes a curriculum with a given ID
+    public async Task DeleteAsync(int id)
+    {
+        var curriculum =
+            await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
+            ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+
+        _context.Curriculums.Remove(curriculum);
+
+        await _context.SaveChangesAsync();
     }
 }
