@@ -71,7 +71,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     }
 
     /// <summary>
-    /// Adds a new subject to the database after verifying that its name is unique.
+    /// Adds a new subject to the database.
     /// </summary>
     /// <param name="dto">The DTO containing the subject's data.</param>
     /// <returns>
@@ -80,11 +80,14 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <exception cref="ConflictException">
     /// Thrown if a subject with the same name already exists (case-insensitive).
     /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if one or more of the provided exam board IDs do not exist.
+    /// </exception>
 
     public async Task<SubjectDto> AddAsync(AddSubjectDto dto)
     {
         //Subject name is unique.
-        //Check if there isn't already another subject with the given name
+        //Check if there isn't already another subject with the given name (case-insensitive)
         bool alreadyExists = await _context
             .Subjects
             .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()));
@@ -94,8 +97,21 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
             throw new ConflictException($"Subject with name '{dto.Name}' already exists.");
         }
 
+        //get the the selected exam boards for the subject
+        var selectedExamBoards = await _context
+            .ExamBoards
+            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
+            .ToListAsync();
+
+        //Make sure all the selected exam boards exist
+        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
+        {
+            throw new InvalidOperationException("One or more selected exam boards do not exist.");
+        }
+
         //add the new subject to the database
         Subject subject = new() { Name = dto.Name };
+        subject.ExamBoards.AddRange(selectedExamBoards);
 
         await _context.Subjects.AddAsync(subject);
 
@@ -113,6 +129,9 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <exception cref="ConflictException">
     /// Thrown if another subject with the same name already exists (case-insensitive).
     /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if one or more of the provided exam board IDs do not exist.
+    /// </exception>
 
     public async Task UpdateAsync(int id, UpdateSubjectDto dto)
     {
@@ -125,13 +144,25 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         bool alreadyExists = await _context
             .Subjects
             .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()) && c.Id != id);
-
         if (alreadyExists)
         {
             throw new ConflictException($"A subject with name '{dto.Name}' already exists.");
         }
 
+        //get the the selected exam boards for the subject
+        var selectedExamBoards = await _context
+            .ExamBoards
+            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
+            .ToListAsync();
+
+        //Make sure all the selected exam boards exist
+        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
+        {
+            throw new InvalidOperationException("One or more selected exam boards do not exist.");
+        }
+
         subject.Name = dto.Name;
+        subject.ExamBoards.AddRange(selectedExamBoards);
 
         await _context.SaveChangesAsync();
     }
@@ -141,7 +172,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     {
         var subject =
             await _context.Subjects.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"Subject with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
 
         _context.Subjects.Remove(subject);
 
