@@ -5,7 +5,7 @@ namespace Education.Api.Services.Abstractions.ExamBoards;
 
 public interface IExamBoardService
 {
-    Task<ExamBoard> GetByIdAsync(int id);
+    Task<ExamBoardDto> GetByIdAsync(int id);
 
     Task<PageInfo<ExamBoardDto>> GetAsync(int page, int pageSize);
 
