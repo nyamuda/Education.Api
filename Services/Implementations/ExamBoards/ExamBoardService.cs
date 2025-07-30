@@ -1,6 +1,7 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
 using Microsoft.EntityFrameworkCore;
@@ -87,7 +88,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
     /// <returns>
     /// An <see cref="ExamBoardDto"/> representing the newly created exam board.
     /// </returns>
-    /// <exception cref="InvalidOperationException">
+    /// <exception cref="ConflictException">
     /// Thrown if an exam board with the same name already exists (case-insensitive).
     /// </exception>
     /// <exception cref="KeyNotFoundException">
@@ -102,9 +103,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
             .AnyAsync(eb => eb.Name.ToLower().Equals(dto.Name.ToLower()));
         if (alreadyExists)
         {
-            throw new InvalidOperationException(
-                $"Exam board with name '{dto.Name}' already exists."
-            );
+            throw new ConflictException($"Exam board with name '{dto.Name}' already exists.");
         }
         //check if the curriculum with the given ID exists
         var _ =
@@ -123,19 +122,40 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         return ExamBoardDto.MapFrom(examBoard);
     }
 
-    //Updates a exam board with a given ID
+    /// <summary>
+    /// Updates an existing exam with a given ID.
+    /// </summary>
+    /// <param name="id">The ID of the exam board to update.</param>
+    /// <param name="dto">The DTO containing the updated exam board</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if no exam board with the specified ID exists.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if another exam board with the same name already exists (case-insensitive).
+    /// </exception>
     public async Task UpdateAsync(int id, UpdateExamBoardDto dto)
     {
         var examBoard =
             await _context.ExamBoards.FirstOrDefaultAsync(eb => eb.Id.Equals(id))
             ?? throw new KeyNotFoundException($"ExamBoard with ID '{id}' does not exist.");
 
+        //exam board name is unique.
+        //check if there isn't already an existing exam board with the new updated name
+        bool alreadyExists = await _context
+            .ExamBoards
+            .AnyAsync(eb => eb.Name.ToLower().Equals(dto.Name.ToLower()) && eb.Id != id);
+
+        if (alreadyExists)
+        {
+            throw new ConflictException($"An exam board with name '{dto.Name}' already exists.");
+        }
+
         examBoard.Name = dto.Name;
 
         await _context.SaveChangesAsync();
     }
 
-    //Deletes a exam board with a given ID
+    //Deletes an exam board with a given ID
     public async Task DeleteAsync(int id)
     {
         var examBoard =

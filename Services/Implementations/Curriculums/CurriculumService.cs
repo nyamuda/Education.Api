@@ -104,12 +104,34 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
         return CurriculumDto.MapFrom(curriculum);
     }
 
-    //Updates a curriculum with a given ID
+    /// <summary>
+    /// Updates an existing curriculum with a given ID.
+    /// </summary>
+    /// <param name="id">The ID of the curriculum to update.</param>
+    /// <param name="dto">The DTO containing the updated curriculum</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if no curriculum with the specified ID exists.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if another curriculum with the same name already exists (case-insensitive).
+    /// </exception>
+
     public async Task UpdateAsync(int id, UpdateCurriculumDto dto)
     {
         var curriculum =
             await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
             ?? throw new KeyNotFoundException($@"Curriculum with ID ""{id}"" does not exist.");
+
+        //curriculum name is unique.
+        //check if there isn't already an existing curriculum with the new updated name
+        bool alreadyExists = await _context
+            .Curriculums
+            .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()) && c.Id != id);
+
+        if (alreadyExists)
+        {
+            throw new ConflictException($"A curriculum with name '{dto.Name}' already exists.");
+        }
 
         curriculum.Name = dto.Name;
 
