@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Education.Api.Models;
 
 namespace Education.Api.Dtos.Subjects;
