@@ -70,6 +70,25 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
         };
     }
 
+    /// <summary>
+    /// Adds a new curriculum to the database after validating its uniqueness
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    public async Task<CurriculumDto> AddAsync(AddCurriculumDto dto)
+    {
+        //Curriculum name is unique.
+        //Check if there isn't already another curriculum with the given name
+        bool alreadyExists = await _context
+            .Curriculums
+            .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()));
+            
+    if(alreadyExists) 
+    {
+        throw new Conflict
+    }
+    }
+
     //Updates a curriculum with a given ID
     public async Task UpdateAsync(int id, UpdateCurriculumDto dto)
     {

@@ -7,15 +7,14 @@ public class CurriculumDto
     public required int Id { get; set; }
     public required string Name { get; set; }
     public DateTime CreatedAt { get; set; }
-    
-    
-    public static CurriculumDto MapFrom(Curriculum curriculum) 
+
+    public static CurriculumDto MapFrom(Curriculum curriculum)
     {
-        return new CurriculumDto 
+        return new CurriculumDto
         {
-            Id=curriculum.Id,
-            Name=curriculum.Name,
-            CreatedAt=curriculum.CreatedAt
-        }
+            Id = curriculum.Id,
+            Name = curriculum.Name,
+            CreatedAt = curriculum.CreatedAt
+        };
     }
 }
