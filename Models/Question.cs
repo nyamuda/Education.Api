@@ -24,6 +24,8 @@ public class Question
     public required int TopicId { get; set; }
     public Topic? Topic { get; set; }
 
+    public List<Subtopic> Subtopics { get; set; } = [];
+
     public required int UserId { get; set; }
     public User? User { get; set; }
 

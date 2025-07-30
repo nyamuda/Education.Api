@@ -127,6 +127,10 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(q => q.TopicId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        //A Question can fall under multiple Subtopics and a Subtopic can exist in multiple Questions
+        //Hence, there is a many-to-many relationship between Question and Subtopic
+        modelBuilder.Entity<Question>().HasMany(q => q.Subtopics).WithMany(st => st.Questions);
+
         //A Question can have multiple Likes while a Like can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Like
         modelBuilder
