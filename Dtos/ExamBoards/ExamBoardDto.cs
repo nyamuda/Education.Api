@@ -13,4 +13,15 @@ public class ExamBoardDto
     public CurriculumDto? Curriculum { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public static ExamBoardDto MapFrom(ExamBoard examBoard)
+    {
+        return new ExamBoardDto
+        {
+            Id = examBoard.Id,
+            Name = examBoard.Name,
+            CurriculumId = examBoard.CurriculumId,
+            CreatedAt = examBoard.CreatedAt,
+        };
+    }
 }

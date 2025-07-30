@@ -36,7 +36,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
                         }
                 )
                 .FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"ExamBoard with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"ExamBoard with ID '{id}' does not exist.");
     }
 
     /// <summary>
@@ -80,12 +80,42 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         };
     }
 
+    public async Task<ExamBoardDto> AddAsync(AddExamBoardDto dto)
+    {
+        //Exam board name is unique.
+        //check if there isn't already another exam board with the given name
+        bool alreadyExists = await _context
+            .ExamBoards
+            .AnyAsync(eb => eb.Name.ToLower().Equals(dto.Name.ToLower()));
+        if (alreadyExists)
+        {
+            throw new InvalidOperationException(
+                $"Exam board with name '{dto.Name}' already exists."
+            );
+        }
+        //check if curriculum with the given ID exist
+        var _ =
+            await _context
+                .Curriculums
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id.Equals(dto.CurriculumId))
+            ?? throw new KeyNotFoundException(
+                $"Curriculum with ID '{dto.CurriculumId}' does not exist."
+            );
+
+        //add the new exam board to the database
+        ExamBoard examBoard = new() { Name = dto.Name, CurriculumId = dto.CurriculumId, };
+        await _context.ExamBoards.AddAsync(examBoard);
+        
+        return 
+    }
+
     //Updates a exam board with a given ID
     public async Task UpdateAsync(int id, UpdateExamBoardDto dto)
     {
         var examBoard =
             await _context.ExamBoards.FirstOrDefaultAsync(eb => eb.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"ExamBoard with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"ExamBoard with ID '{id}' does not exist.");
 
         examBoard.Name = dto.Name;
 
@@ -97,7 +127,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
     {
         var examBoard =
             await _context.ExamBoards.FirstOrDefaultAsync(eb => eb.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"ExamBoard with ID ""{id}"" does not exist.");
+            ?? throw new KeyNotFoundException($"ExamBoard with ID '{id}' does not exist.");
 
         _context.ExamBoards.Remove(examBoard);
 

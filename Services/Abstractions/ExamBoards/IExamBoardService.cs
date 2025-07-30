@@ -9,6 +9,8 @@ public interface IExamBoardService
 
     Task<PageInfo<ExamBoardDto>> GetAsync(int page, int pageSize);
 
+    Task<ExamBoardDto> AddAsync(AddExamBoardDto dto);
+
     Task UpdateAsync(int id, UpdateExamBoardDto dto);
 
     Task DeleteAsync(int id);
