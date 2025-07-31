@@ -9,7 +9,7 @@ public interface IQuestionService
 
     Task<PageInfo<QuestionDto>> GetAsync(int page, int pageSize);
 
-    Task<QuestionDto> AddAsync(AddQuestionDto dto);
+    Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto);
 
     Task UpdateAsync(int id, UpdateQuestionDto dto);
 

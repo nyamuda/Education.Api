@@ -13,9 +13,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Questions;
 
-public class QuestionService(ApplicationDbContext context) : IQuestionService
+public class QuestionService(ApplicationDbContext context, ILogger<QuestionService> logger)
+    : IQuestionService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<QuestionService> _logger = logger;
 
     //Gets a question with a given ID
     public async Task<QuestionDto> GetByIdAsync(int id)
@@ -169,11 +171,48 @@ public class QuestionService(ApplicationDbContext context) : IQuestionService
             Page = page,
             PageSize = pageSize,
             HasMore = hasMore,
+            TotalItems = totalItems,
             Items = questions
         };
     }
 
-    Task<QuestionDto> AddAsync(AddQuestionDto dto);
+    public async Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto)
+    {
+        //STEP 1: Check if an exam board with the given ID exists
+        var examBoard = await _context
+            .ExamBoards
+            .AsNoTracking()
+            .FirstOrDefaultAsync(eb => eb.Id.Equals(dto.ExamBoardId));
+
+        if (examBoard is null)
+        {
+            _logger.LogWarning("Exam board with ID {ExamBoardId} not found", dto.ExamBoardId);
+
+            throw new KeyNotFoundException(
+                $"Exam board with ID '{dto.ExamBoardId}' does not exist"
+            );
+        }
+
+        //STEP 2: Check if a subject with the given ID exists and also exists in the given exam board
+        var subject = _context
+            .Subjects
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                s => s.Id.Equals(dto.SubjectId) && s.ExamBoards.Contains(examBoard)
+            );
+        if (subject is null)
+        {
+            _logger.LogWarning(
+                "No subject with ID {SubjectId} found for exam board with ID {ExamBoardId}",
+                dto.SubjectId,
+                dto.ExamBoardId
+            );
+            
+            throw new KeyNotFoundException(
+                $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'"
+            );
+        }
+    }
 
     Task UpdateAsync(int id, UpdateQuestionDto dto);
 
