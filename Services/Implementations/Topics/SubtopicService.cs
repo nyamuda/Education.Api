@@ -96,7 +96,7 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
             ?? throw new KeyNotFoundException($"Topic with ID '{dto.TopicId}' does not exist.");
 
         //Subtopic name is unique for each topic.
-        //Check if there isn't already another subtopic with the given name under the selected topic
+        //Check if there isn't already another subtopic with the given name under the selected topic.
         bool alreadyExists = await _context
             .Subtopics
             .AnyAsync(st => st.Name.ToLower().Equals(dto.Name.ToLower()) && st.TopicId == topic.Id);
