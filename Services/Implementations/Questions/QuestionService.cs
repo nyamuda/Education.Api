@@ -246,7 +246,8 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 $"One or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
             );
         }
-        //STEP 5: Check if the selected subtopics with for a topic with the given ID exist
+        //STEP 5: Get Tags with a given name
+        //if the no tag with a given name is found, create a new tag with that name
     }
 
     Task UpdateAsync(int id, UpdateQuestionDto dto);
