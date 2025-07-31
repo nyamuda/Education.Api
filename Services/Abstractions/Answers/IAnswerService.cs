@@ -7,7 +7,7 @@ public interface IAnswerService
 {
     Task<AnswerDto> GetByIdAsync(int id);
 
-    Task<PageInfo<AnswerDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<AnswerDto>> GetAsync(int questionId, int page, int pageSize);
 
     Task<AnswerDto> AddAsync(int userId, AddAnswerDto dto);
 
