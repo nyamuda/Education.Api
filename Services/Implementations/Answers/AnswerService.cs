@@ -53,7 +53,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     {
         var query = _context
             .Answers
-            .Where(a => a.QuestionId == questionId)
+            .Where(a => a.QuestionId.Equals(questionId))
             .OrderByDescending(a => a.CreatedAt)
             .AsQueryable();
 
@@ -93,48 +93,44 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     }
 
     /// <summary>
-    /// Adds a new answer to the database.
+    /// Adds a new answer for specified question to the database.
     /// </summary>
     /// <param name="dto">The DTO containing the answer's data.</param>
     /// <returns>
     /// A <see cref="AnswerDto"/> representing the newly created answer.
     /// </returns>
-    /// <exception cref="ConflictException">
-    /// Thrown if a answer with the same name already exists (case-insensitive).
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the question the answer is for cannot found.
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided exam board IDs do not exist.
-    /// </exception>
-    public async Task<AnswerDto> AddAsync(AddAnswerDto dto)
+    public async Task<AnswerDto> AddAsync(int userId, AddAnswerDto dto)
     {
-        //Answer name is unique.
-        //Check if there isn't already another answer with the given name (case-insensitive)
-        bool alreadyExists = await _context
-            .Answers
-            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()));
+        //Check if the question the answer is for exists.
+        var question = await _context
+            .Questions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(q => q.Id.Equals(dto.QuestionId));
 
-        if (alreadyExists)
+        if (question is null)
         {
-            throw new ConflictException($"Answer with name '{dto.Name}' already exists.");
-        }
-
-        //get the the selected exam boards for the answer
-        var selectedExamBoards = await _context
-            .ExamBoards
-            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
-            .ToListAsync();
-
-        //Make sure all the selected exam boards exist
-        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
-        {
-            throw new InvalidOperationException("One or more selected exam boards do not exist.");
+            _logger.LogWarning(
+                "Unable to add new answer.Cannot find the question: {QuestionId}.",
+                dto.QuestionId
+            );
+            throw new KeyNotFoundException($"Answer with ID '{dto.QuestionId}' does not exist.");
         }
 
         //add the new answer to the database
-        Answer answer = new() { Name = dto.Name };
-        answer.ExamBoards.AddRange(selectedExamBoards);
+        Answer answer =
+            new()
+            {
+                Content = dto.Content,
+                QuestionId = dto.QuestionId,
+                UserId = userId
+            };
 
         await _context.Answers.AddAsync(answer);
+
+        _logger.LogInformation("Successfully added a new answer by user: {UserId}.", userId);
 
         return AnswerDto.MapFrom(answer);
     }
