@@ -1,0 +1,17 @@
+using Education.Api.Dtos.Questions;
+using Education.Api.Models;
+
+namespace Education.Api.Services.Abstractions.Questions;
+
+public interface IQuestionService
+{
+    Task<QuestionDto> GetByIdAsync(int id);
+
+    Task<PageInfo<QuestionDto>> GetAsync(int page, int pageSize);
+
+    Task<QuestionDto> AddAsync(AddQuestionDto dto);
+
+    Task UpdateAsync(int id, UpdateQuestionDto dto);
+
+    Task DeleteAsync(int id);
+}
