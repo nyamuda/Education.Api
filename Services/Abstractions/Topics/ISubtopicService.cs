@@ -3,7 +3,7 @@ using Education.Api.Models;
 
 namespace Education.Api.Services.Abstractions.Topics;
 
-public interface ISubTopicService
+public interface ISubtopicService
 {
     Task<SubtopicDto> GetByIdAsync(int id);
 
