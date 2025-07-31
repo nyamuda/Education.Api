@@ -189,12 +189,12 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
             _logger.LogWarning("Exam board with ID {ExamBoardId} not found", dto.ExamBoardId);
 
             throw new KeyNotFoundException(
-                $"Exam board with ID '{dto.ExamBoardId}' does not exist"
+                $"Exam board with ID '{dto.ExamBoardId}' does not exist."
             );
         }
 
-        //STEP 2: Check if a subject with the given ID exists and also exists in the given exam board
-        var subject = _context
+        //STEP 2: Check if a subject with the given ID exists and also exists in the given Exam board
+        var subject = await _context
             .Subjects
             .AsNoTracking()
             .FirstOrDefaultAsync(
@@ -207,9 +207,27 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 dto.SubjectId,
                 dto.ExamBoardId
             );
-            
+
             throw new KeyNotFoundException(
-                $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'"
+                $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'."
+            );
+        }
+        //STEP 3: Check if a Topic with the given ID exists and also exists in the given Subject
+        var topic = await _context
+            .Topics
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId) && t.Subjects.Contains(subject));
+
+        if (topic is null)
+        {
+            _logger.LogWarning(
+                "Topic with ID {TopicId} was not found for subject with ID {SubjectId}",
+                dto.TopicId,
+                dto.SubjectId
+            );
+
+            throw new KeyNotFoundException(
+                $"No topic with ID {dto.TopicId} found for subject with ID {dto.SubjectId}."
             );
         }
     }

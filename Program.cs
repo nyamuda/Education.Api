@@ -23,6 +23,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddSingleton<IEmailTemplateBuilder, EmailTemplateBuilder>();
 
+
 //Configure the database
 string connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
