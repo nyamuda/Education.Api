@@ -1,0 +1,39 @@
+using Education.Api.Dtos.Questions;
+using Education.Api.Dtos.Users;
+using Education.Api.Models;
+
+namespace Education.Api.Dtos.Answers;
+
+public class AnswerDto
+{
+    public required int Id { get; set; }
+
+    public required string Content { get; set; }
+
+    public required int QuestionId { get; set; }
+
+    public required int UserId { get; set; }
+
+    public UserDto? User { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
+    public static AnswerDto MapFrom(Answer answer)
+    {
+        return new AnswerDto
+        {
+            Id = answer.Id,
+            Content = answer.Content,
+            QuestionId = answer.QuestionId,
+            UserId = answer.UserId,
+            User =
+                answer.User != null
+                    ? new UserDto { Id = answer.User.Id, Username = answer.User.Username, }
+                    : null,
+            CreatedAt = answer.CreatedAt,
+            UpdatedAt = answer.UpdatedAt
+        };
+    }
+}
