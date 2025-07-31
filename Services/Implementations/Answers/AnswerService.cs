@@ -96,17 +96,17 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     /// Adds a new answer for a specified question to the database.
     /// </summary>
     ///  <param name="userId">The ID of the user adding the answer.</param>
-    ///  <param name="questionId">The ID of the question the answer is for.</param>
+    ///  <param name="questionId">The ID of the question being answered.</param>
     /// <param name="dto">The DTO containing the answer's content.</param>
     /// <returns>
     /// A <see cref="AnswerDto"/> representing the newly created answer.
     /// </returns>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if the question the answer is for cannot found.
+    /// Thrown if the specified question does not exist.
     /// </exception>
     public async Task<AnswerDto> AddAsync(int userId, int questionId, AddAnswerDto dto)
     {
-        //Check if the question the answer is for exists.
+        //Check if the question being answered exists
         var question = await _context
             .Questions
             .AsNoTracking()
@@ -118,7 +118,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                 "Unable to add new answer.Cannot find the question: {QuestionId}.",
                 questionId
             );
-            throw new KeyNotFoundException($"Answer with ID '{questionId}' does not exist.");
+            throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
         }
 
         //add the new answer to the database
@@ -212,7 +212,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                 "Cannot delete answer. Answer does not belong to specified user: {UserId}",
                 userId
             );
-            throw new UnauthorizedAccessException("You're not authorized to delete this answer");
+            throw new UnauthorizedAccessException("You're not authorized to delete this answer.");
         }
 
         //Remove the answer from the database
