@@ -85,8 +85,8 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
     /// <exception cref="ConflictException">
     /// Thrown if a subtopic with the same name already exists under the selected topic (case-insensitive).
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided subject IDs do not exist.
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the selected topic for the subtopic does not exist.
     /// </exception>
     public async Task<SubtopicDto> AddAsync(AddSubtopicDto dto)
     {
@@ -109,7 +109,7 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
         }
 
         //add the new subtopic to the database
-        Subtopic subtopic = new() { Name = dto.Name, TopicId = topic.Id };
+        Subtopic subtopic = new() { Name = dto.Name, TopicId = dto.TopicId };
 
         await _context.Subtopics.AddAsync(subtopic);
 
@@ -122,45 +122,42 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
     /// <param name="id">The ID of the subtopic to update.</param>
     /// <param name="dto">The DTO containing the updated subtopic</param>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if no subtopic with the specified ID exists.
+    /// Thrown if the subtopic with the specified ID or selected topic for the subtopic does not exist.
     /// </exception>
     /// <exception cref="ConflictException">
-    /// Thrown if another subtopic with the same name already exists (case-insensitive).
+    /// Thrown if a subtopic with the same name already exists under the selected topic (case-insensitive).
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided subject IDs do not exist.
-    /// </exception>
-
     public async Task UpdateAsync(int id, UpdateSubtopicDto dto)
     {
         var subtopic =
             await _context.Subtopics.FirstOrDefaultAsync(t => t.Id.Equals(id))
             ?? throw new KeyNotFoundException($"Subtopic with ID '{id}' does not exist.");
 
-        //subtopic name is unique.
-        //check if there isn't already an existing subtopic with the new updated name
+        //get the selected topic for the subtopic
+        var topic =
+            await _context.Topics.AsNoTracking().FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId))
+            ?? throw new KeyNotFoundException($"Topic with ID '{dto.TopicId}' does not exist.");
+
+        //Subtopic name is unique for each topic.
+        //Check if there isn't already another subtopic with the new updated name under the selected topic
         bool alreadyExists = await _context
             .Subtopics
-            .AnyAsync(t => t.Name.ToLower().Equals(dto.Name.ToLower()) && t.Id != id);
+            .AnyAsync(
+                st =>
+                    st.Name.ToLower().Equals(dto.Name.ToLower())
+                    && st.Id != id
+                    && st.TopicId == topic.Id
+            );
+
         if (alreadyExists)
         {
-            throw new ConflictException($"A subtopic with name '{dto.Name}' already exists.");
-        }
-
-        //get the the selected subjects for the subtopic
-        var selectedSubjects = await _context
-            .Subjects
-            .Where(s => dto.SubjectIds.Contains(s.Id))
-            .ToListAsync();
-
-        //Make sure all the selected subjects exist
-        if (selectedSubjects.Count != dto.SubjectIds.Count)
-        {
-            throw new InvalidOperationException("One or more selected subjects do not exist.");
+            throw new ConflictException(
+                $"A subtopic with name '{dto.Name}' already exists under the topic '{topic.Name}'."
+            );
         }
 
         subtopic.Name = dto.Name;
-        subtopic.Subjects.AddRange(selectedSubjects);
+        subtopic.TopicId = dto.TopicId;
 
         await _context.SaveChangesAsync();
     }
