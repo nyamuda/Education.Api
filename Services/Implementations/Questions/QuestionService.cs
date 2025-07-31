@@ -230,6 +230,23 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 $"No topic with ID {dto.TopicId} found for subject with ID {dto.SubjectId}."
             );
         }
+        //STEP 4: Check if the selected subtopics with for a topic with the given ID exist
+        var selectedSubtopics = await _context
+            .Subtopics
+            .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
+            .ToListAsync();
+        if (selectedSubtopics.Count != dto.SubtopicIds.Count)
+        {
+            _logger.LogWarning(
+                "One or more selected subtopics do not exist under a topic with ID {TopicId}",
+                dto.TopicId
+            );
+
+            throw new InvalidOperationException(
+                $"One or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
+            );
+        }
+        //STEP 5: Check if the selected subtopics with for a topic with the given ID exist
     }
 
     Task UpdateAsync(int id, UpdateQuestionDto dto);
