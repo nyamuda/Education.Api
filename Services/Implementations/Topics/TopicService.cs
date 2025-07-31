@@ -131,39 +131,39 @@ public class TopicService(ApplicationDbContext context) : ITopicService
     /// Thrown if another topic with the same name already exists (case-insensitive).
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided exam board IDs do not exist.
+    /// Thrown if one or more of the provided subject IDs do not exist.
     /// </exception>
 
     public async Task UpdateAsync(int id, UpdateTopicDto dto)
     {
         var topic =
-            await _context.Topics.FirstOrDefaultAsync(s => s.Id.Equals(id))
+            await _context.Topics.FirstOrDefaultAsync(t => t.Id.Equals(id))
             ?? throw new KeyNotFoundException($"Topic with ID '{id}' does not exist.");
 
         //topic name is unique.
         //check if there isn't already an existing topic with the new updated name
         bool alreadyExists = await _context
             .Topics
-            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()) && s.Id != id);
+            .AnyAsync(t => t.Name.ToLower().Equals(dto.Name.ToLower()) && t.Id != id);
         if (alreadyExists)
         {
             throw new ConflictException($"A topic with name '{dto.Name}' already exists.");
         }
 
-        //get the the selected exam boards for the topic
-        var selectedExamBoards = await _context
-            .ExamBoards
-            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
+        //get the the selected subjects for the topic
+        var selectedSubjects = await _context
+            .Subjects
+            .Where(s => dto.SubjectIds.Contains(s.Id))
             .ToListAsync();
 
-        //Make sure all the selected exam boards exist
-        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
+        //Make sure all the selected subjects exist
+        if (selectedSubjects.Count != dto.SubjectIds.Count)
         {
-            throw new InvalidOperationException("One or more selected exam boards do not exist.");
+            throw new InvalidOperationException("One or more selected subjects do not exist.");
         }
 
         topic.Name = dto.Name;
-        topic.ExamBoards.AddRange(selectedExamBoards);
+        topic.Subjects.AddRange(selectedSubjects);
 
         await _context.SaveChangesAsync();
     }

@@ -9,5 +9,5 @@ public class UpdateTopicDto
 
     [Required]
     [MinLength(1, ErrorMessage = "Please select at least one subject.")]
-    public required List<int> SubjectId { get; set; }
+    public required List<int> SubjectIds { get; set; }
 }
