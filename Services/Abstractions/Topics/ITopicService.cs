@@ -1,14 +1,17 @@
+using Education.Api.Dtos.Topics;
+using Education.Api.Models;
+
 namespace Education.Api.Services.Abstractions.Topics;
 
 public interface ITopicService
 {
-    Task<SubjectDto> GetByIdAsync(int id);
+    Task<TopicDto> GetByIdAsync(int id);
 
-    Task<PageInfo<SubjectDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<TopicDto>> GetAsync(int page, int pageSize);
 
-    Task<SubjectDto> AddAsync(AddSubjectDto dto);
+    Task<TopicDto> AddAsync(AddTopicDto dto);
 
-    Task UpdateAsync(int id, UpdateSubjectDto dto);
+    Task UpdateAsync(int id, UpdateTopicDto dto);
 
     Task DeleteAsync(int id);
 }
