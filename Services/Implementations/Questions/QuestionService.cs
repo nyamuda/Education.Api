@@ -9,15 +9,20 @@ using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Questions;
+using Education.Api.Services.Abstractions.Tags;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Questions;
 
-public class QuestionService(ApplicationDbContext context, ILogger<QuestionService> logger)
-    : IQuestionService
+public class QuestionService(
+    ApplicationDbContext context,
+    ILogger<QuestionService> logger,
+    ITagService tagService
+) : IQuestionService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<QuestionService> _logger = logger;
+    private readonly ITagService _tagService = tagService;
 
     //Gets a question with a given ID
     public async Task<QuestionDto> GetByIdAsync(int id)
@@ -176,6 +181,18 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
         };
     }
 
+    /// <summary>
+    /// Adds a new question to the database after validating the provided exam board, subject, topic, subtopics, and tags.
+    /// </summary>
+    /// <param name="userId">The ID of the user creating the question.</param>
+    /// <param name="dto">The question DTO containing question content, metadata, and tags.</param>
+    /// <returns>The newly created <see cref="QuestionDto"/>.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when a referenced exam board, subject, or topic does not exist.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when one or more selected subtopics do not belong to the specified topic.
+    /// </exception>
     public async Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto)
     {
         //STEP 1: Check if an exam board with the given ID exists
@@ -186,7 +203,7 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
 
         if (examBoard is null)
         {
-            _logger.LogWarning("Exam board with ID {ExamBoardId} not found", dto.ExamBoardId);
+            _logger.LogWarning("Exam board with ID {ExamBoardId} not found.", dto.ExamBoardId);
 
             throw new KeyNotFoundException(
                 $"Exam board with ID '{dto.ExamBoardId}' does not exist."
@@ -203,7 +220,7 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
         if (subject is null)
         {
             _logger.LogWarning(
-                "No subject with ID {SubjectId} found for exam board with ID {ExamBoardId}",
+                "No subject with ID {SubjectId} found for exam board with ID {ExamBoardId}.",
                 dto.SubjectId,
                 dto.ExamBoardId
             );
@@ -212,7 +229,7 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'."
             );
         }
-        //STEP 3: Check if a Topic with the given ID exists and also exists in the given Subject
+        //STEP 3: Check if a topic with the given ID exists and also belongs to the given subject
         var topic = await _context
             .Topics
             .AsNoTracking()
@@ -221,7 +238,7 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
         if (topic is null)
         {
             _logger.LogWarning(
-                "Topic with ID {TopicId} was not found for subject with ID {SubjectId}",
+                "Topic with ID {TopicId} was not found for subject with ID {SubjectId}.",
                 dto.TopicId,
                 dto.SubjectId
             );
@@ -230,7 +247,7 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 $"No topic with ID {dto.TopicId} found for subject with ID {dto.SubjectId}."
             );
         }
-        //STEP 4: Check if the selected subtopics with for a topic with the given ID exist
+        //STEP 4: Get the selected subtopics and make sure they belong to the topic
         var selectedSubtopics = await _context
             .Subtopics
             .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
@@ -246,8 +263,35 @@ public class QuestionService(ApplicationDbContext context, ILogger<QuestionServi
                 $"One or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
             );
         }
-        //STEP 5: Get Tags with a given name
-        //if the no tag with a given name is found, create a new tag with that name
+
+        //STEP 5: Initialize the question entity with provided details
+        Question question =
+            new()
+            {
+                Content = dto.Content,
+                ExamBoardId = dto.ExamBoardId,
+                SubjectId = dto.SubjectId,
+                TopicId = dto.TopicId,
+                UserId = userId,
+                Marks = dto.Marks,
+            };
+        question.Subtopics.AddRange(selectedSubtopics);
+
+        //STEP 6: Find each tag by name, or create it if it doesn't exist, then add it to the question.
+        // Go through each tag name provided in the request.
+        // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
+        foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            Tag tag = await _tagService.GetByName(tagName);
+            question.Tags.Add(tag);
+        }
+
+        //STEP 7: Finally save the question to the database
+        await _context.Questions.AddAsync(question);
+
+        _logger.LogInformation("Successfully created new question by user ID {UserId}.", userId);
+
+        return QuestionDto.MapFrom(question);
     }
 
     Task UpdateAsync(int id, UpdateQuestionDto dto);

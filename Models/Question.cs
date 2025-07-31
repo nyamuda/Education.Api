@@ -12,8 +12,8 @@ public class Question
 
     public int? Marks { get; set; }
 
-    public required int CurriculumId { get; set; }
-    public Curriculum? Curriculum { get; set; }
+    // public required int CurriculumId { get; set; }
+    // public Curriculum? Curriculum { get; set; }
 
     public required int ExamBoardId { get; set; }
     public ExamBoard? ExamBoard { get; set; }
