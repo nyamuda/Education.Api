@@ -293,8 +293,6 @@ public class QuestionService(
 
         return QuestionDto.MapFrom(question);
     }
-    
-    
 
     /// <summary>
     /// Updates an existing question with new content, topic, subtopics, tags, and related details.
@@ -303,7 +301,7 @@ public class QuestionService(
     /// <param name="questionId">The ID of the question to update.</param>
     /// <param name="dto">The updated question data.</param>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if the question, exam board, subject, or topic is not found
+    /// Thrown if the question, exam board, subject, or topic is not found.
     /// </exception>
     /// <exception cref="UnauthorizedAccessException">
     /// Thrown if the question does not belong to the specified user.
@@ -430,5 +428,43 @@ public class QuestionService(
         _logger.LogInformation("Successfully updated question with ID {QuestionId}.", questionId);
     }
 
-    Task DeleteAsync(int id);
+    /// <summary>
+    ///  Deletes an existing question with a given ID.
+    /// </summary>
+    /// <param name="userId">The ID of the user attempting to delete the question.</param>
+    /// <param name="questionId">The ID of the soon to be deleted question.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the question is not found.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown if the question does not belong to the specified user.
+    /// </exception>
+    public async Task DeleteAsync(int userId, int questionId)
+    {
+        //Check if the question exists
+        var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == questionId);
+
+        if (question is null)
+        {
+            _logger.LogWarning("Question not found: {QuestionId}", questionId);
+
+            throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
+        }
+        //Make sure the question belongs to the specified user
+        if (question.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Question {QuestionId} does not belong to user {UserId}.",
+                questionId,
+                userId
+            );
+
+            throw new UnauthorizedAccessException("You're not authorized delete this question.");
+        }
+
+        //delete the question
+        _context.Questions.Remove(question);
+
+        _logger.LogInformation("Successfully deleted question: {QuestionId}", questionId);
+    }
 }
