@@ -93,30 +93,32 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     }
 
     /// <summary>
-    /// Adds a new answer for specified question to the database.
+    /// Adds a new answer for a specified question to the database.
     /// </summary>
-    /// <param name="dto">The DTO containing the answer's data.</param>
+    ///  <param name="userId">The ID of the user adding the answer.</param>
+    ///  <param name="questionId">The ID of the question the answer is for.</param>
+    /// <param name="dto">The DTO containing the answer's content.</param>
     /// <returns>
     /// A <see cref="AnswerDto"/> representing the newly created answer.
     /// </returns>
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the question the answer is for cannot found.
     /// </exception>
-    public async Task<AnswerDto> AddAsync(int userId, AddAnswerDto dto)
+    public async Task<AnswerDto> AddAsync(int userId, int questionId, AddAnswerDto dto)
     {
         //Check if the question the answer is for exists.
         var question = await _context
             .Questions
             .AsNoTracking()
-            .FirstOrDefaultAsync(q => q.Id.Equals(dto.QuestionId));
+            .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
 
         if (question is null)
         {
             _logger.LogWarning(
                 "Unable to add new answer.Cannot find the question: {QuestionId}.",
-                dto.QuestionId
+                questionId
             );
-            throw new KeyNotFoundException($"Answer with ID '{dto.QuestionId}' does not exist.");
+            throw new KeyNotFoundException($"Answer with ID '{questionId}' does not exist.");
         }
 
         //add the new answer to the database
@@ -124,7 +126,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
             new()
             {
                 Content = dto.Content,
-                QuestionId = dto.QuestionId,
+                QuestionId = questionId,
                 UserId = userId
             };
 
@@ -136,63 +138,88 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     }
 
     /// <summary>
-    /// Updates an existing answer with a given ID.
+    /// Updates an existing answer.
     /// </summary>
-    /// <param name="id">The ID of the answer to update.</param>
-    /// <param name="dto">The DTO containing the updated answer</param>
+    /// <param name="userId">The ID of the user attempting the update.</param>
+    /// <param name="answerId">The ID of the soon to be updated answer.</param>
+    /// <param name="dto">The DTO containing the answer's updated content.</param>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if no answer with the specified ID exists.
+    /// Thrown if the answer with the given ID cannot be found.
     /// </exception>
-    /// <exception cref="ConflictException">
-    /// Thrown if another answer with the same name already exists (case-insensitive).
-    /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided exam board IDs do not exist.
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown if the answer doesn't belong to the user attempting the update.
     /// </exception>
 
-    public async Task UpdateAsync(int id, UpdateAnswerDto dto)
+    public async Task UpdateAsync(int userId, int answerId, UpdateAnswerDto dto)
     {
-        var answer =
-            await _context.Answers.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Answer with ID '{id}' does not exist.");
+        //Check if the answer exists
+        var answer = await _context.Answers.FirstOrDefaultAsync(q => q.Id.Equals(answerId));
 
-        //answer name is unique.
-        //check if there isn't already an existing answer with the new updated name
-        bool alreadyExists = await _context
-            .Answers
-            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()) && s.Id != id);
-        if (alreadyExists)
+        if (answer is null)
         {
-            throw new ConflictException($"A answer with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Unable to update answer. Cannot find the answer: {AnswerId}.",
+                answerId
+            );
+            throw new KeyNotFoundException($"Answer with ID '{answerId}' does not exist.");
+        }
+        //Make sure the answer belongs to the specified user
+        if (answer.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Cannot update answer. Answer does not belong to specified user: {UserId}",
+                userId
+            );
+            throw new UnauthorizedAccessException("You're not authorized to update this answer");
         }
 
-        //get the the selected exam boards for the answer
-        var selectedExamBoards = await _context
-            .ExamBoards
-            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
-            .ToListAsync();
-
-        //Make sure all the selected exam boards exist
-        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
-        {
-            throw new InvalidOperationException("One or more selected exam boards do not exist.");
-        }
-
-        answer.Name = dto.Name;
-        answer.ExamBoards.AddRange(selectedExamBoards);
+        //Persist the changes to the database
+        answer.Content = dto.Content;
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully updated answer: {AnswerId}", answerId);
     }
 
-    //Deletes a answer with a given ID
-    public async Task DeleteAsync(int id)
+    /// <summary>
+    ///  Deletes an existing answer with a given ID.
+    /// </summary>
+    /// <param name="userId">The ID of the user attempting to delete the answer.</param>
+    /// <param name="answerId">The ID of the soon to be deleted answer.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the answer is not found.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown if the answer does not belong to the specified user.
+    /// </exception>
+    public async Task DeleteAsync(int userId, int answerId)
     {
-        var answer =
-            await _context.Answers.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Answer with ID '{id}' does not exist.");
+        //Check if the answer exists
+        var answer = await _context.Answers.FirstOrDefaultAsync(q => q.Id.Equals(answerId));
 
+        if (answer is null)
+        {
+            _logger.LogWarning(
+                "Unable to delete answer. Cannot find the answer: {AnswerId}.",
+                answerId
+            );
+            throw new KeyNotFoundException($"Answer with ID '{answerId}' does not exist.");
+        }
+        //Make sure the answer belongs to the specified user
+        if (answer.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Cannot delete answer. Answer does not belong to specified user: {UserId}",
+                userId
+            );
+            throw new UnauthorizedAccessException("You're not authorized to delete this answer");
+        }
+
+        //Remove the answer from the database
         _context.Answers.Remove(answer);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully deleted answer: {AnswerId}", answerId);
     }
 }

@@ -9,7 +9,7 @@ public interface IAnswerService
 
     Task<PageInfo<AnswerDto>> GetAsync(int questionId, int page, int pageSize);
 
-    Task<AnswerDto> AddAsync(int userId, AddAnswerDto dto);
+    Task<AnswerDto> AddAsync(int userId, int questionId, AddAnswerDto dto);
 
     Task UpdateAsync(int userId, int answerId, UpdateAnswerDto dto);
 
