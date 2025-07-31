@@ -95,7 +95,7 @@ public class TopicService(ApplicationDbContext context) : ITopicService
 
         if (alreadyExists)
         {
-            throw new ConflictException($"Topic with name '{dto.Name}' already exists.");
+            throw new ConflictException($"A topic with name '{dto.Name}' already exists.");
         }
 
         //get the the selected subjects for the topic
