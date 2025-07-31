@@ -1,5 +1,4 @@
 using Education.Api.Data;
-using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Exceptions;
 using Education.Api.Models;

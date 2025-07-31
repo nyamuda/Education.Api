@@ -1,5 +1,5 @@
 using Education.Api.Enums;
-using Education.Api.Models;
+using Education.Api.Models.Users;
 
 namespace Education.Api.Dtos.Users;
 

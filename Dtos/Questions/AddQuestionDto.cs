@@ -1,0 +1,24 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Education.Api.Dtos.Questions;
+
+public class AddQuestionDto
+{
+    [Required]
+    public required string Content { get; set; }
+
+    [Required]
+    public required int ExamBoardId { get; set; }
+
+    [Required]
+    public required int SubjectId { get; set; }
+
+    [Required]
+    public required int TopicId { get; set; }
+
+    public List<int> SubtopicIds { get; set; } = [];
+
+    public int? Marks { get; set; }
+
+    public List<string> Tags { get; set; } = [];
+}
