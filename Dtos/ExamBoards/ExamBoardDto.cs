@@ -21,6 +21,14 @@ public class ExamBoardDto
             Id = examBoard.Id,
             Name = examBoard.Name,
             CurriculumId = examBoard.CurriculumId,
+            Curriculum =
+                examBoard.Curriculum != null
+                    ? new CurriculumDto
+                    {
+                        Id = examBoard.Curriculum.Id,
+                        Name = examBoard.Curriculum.Name
+                    }
+                    : null,
             CreatedAt = examBoard.CreatedAt,
         };
     }

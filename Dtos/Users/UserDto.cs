@@ -9,13 +9,13 @@ public class UserDto
 
     public required string Username { get; set; }
 
-    public required string Email { get; set; }
+    public string? Email { get; set; }
 
-    public required UserRole Role { get; set; }
+    public UserRole? Role { get; set; }
 
-    public required bool IsVerified { get; set; }
+    public bool? IsVerified { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public static UserDto MapFrom(User user)
     {
