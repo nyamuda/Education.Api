@@ -46,6 +46,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
         List<CurriculumDto> items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .AsNoTracking()
             .Select(
                 c =>
                     new CurriculumDto

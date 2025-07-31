@@ -18,15 +18,15 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                 .Subjects
                 .AsNoTracking()
                 .Select(
-                    c =>
+                    s =>
                         new SubjectDto
                         {
-                            Id = c.Id,
-                            Name = c.Name,
-                            CreatedAt = c.CreatedAt
+                            Id = s.Id,
+                            Name = s.Name,
+                            CreatedAt = s.CreatedAt
                         }
                 )
-                .FirstOrDefaultAsync(c => c.Id.Equals(id))
+                .FirstOrDefaultAsync(s => s.Id.Equals(id))
             ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
     }
 
@@ -41,18 +41,19 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// </returns>
     public async Task<PageInfo<SubjectDto>> GetAsync(int page, int pageSize)
     {
-        var query = _context.Subjects.OrderByDescending(c => c.CreatedAt).AsQueryable();
+        var query = _context.Subjects.OrderByDescending(s => s.CreatedAt).AsQueryable();
 
         List<SubjectDto> items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .AsNoTracking()
             .Select(
-                c =>
+                s =>
                     new SubjectDto
                     {
-                        Id = c.Id,
-                        Name = c.Name,
-                        CreatedAt = c.CreatedAt
+                        Id = s.Id,
+                        Name = s.Name,
+                        CreatedAt = s.CreatedAt
                     }
             )
             .ToListAsync();
@@ -83,14 +84,13 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <exception cref="InvalidOperationException">
     /// Thrown if one or more of the provided exam board IDs do not exist.
     /// </exception>
-
     public async Task<SubjectDto> AddAsync(AddSubjectDto dto)
     {
         //Subject name is unique.
         //Check if there isn't already another subject with the given name (case-insensitive)
         bool alreadyExists = await _context
             .Subjects
-            .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()));
+            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()));
 
         if (alreadyExists)
         {
@@ -136,14 +136,14 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     public async Task UpdateAsync(int id, UpdateSubjectDto dto)
     {
         var subject =
-            await _context.Subjects.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($@"Subject with ID ""{id}"" does not exist.");
+            await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(id))
+            ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
 
         //subject name is unique.
         //check if there isn't already an existing subject with the new updated name
         bool alreadyExists = await _context
             .Subjects
-            .AnyAsync(c => c.Name.ToLower().Equals(dto.Name.ToLower()) && c.Id != id);
+            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()) && s.Id != id);
         if (alreadyExists)
         {
             throw new ConflictException($"A subject with name '{dto.Name}' already exists.");
@@ -171,7 +171,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     public async Task DeleteAsync(int id)
     {
         var subject =
-            await _context.Subjects.FirstOrDefaultAsync(c => c.Id.Equals(id))
+            await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(id))
             ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
 
         _context.Subjects.Remove(subject);

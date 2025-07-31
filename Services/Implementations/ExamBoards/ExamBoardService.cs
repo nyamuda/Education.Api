@@ -56,6 +56,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         List<ExamBoardDto> items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .AsNoTracking()
             .Select(
                 eb =>
                     new ExamBoardDto
