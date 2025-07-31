@@ -4,6 +4,7 @@ using Education.Api.Dtos.Tags;
 using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Dtos.Users;
+using Education.Api.Models;
 
 namespace Education.Api.Dtos.Questions;
 
@@ -32,4 +33,19 @@ public class QuestionDto
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    public static QuestionDto MapFrom(Question question)
+    {
+        return new QuestionDto
+        {
+            Id = question.Id,
+            Content = question.Content,
+            ExamBoardId = question.ExamBoardId,
+            SubjectId = question.SubjectId,
+            TopicId = question.TopicId,
+            UserId = question.UserId,
+            CreatedAt = question.CreatedAt,
+            UpdatedAt = question.UpdatedAt
+        };
+    }
 }
