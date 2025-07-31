@@ -7,5 +7,7 @@ public class PageInfo<T>
 
     public required bool HasMore { get; set; }
 
+    public int? ItemCount { get; set; }
+
     public required List<T> Items { get; set; }
 }
