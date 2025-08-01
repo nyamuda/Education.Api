@@ -8,7 +8,7 @@ namespace Education.Api.Models.Flags;
 public class AnswerFlag : BaseFlag
 {
     /// <summary>
-    /// The ID of the answer being flagged, if applicable.
+    /// The ID of the answer being flagged.
     /// </summary>
     public required int AnswerId { get; set; }
     public Answer? Answer { get; set; }
