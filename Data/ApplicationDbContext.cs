@@ -154,6 +154,15 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        //A Question can have multiple Comments while a Comment can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and Comment
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Comments)
+            .WithOne(c => c.Question)
+            .HasForeignKey(c => c.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Comments for that question
+
         //An User can have multiple Question while a Question can only belong to one User.
         //Hence, there is a one-to-many relationship between User and Question
         modelBuilder

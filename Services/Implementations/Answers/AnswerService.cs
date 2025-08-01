@@ -13,7 +13,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<AnswerService> _logger = logger;
 
-    //Gets a answer with a given ID
+    //Gets an answer with a given ID
     public async Task<AnswerDto> GetByIdAsync(int id)
     {
         return await _context
