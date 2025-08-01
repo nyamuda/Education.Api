@@ -9,8 +9,8 @@ namespace Education.Api.Services.Implementations.Comments;
 public class CommentService(ApplicationDbContext context, ILogger<CommentService> logger)
     : ICommentService
 {
-    private readonly ApplicationDbContext _context = context;
-    private readonly ILogger<CommentService> _logger = logger;
+    protected readonly ApplicationDbContext _context = context;
+    protected readonly ILogger<CommentService> _logger = logger;
 
     /// <summary>
     /// Retrieves a comment by its unique ID.
