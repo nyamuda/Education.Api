@@ -244,12 +244,112 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
     /// </summary>
     /// <param name="userId">The ID of the user upvoting the comment.</param>
     /// <param name="commentId">The ID of the comment to upvote.</param>
-    Task UpvoteCommentAsync(int userId, int commentId);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified comment or user is not found.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if the specified user has already upvoted the same comment.
+    /// </exception>
+    public async Task UpvoteCommentAsync(int userId, int commentId)
+    {
+        //check if there isn't already an existing upvote for the same comment by the same user
+        bool hasAlreadyUpvoted = await _context
+            .Upvotes
+            .Where(upv => upv.UserId.Equals(userId) && upv.CommentId.Equals(commentId))
+            .AnyAsync();
+
+        if (hasAlreadyUpvoted)
+        {
+            _logger.LogWarning(
+                "Upvote skipped: User {UserId} has already upvoted comment {CommentId}.",
+                userId,
+                commentId
+            );
+            throw new ConflictException(
+                $"Duplicate upvote: User with ID '{userId}' has already upvoted comment with ID '{commentId}'."
+            );
+        }
+
+        //check if the comment exists
+        var comment = await _context
+            .Comments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id.Equals(commentId));
+
+        if (comment is null)
+        {
+            _logger.LogWarning(
+                "Upvote failed: Comment with ID {CommentId} does not exist.",
+                commentId
+            );
+            throw new KeyNotFoundException(
+                $"Cannot upvote: No comment found with ID '{commentId}'."
+            );
+        }
+
+        //check if the user casting the upvote exists
+        var user = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id.Equals(userId));
+
+        if (user is null)
+        {
+            _logger.LogWarning(
+                "Comment upvote failed: User with ID {UserId} does not exist.",
+                userId
+            );
+
+            throw new KeyNotFoundException(
+                $"Cannot upvote comment: No user found with ID '{userId}'."
+            );
+        }
+
+        // upvote the comment and the save the upvote to the database
+        Upvote upvote = new() { UserId = userId, CommentId = commentId };
+
+        await _context.Upvotes.AddAsync(upvote);
+
+        _logger.LogInformation("Successfully upvoted comment with ID {CommentId}.", commentId);
+    }
 
     /// <summary>
     /// Removes an existing upvote from the specified comment by the given user.
     /// </summary>
     /// <param name="userId">The ID of the user removing their upvote.</param>
     /// <param name="commentId">The ID of the comment to remove the upvote from.</param>
-    Task RemoveCommentUpvoteAsync(int userId, int commentId);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified upvote is not not found.
+    /// </exception>
+    public async Task RemoveCommentUpvoteAsync(int userId, int commentId)
+    {
+        //check if the comment upvote exists
+        var commentUpvote = await _context
+            .Upvotes
+            .FirstOrDefaultAsync(
+                upv => upv.UserId.Equals(userId) && upv.CommentId.Equals(commentId)
+            );
+
+        if (commentUpvote is null)
+        {
+            _logger.LogWarning(
+                "Failed to remove upvote: Upvote for comment with ID {CommentId} by user with ID {UserId} not found.",
+                commentId,
+                userId
+            );
+
+            throw new KeyNotFoundException(
+                $"Cannot remove upvote: Upvote for comment with ID '{commentId}' by user with ID '{userId}' does not exist."
+            );
+        }
+
+        //remove the upvote
+        _context.Upvotes.Remove(commentUpvote);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Successfully removed an upvote for a comment with ID {CommentId}.",
+            commentId
+        );
+    }
 }
