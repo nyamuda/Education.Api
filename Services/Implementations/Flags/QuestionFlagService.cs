@@ -1,7 +1,9 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Flags;
 using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
+using Education.Api.Models.Flags;
 using Education.Api.Services.Abstractions.Flags;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -97,7 +99,60 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// <param name="questionId">The ID of the question to flag on.</param>
     /// <param name="dto">The DTO containing the content of the flag.</param>
     /// <returns>The newly created flag for the question.</returns>
-    Task<QuestionFlagDto> AddAsync(int userId, int questionId, AddQuestionFlagDto dto);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified user or question to flag on is not found.
+    /// </exception>
+    public async Task<QuestionFlagDto> AddAsync(int userId, int questionId, AddQuestionFlagDto dto)
+    {
+        //check if the question to flag on exists
+        var question = await _context
+            .Questions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
+
+        if (question is null)
+        {
+            _logger.LogWarning(
+                "Unable to add flag. Question to flag not found: {QuestionId}.",
+                questionId
+            );
+            throw new KeyNotFoundException(
+                $"Question to flag with ID '{questionId}' does not exist."
+            );
+        }
+        //check if the user adding the flag exists
+        var user = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id.Equals(userId));
+
+        if (user is null)
+        {
+            _logger.LogWarning(
+                "Unable to add flag. User attempting to flag a question not found: {UserId}.",
+                userId
+            );
+            throw new KeyNotFoundException(
+                $"User with ID '{userId}' attempting to flag a question does not exist."
+            );
+        }
+
+        //add the new question flag to the database
+        QuestionFlag flag =
+            new()
+            {
+                Content = dto.Content,
+                UserId = userId,
+                QuestionId = questionId,
+                FlagType = dto.FlagType
+            };
+
+        await _context.QuestionFlags.AddAsync(flag);
+
+        _logger.LogInformation("Added a new question flag by user: {UserId}", userId);
+
+        return QuestionFlagDto.MapFrom(flag);
+    }
 
     /// <summary>
     /// Deletes a flag for a question.
