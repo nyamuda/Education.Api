@@ -1,6 +1,7 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Dtos.Users;
+using Education.Api.Models;
 using Education.Api.Services.Abstractions.Flags;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -52,7 +53,42 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// <param name="page">The page number to retrieve.</param>
     /// <param name="pageSize">The number of question flags per page.</param>
     /// <returns>A paginated list of flag for questions.</returns>
-    Task<PageInfo<QuestionFlagDto>> GetAsync(int page, int pageSize);
+    public async Task<PageInfo<QuestionFlagDto>> GetAsync(int page, int pageSize)
+    {
+        var query = _context.QuestionFlags.OrderByDescending(c => c.CreatedAt).AsQueryable();
+
+        List<QuestionFlagDto> questionFlags = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(
+                x =>
+                    new QuestionFlagDto
+                    {
+                        Id = x.Id,
+                        Content = x.Content,
+                        UserId = x.UserId,
+                        User =
+                            x.User != null
+                                ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
+                                : null,
+                        QuestionId = x.QuestionId,
+                        Status = x.Status,
+                        CreatedAt = x.CreatedAt,
+                    }
+            )
+            .ToListAsync();
+
+        //pagination info
+        int totalItems = await query.CountAsync();
+        bool hasMore = totalItems > page * pageSize;
+        return new PageInfo<QuestionFlagDto>
+        {
+            Page = page,
+            PageSize = pageSize,
+            HasMore = hasMore,
+            Items = questionFlags,
+        };
+    }
 
     /// <summary>
     /// Adds a new flag for the specified question.
