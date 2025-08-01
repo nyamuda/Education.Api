@@ -17,11 +17,11 @@ public interface ICommentFlagService
     Task<CommentFlagDto> GetByIdAsync(int id);
 
     /// <summary>
-    /// Retrieves a paginated list of comment flags.
+    /// Retrieves a paginated list of flags for comments.
     /// </summary>
     /// <param name="page">The page number to retrieve.</param>
     /// <param name="pageSize">The number of comment flags per page.</param>
-    /// <returns>A paginated list of comment flags.</returns>
+    /// <returns>A paginated list of flags for comments.</returns>
     Task<PageInfo<CommentFlagDto>> GetAsync(int page, int pageSize);
 
     /// <summary>

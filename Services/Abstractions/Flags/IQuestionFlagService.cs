@@ -17,11 +17,11 @@ public interface IQuestionFlagService
     Task<QuestionFlagDto> GetByIdAsync(int id);
 
     /// <summary>
-    /// Retrieves a paginated list of question flags.
+    /// Retrieves a paginated list of flags for questions.
     /// </summary>
     /// <param name="page">The page number to retrieve.</param>
     /// <param name="pageSize">The number of question flags per page.</param>
-    /// <returns>A paginated list of question flags.</returns>
+    /// <returns>A paginated list of flag for questions.</returns>
     Task<PageInfo<QuestionFlagDto>> GetAsync(int page, int pageSize);
 
     /// <summary>
