@@ -4,7 +4,7 @@ using Education.Api.Models.Users;
 namespace Education.Api.Models.Flags;
 
 /// <summary>
-/// Base class for a user-submitted flag on a piece of content (e.g., comment or post).
+/// Base class for a user-submitted flag on a piece of content (e.g., comment, question or answer).
 /// Contains shared properties for all flag types.
 /// </summary>
 public abstract class BaseFlag

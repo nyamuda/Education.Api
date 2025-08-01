@@ -33,7 +33,7 @@ public class Question
     public List<Like> Likes { get; set; } = [];
     public List<Upvote> Upvotes { get; set; } = [];
 
-    public List<PostFlag> Flags { get; set; } = [];
+    public List<QuestionFlag> Flags { get; set; } = [];
 
     public List<Comment> Comments { get; set; } = [];
 

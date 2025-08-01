@@ -22,7 +22,7 @@ public class Answer
 
     public List<Comment> Comments { get; set; } = [];
 
-    public List<PostFlag> Flags { get; set; } = [];
+    public List<AnswerFlag> Flags { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

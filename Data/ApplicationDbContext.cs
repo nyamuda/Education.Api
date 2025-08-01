@@ -12,13 +12,14 @@ public class ApplicationDbContext : DbContext
         : base(options) { }
 
     public DbSet<Answer> Answers { get; set; }
+    public DbSet<AnswerFlag> AnswerFlags { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentFlag> CommentFlags { get; set; }
     public DbSet<Curriculum> Curriculums { get; set; }
     public DbSet<ExamBoard> ExamBoards { get; set; }
     public DbSet<Like> Likes { get; set; }
-    public DbSet<PostFlag> PostFlags { get; set; }
     public DbSet<Question> Questions { get; set; }
+    public DbSet<QuestionFlag> QuestionFlags { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Subtopic> Subtopics { get; set; }
     public DbSet<Tag> Tags { get; set; }
@@ -30,6 +31,24 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        //A Comment can have multiple CommentFlags while a CommentFlag can only belong to one Comment.
+        //Hence, there is a one-to-many relationship between Comment and CommentFlag
+        modelBuilder
+            .Entity<Comment>()
+            .HasMany(c => c.Flags)
+            .WithOne(cf => cf.Comment)
+            .HasForeignKey(cf => cf.CommentId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete comment -> delete flags for that comment
+
+        //A Comment can only belong to one User while a User can have multiple Comments.
+        //Hence, there is a many-to-one relationship between Comment and User
+        modelBuilder
+            .Entity<Comment>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
 
         //A User can have multiple Otps while an Otp can only belong to one User.
         //Hence, there is a one-to-many relationship between User and UserOtp
@@ -92,15 +111,6 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(upv => upv.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set the foreign UserId key to null
-
-        //A Question can only belong to one Curriculum and a Curriculum can have multiple Questions.
-        //Hence, there is a one-to-many relationship between Curriculum and Question.
-        modelBuilder
-            .Entity<Question>()
-            .HasOne(q => q.Curriculum)
-            .WithMany()
-            .HasForeignKey(q => q.CurriculumId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
@@ -172,6 +182,15 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(q => q.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
 
+        //An Question can have multiple QuestionFlags while a QuestionFlag can only belong to one Question.
+        //Hence, there is a one-to-many relationship between Question and QuestionFlag
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Flags)
+            .WithOne(qf => qf.Question)
+            .HasForeignKey(qf => qf.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete flags for that question
+
         //An Answer can have multiple Upvotes while an Upvote can only belong to one Answer.
         //Hence, there is a one-to-many relationship between Answer and Upvote
         modelBuilder
@@ -208,13 +227,31 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
 
-        //An User can have multiple PostFlags while a PostFlag can only belong to one User.
-        //Hence, there is a one-to-many relationship between User and PostFlag
+        //An Answer can have multiple AnswerFlags while an AnswerFlag can only belong to one Answer.
+        //Hence, there is a one-to-many relationship between Answer and AnswerFlag
         modelBuilder
-            .Entity<PostFlag>()
-            .HasOne(pf => pf.User)
+            .Entity<Answer>()
+            .HasMany(a => a.Flags)
+            .WithOne(af => af.Answer)
+            .HasForeignKey(af => af.AnswerId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete flags for that answer
+
+        //An User can have multiple QuestionFlags while a QuestionFlag can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and QuestionFlag
+        modelBuilder
+            .Entity<QuestionFlag>()
+            .HasOne(qf => qf.User)
             .WithMany()
-            .HasForeignKey(pf => pf.UserId)
+            .HasForeignKey(qf => qf.UserId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
+
+        //An User can have multiple AnswerFlags while an AnswerFlag can only belong to one User.
+        //Hence, there is a one-to-many relationship between User and AnswerFlag
+        modelBuilder
+            .Entity<AnswerFlag>()
+            .HasOne(af => af.User)
+            .WithMany()
+            .HasForeignKey(af => af.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
 
         //An User can have multiple CommentFlags while a CommentFlag can only belong to one User.
@@ -225,32 +262,5 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(cf => cf.UserId)
             .OnDelete(DeleteBehavior.NoAction); //Delete User -> set foreign key UserId to null
-
-        //An Question can have multiple PostFlags while a PostFlag can only belong to one Question.
-        //Hence, there is a one-to-many relationship between Question and PostFlag
-        modelBuilder
-            .Entity<PostFlag>()
-            .HasOne(pf => pf.Question)
-            .WithMany(q => q.Flags)
-            .HasForeignKey(pf => pf.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete flags for that question
-
-        //An Answer can have multiple PostFlags while a PostFlag can only belong to one Answer.
-        //Hence, there is a one-to-many relationship between Answer and PostFlag
-        modelBuilder
-            .Entity<PostFlag>()
-            .HasOne(pf => pf.Answer)
-            .WithMany(a => a.Flags)
-            .HasForeignKey(pf => pf.AnswerId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete flags for that answer
-
-        //A Comment can have multiple CommentFlags while a CommentFlag can only belong to one Comment.
-        //Hence, there is a one-to-many relationship between Comment and CommentFlag
-        modelBuilder
-            .Entity<CommentFlag>()
-            .HasOne(cf => cf.Comment)
-            .WithMany(c => c.Flags)
-            .HasForeignKey(cf => cf.CommentId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete comment -> delete flags for that comment
     }
 }

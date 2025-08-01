@@ -2,6 +2,9 @@ using Education.Api.Enums;
 
 namespace Education.Api.Dtos.Flags;
 
+/// <summary>
+/// Represents a report or flag raised by a user on a comment.
+/// </summary>
 public class AddCommentFlagDto
 {
     public required CommentFlagType FlagType { get; set; }
