@@ -96,7 +96,7 @@ public class QuestionCommentService(ApplicationDbContext context, ILogger<Commen
         if (user is null)
         {
             _logger.LogWarning(
-                "Unable to add comment. User attempting to comment not found: {UserId}",
+                "Unable to add comment. User attempting to comment on a question not found: {UserId}",
                 userId
             );
             throw new KeyNotFoundException(
@@ -115,7 +115,7 @@ public class QuestionCommentService(ApplicationDbContext context, ILogger<Commen
 
         await _context.Comments.AddAsync(comment);
 
-        _logger.LogInformation("Added new question comment by user: {UserId}", userId);
+        _logger.LogInformation("Added a new question comment by user: {UserId}", userId);
 
         return CommentDto.MapFrom(comment);
     }
