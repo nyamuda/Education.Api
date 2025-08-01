@@ -102,7 +102,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
     /// A <see cref="AnswerDto"/> representing the newly created answer.
     /// </returns>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if the specified question does not exist.
+    /// Thrown if the  specified user or question does not exist.
     /// </exception>
     public async Task<AnswerDto> AddAsync(int userId, int questionId, AddAnswerDto dto)
     {
@@ -119,6 +119,21 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                 questionId
             );
             throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
+        }
+
+        //check if the user adding the answer exists
+        var user = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id.Equals(userId));
+
+        if (user is null)
+        {
+            _logger.LogWarning("Unable to add answer. User not found: {UserId}", userId);
+
+            throw new KeyNotFoundException(
+                $"User with ID '{userId}' attempting to answer a question does not exist."
+            );
         }
 
         //add the new answer to the database

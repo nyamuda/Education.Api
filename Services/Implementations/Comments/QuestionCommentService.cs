@@ -66,5 +66,57 @@ public class QuestionCommentService(ApplicationDbContext context, ILogger<Commen
     /// <param name="questionId">The ID of the question to comment on.</param>
     /// <param name="dto">The DTO containing the content of the comment.</param>
     /// <returns>The newly created comment.</returns>
-    Task<CommentDto> AddAsync(int userId, int questionId, AddCommentDto dto);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified user or question to comment on is not found.
+    /// </exception>
+    public async Task<CommentDto> AddAsync(int userId, int questionId, AddCommentDto dto)
+    {
+        //check if the question to comment on exists
+        var question = await _context
+            .Questions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
+
+        if (question is null)
+        {
+            _logger.LogWarning(
+                "Unable to add comment. Question to comment on not found: {QuestionId}",
+                questionId
+            );
+            throw new KeyNotFoundException(
+                $"Question to comment on with ID '{questionId}' does not exist."
+            );
+        }
+        //check if the user adding the comment exists
+        var user = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id.Equals(userId));
+
+        if (user is null)
+        {
+            _logger.LogWarning(
+                "Unable to add comment. User attempting to comment not found: {UserId}",
+                userId
+            );
+            throw new KeyNotFoundException(
+                $"User with ID '{userId}' attempting to comment on a question does not exist."
+            );
+        }
+
+        //add the new comment to the database
+        Comment comment =
+            new()
+            {
+                Content = dto.Content,
+                UserId = userId,
+                QuestionId = questionId,
+            };
+
+        await _context.Comments.AddAsync(comment);
+
+        _logger.LogInformation("Added new question comment by user: {UserId}", userId);
+
+        return CommentDto.MapFrom(comment);
+    }
 }
