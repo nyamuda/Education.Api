@@ -93,5 +93,42 @@ public class CommentService(ApplicationDbContext context, ILogger<CommentService
     /// </summary>
     /// <param name="userId">The ID of the user attempting to delete the comment.</param>
     /// <param name="commentId">The ID of the comment to delete.</param>
-    Task DeleteAsync(int userId, int commentId);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified comment is not found.
+    /// </exception>
+    ///  <exception cref="UnauthorizedAccessException">
+    /// Thrown if the comment doesn't belong to the specified user.
+    /// </exception>
+    public async Task DeleteAsync(int userId, int commentId)
+    {
+        //check if the comment exists
+        var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id.Equals(commentId));
+
+        if (comment is null)
+        {
+            _logger.LogWarning(
+                "Unable to delete comment. Comment not found: {CommentId}",
+                commentId
+            );
+            throw new KeyNotFoundException($"Comment with ID '{commentId}' was not found.");
+        }
+
+        //make sure the comment belongs to the specified user
+        if (comment.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Cannot delete comment. User {UserId} does not own the comment {CommentId}",
+                userId,
+                commentId
+            );
+
+            throw new UnauthorizedAccessException("You're not authorized to delete this comment.");
+        }
+
+        //remove the comment from the database
+        _context.Comments.Remove(comment);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully deleted comment: {CommentId}", commentId);
+    }
 }
