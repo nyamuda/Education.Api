@@ -6,7 +6,6 @@ using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Services.Abstractions.Flags;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Education.Api.Services.Implementations.Flags;
 
@@ -108,7 +107,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
         var question = await _context
             .Questions
             .AsNoTracking()
-            .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
+            .FirstOrDefaultAsync(x => x.Id.Equals(questionId));
 
         if (question is null)
         {
@@ -158,5 +157,24 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// Deletes a flag for a question.
     /// </summary>
     /// <param name="id">The ID of the question flag to delete.</param>
-    Task DeleteAsync(int id);
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified question flag is not found.
+    /// </exception>
+    public async Task DeleteAsync(int id)
+    {
+        //check if the question flag exists
+        var questionFlag = await _context.QuestionFlags.FirstOrDefaultAsync(x => x.Id.Equals(id));
+
+        if (questionFlag is null)
+        {
+            _logger.LogWarning(
+                "Unable to delete flag. Question flag not found: {QuestionFlagId}.",
+                id
+            );
+            throw new KeyNotFoundException($"Question flag with ID '{id}' does not exist.");
+        }
+
+        //delete the question flag
+        _context.QuestionFlags.Remove(questionFlag);
+    }
 }
