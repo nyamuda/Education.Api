@@ -53,7 +53,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// </summary>
     /// <param name="page">The page number to retrieve.</param>
     /// <param name="pageSize">The number of question flags per page.</param>
-    /// <returns>A paginated list of flag for questions.</returns>
+    /// <returns>A paginated list of flags for questions.</returns>
     public async Task<PageInfo<QuestionFlagDto>> GetAsync(int page, int pageSize)
     {
         var query = _context.QuestionFlags.OrderByDescending(c => c.CreatedAt).AsQueryable();
@@ -176,5 +176,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
 
         //delete the question flag
         _context.QuestionFlags.Remove(questionFlag);
+
+        await _context.SaveChangesAsync();
     }
 }
