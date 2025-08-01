@@ -1,4 +1,5 @@
 using Education.Api.Data;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Upvotes;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,29 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the specified question or user is not found.
     /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if the specified user has already upvoted the same question.
+    /// </exception>
     public async Task UpvoteQuestionAsync(int userId, int questionId)
     {
+        //check if there isn't already an existing upvote for the same question by the same user
+        bool hasAlreadyUpvoted = await _context
+            .Upvotes
+            .Where(upv => upv.UserId.Equals(userId) && upv.QuestionId.Equals(questionId))
+            .AnyAsync();
+
+        if (hasAlreadyUpvoted)
+        {
+            _logger.LogWarning(
+                "Upvote skipped: User {UserId} has already upvoted question {QuestionId}.",
+                userId,
+                questionId
+            );
+            throw new ConflictException(
+                $"Duplicate upvote: User with ID '{userId}' has already upvoted question with ID '{questionId}'."
+            );
+        }
+
         //check if the question exists
         var question = await _context
             .Questions
@@ -33,7 +55,7 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
         if (question is null)
         {
             _logger.LogWarning(
-                "Upvote failed: Question with ID '{QuestionId}' does not exist.",
+                "Upvote failed: Question with ID {QuestionId} does not exist.",
                 questionId
             );
             throw new KeyNotFoundException(
@@ -49,24 +71,89 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
 
         if (user is null)
         {
-            _logger.LogWarning("Upvote failed: User with ID '{UserId}' does not exist.", userId);
+            _logger.LogWarning(
+                "Question upvote failed: User with ID {UserId} does not exist.",
+                userId
+            );
 
-            throw new KeyNotFoundException($"Cannot upvote: No user found with ID '{userId}'.");
+            throw new KeyNotFoundException(
+                $"Cannot upvote question: No user found with ID '{userId}'."
+            );
         }
 
         // upvote the question and the save the upvote to the database
         Upvote upvote = new() { UserId = userId, QuestionId = questionId };
 
         await _context.Upvotes.AddAsync(upvote);
+
+        _logger.LogInformation("Successfully upvoted question with ID {QuestionId}.", questionId);
     }
 
-    Task RemoveQuestionUpvoteAsync(int userId, int questionId);
+    /// <summary>
+    /// Removes an existing upvote from the specified question by the given user.
+    /// </summary>
+    /// <param name="userId">The ID of the user removing their upvote.</param>
+    /// <param name="questionId">The ID of the question to remove the upvote from.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified upvote is not not found.
+    /// </exception>
+    public async Task RemoveQuestionUpvoteAsync(int userId, int questionId)
+    {
+        //check if the question upvote exists
+        var questionUpvote = await _context
+            .Upvotes
+            .FirstOrDefaultAsync(
+                upv => upv.UserId.Equals(userId) && upv.QuestionId.Equals(questionId)
+            );
 
+        if (questionUpvote is null)
+        {
+            _logger.LogWarning(
+                "Failed to remove upvote: Upvote for question with ID {QuestionId} by user with ID {UserId} not found.",
+                questionId,
+                userId
+            );
+
+            throw new KeyNotFoundException(
+                $"Cannot remove upvote: Upvote for question with ID '{questionId}' by user with ID '{userId}' does not exist."
+            );
+        }
+
+        //remove the upvote
+        _context.Upvotes.Remove(questionUpvote);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Successfully removed an upvote for question with ID {QuestionId}.",
+            questionId
+        );
+    }
+
+    /// <summary>
+    /// Adds an upvote to the specified answer by the given user.
+    /// </summary>
+    /// <param name="userId">The ID of the user upvoting the answer.</param>
+    /// <param name="answerId">The ID of the answer to upvote.</param>
     Task UpvoteAnswerAsync(int userId, int answerId);
 
+    /// <summary>
+    /// Removes an existing upvote from the specified answer by the given user.
+    /// </summary>
+    /// <param name="userId">The ID of the user removing their upvote.</param>
+    /// <param name="answerId">The ID of the answer to remove the upvote from.</param>
     Task RemoveAnswerUpvoteAsync(int userId, int answerId);
 
+    /// <summary>
+    /// Adds an upvote to the specified comment by the given user.
+    /// </summary>
+    /// <param name="userId">The ID of the user upvoting the comment.</param>
+    /// <param name="commentId">The ID of the comment to upvote.</param>
     Task UpvoteCommentAsync(int userId, int commentId);
 
+    /// <summary>
+    /// Removes an existing upvote from the specified comment by the given user.
+    /// </summary>
+    /// <param name="userId">The ID of the user removing their upvote.</param>
+    /// <param name="commentId">The ID of the comment to remove the upvote from.</param>
     Task RemoveCommentUpvoteAsync(int userId, int commentId);
 }
