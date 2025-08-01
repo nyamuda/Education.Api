@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Comments;
 
+/// <summary>
+/// Service for managing comments on answers.
+/// </summary>
 public class AnswerCommentService(ApplicationDbContext context, ILogger<CommentService> logger)
     : CommentService(context, logger),
         IAnswerCommentService
