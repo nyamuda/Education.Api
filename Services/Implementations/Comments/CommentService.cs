@@ -17,6 +17,9 @@ public class CommentService(ApplicationDbContext context, ILogger<CommentService
     /// </summary>
     /// <param name="id">The ID of the comment to retrieve.</param>
     /// <returns>The comment associated with the specified ID.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified comment is not found.
+    /// </exception>
     public async Task<CommentDto> GetByIdAsync(int id)
     {
         return await _context
@@ -49,8 +52,41 @@ public class CommentService(ApplicationDbContext context, ILogger<CommentService
     /// <param name="userId">The ID of the user attempting to update the comment.</param>
     /// <param name="commentId">The ID of the comment to update.</param>
     /// <param name="dto">The DTO containing the updated content.</param>
-    ///
-    Task UpdateAsync(int userId, int commentId, UpdateCommentDto dto);
+    ///  <exception cref="KeyNotFoundException">
+    /// Thrown if the specified comment is not found.
+    /// </exception>
+    ///  <exception cref="UnauthorizedAccessException">
+    /// Thrown if the comment doesn't belong to the specified user.
+    /// </exception>
+    public async Task UpdateAsync(int userId, int commentId, UpdateCommentDto dto)
+    {
+        //check if the comment exists
+        var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id.Equals(commentId));
+
+        if (comment is null)
+        {
+            _logger.LogWarning(
+                "Unable to update comment. Comment not found: {CommentId}",
+                commentId
+            );
+            throw new KeyNotFoundException($"Comment with ID '{commentId}' was not found.");
+        }
+
+        //make sure the comment belongs to the specified user
+        if (comment.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Cannot update comment. User {UserId} does not own the comment {CommentId}",
+                userId,
+                commentId
+            );
+
+            throw new UnauthorizedAccessException("You're not authorized to update this comment.");
+        }
+        //update the comment and persist the changes to the database
+        comment.Content = dto.Content;
+        await _context.SaveChangesAsync();
+    }
 
     /// <summary>
     /// Deletes a comment, if the specified user is the owner.
