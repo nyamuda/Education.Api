@@ -13,8 +13,10 @@ public class Upvote
     public Question? Question { get; set; }
 
     public int? AnswerId { get; set; }
-
     public Answer? Answer { get; set; }
+
+    public int? CommentId { get; set; }
+    public Comment? Comment { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

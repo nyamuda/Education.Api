@@ -13,7 +13,6 @@ public class Comment
     public required string Content { get; set; }
     public required int UserId { get; set; }
     public User? User { get; set; }
-    public List<CommentFlag> Flags { get; set; } = [];
 
     /// <summary>
     /// If this comment is on a question, the ID of the related question.
@@ -26,6 +25,9 @@ public class Comment
     /// </summary>
     public int? AnswerId { get; set; }
     public Answer? Answer { get; set; }
+
+    public List<CommentFlag> Flags { get; set; } = [];
+    public List<Upvote> Upvotes { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

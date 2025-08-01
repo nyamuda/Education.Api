@@ -17,7 +17,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<CommentFlag> CommentFlags { get; set; }
     public DbSet<Curriculum> Curriculums { get; set; }
     public DbSet<ExamBoard> ExamBoards { get; set; }
-    public DbSet<Like> Likes { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<QuestionFlag> QuestionFlags { get; set; }
     public DbSet<Subject> Subjects { get; set; }
@@ -40,6 +39,15 @@ public class ApplicationDbContext : DbContext
             .WithOne(cf => cf.Comment)
             .HasForeignKey(cf => cf.CommentId)
             .OnDelete(DeleteBehavior.Cascade); //Delete comment -> delete flags for that comment
+
+        //A Comment can have multiple Upvotes while an Upvote can only belong to one Comment.
+        //Hence, there is a one-to-many relationship between Comment and Upvote
+        modelBuilder
+            .Entity<Comment>()
+            .HasMany(c => c.Upvotes)
+            .WithOne(uv => uv.Comment)
+            .HasForeignKey(uv => uv.CommentId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Comment -> delete Upvotes for that comment
 
         //A Comment can only belong to one User while a User can have multiple Comments.
         //Hence, there is a many-to-one relationship between Comment and User
@@ -79,7 +87,7 @@ public class ApplicationDbContext : DbContext
             .HasMany(eb => eb.Questions)
             .WithOne(q => q.ExamBoard)
             .HasForeignKey(q => q.ExamBoardId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Questions for that exam board
 
         //A Subject can have multiple Topics and the a Topic can exist in multiple Subjects.
         //Hence, there is a many-to-many relationship between Subject and Topic.
@@ -92,16 +100,7 @@ public class ApplicationDbContext : DbContext
             .HasOne(st => st.Topic)
             .WithMany(t => t.Subtopics)
             .HasForeignKey(st => st.TopicId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        //A User can have multiple Likes while a Like can only belong to one User.
-        //Hence, there is a one-to-many relationship between User and Like.
-        modelBuilder
-            .Entity<Like>()
-            .HasOne(l => l.User)
-            .WithMany()
-            .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.NoAction); //Delete User -> set the foreign UserId key to null
+            .OnDelete(DeleteBehavior.Cascade); //Delete Topic -> delete Subtopics for that Topic
 
         //A User can have multiple Upvotes while an Upvote can only belong to one User.
         //Hence, there is a one-to-many relationship between User and Upvote
@@ -123,7 +122,7 @@ public class ApplicationDbContext : DbContext
             .HasOne(q => q.Subject)
             .WithMany(s => s.Questions)
             .HasForeignKey(q => q.SubjectId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade); //Delete Subject -> delete Questions for that subject
         //A Topic can have multiple Questions while a Question can only belong to one Topic.
         //Hence, there is a one-to-many relationship between Topic and Question.
         modelBuilder
@@ -131,7 +130,7 @@ public class ApplicationDbContext : DbContext
             .HasOne(q => q.Topic)
             .WithMany(t => t.Questions)
             .HasForeignKey(q => q.TopicId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade); //Delete Topic -> delete Questions for that topic
 
         //A Question can fall under multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic
@@ -162,7 +161,7 @@ public class ApplicationDbContext : DbContext
             .HasMany(q => q.Answers)
             .WithOne(a => a.Question)
             .HasForeignKey(a => a.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Answers for that question
 
         //A Question can have multiple Comments while a Comment can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Comment

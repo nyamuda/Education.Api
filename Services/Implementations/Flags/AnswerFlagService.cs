@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Flags;
 
+/// <summary>
+/// Service for managing flags for answers.
+/// </summary>
 public class AnswerFlagService(ApplicationDbContext context, ILogger<AnswerFlagService> logger)
     : IAnswerFlagService
 {
