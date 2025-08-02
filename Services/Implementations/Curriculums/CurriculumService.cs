@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Curriculums;
 
-public class CurriculumService(ApplicationDbContext context) : ICurriculumService
+public class CurriculumService(ApplicationDbContext context, ILogger<CurriculumService> logger)
+    : ICurriculumService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<CurriculumService> _logger = logger;
 
     //Gets a curriculum with a given ID
     public async Task<CurriculumDto> GetByIdAsync(int id)
@@ -91,13 +93,21 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
 
         if (alreadyExists)
         {
-            throw new ConflictException($"Curriculum with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Failed to create curriculum. Curriculum with name {CurriculumName} already exists.",
+                dto.Name
+            );
+            throw new ConflictException(
+                $"Cannot add curriculum. Curriculum with name '{dto.Name}' already exists."
+            );
         }
 
         //add the new curriculum to the database
         Curriculum curriculum = new() { Name = dto.Name };
 
         await _context.Curriculums.AddAsync(curriculum);
+
+        _logger.LogInformation("New curriculum created with name {CurriculumName}", dto.Name);
 
         return CurriculumDto.MapFrom(curriculum);
     }
@@ -128,10 +138,18 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
 
         if (alreadyExists)
         {
-            throw new ConflictException($"A curriculum with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Update failed: curriculum with name {CurriculumName} already exists.",
+                dto.Name
+            );
+            throw new ConflictException(
+                $"Update failed: curriculum with name '{dto.Name}' already exists."
+            );
         }
 
         curriculum.Name = dto.Name;
+
+        _logger.LogInformation("Successfully updated curriculum: {CurriculumId}", id);
 
         await _context.SaveChangesAsync();
     }
@@ -146,5 +164,7 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
         _context.Curriculums.Remove(curriculum);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully deleted curriculum: {CurriculumId}", id);
     }
 }
