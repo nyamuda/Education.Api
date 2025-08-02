@@ -19,7 +19,7 @@ public class ErrorResponse
         new() { Message = message, Details = details };
 
     // Factory method for generating a general unexpected error response
-    public static ErrorResponse Unexpected(string? details) =>
+    public static ErrorResponse Unexpected(string? details = null) =>
         new()
         {
             Message = "The server encountered an unexpected issue. Please try again later.",
@@ -27,7 +27,7 @@ public class ErrorResponse
         };
 
     // Factory method for generating a 403 Forbidden error response
-    public static ErrorResponse Forbidden(string? details) =>
+    public static ErrorResponse Forbidden(string? details = null) =>
         new()
         {
             Message = "You do not have permission to access this resource.",

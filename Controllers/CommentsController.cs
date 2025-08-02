@@ -2,6 +2,7 @@ using Education.Api.Dtos.Comments;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Comments;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
@@ -14,6 +15,7 @@ public class CommentsController(ICommentService commentService, IJwtService jwtS
     private readonly ICommentService _commentService = commentService;
     private readonly IJwtService _jwtService = jwtService;
 
+    //Gets a comment with a given ID
     [HttpGet("{id}", Name = "GetCommentById")]
     public async Task<IActionResult> Get(int id)
     {
@@ -32,7 +34,9 @@ public class CommentsController(ICommentService commentService, IJwtService jwtS
         }
     }
 
+    //Updates a comment with a given ID
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Put(int id, UpdateCommentDto dto)
     {
         try
@@ -70,7 +74,9 @@ public class CommentsController(ICommentService commentService, IJwtService jwtS
         }
     }
 
+    //Deletes a comment with a given ID
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         try

@@ -107,7 +107,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the specified user or question to flag on is not found.
     /// </exception>
-    ///  <exception cref="ConflictException">
+    /// <exception cref="ConflictException">
     /// Thrown if the specified user has already flagged the same question.
     /// </exception>
     public async Task<QuestionFlagDto> AddAsync(int userId, int questionId, AddQuestionFlagDto dto)
@@ -115,7 +115,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
         //check if there isn't already an existing flag for the same question by the same user
         bool hasAlreadyFlagged = await _context
             .QuestionFlags
-            .Where(qf => qf.UserId.Equals(userId) && qf.QuestionId.Equals(questionId))
+            .Where(x => x.UserId.Equals(userId) && x.QuestionId.Equals(questionId))
             .AnyAsync();
 
         if (hasAlreadyFlagged)

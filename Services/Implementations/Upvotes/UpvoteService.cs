@@ -37,7 +37,7 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
         if (hasAlreadyUpvoted)
         {
             _logger.LogWarning(
-                "Upvote skipped: User {UserId} has already upvoted question {QuestionId}.",
+                "Upvote ignored: User {UserId} has already upvoted question {QuestionId}.",
                 userId,
                 questionId
             );
@@ -151,7 +151,7 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
         if (hasAlreadyUpvoted)
         {
             _logger.LogWarning(
-                "Upvote skipped: User {UserId} has already upvoted answer {AnswerId}.",
+                "Upvote ignored: User {UserId} has already upvoted answer {AnswerId}.",
                 userId,
                 answerId
             );
@@ -261,7 +261,7 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
         if (hasAlreadyUpvoted)
         {
             _logger.LogWarning(
-                "Upvote skipped: User {UserId} has already upvoted comment {CommentId}.",
+                "Upvote ignored: User {UserId} has already upvoted comment {CommentId}.",
                 userId,
                 commentId
             );

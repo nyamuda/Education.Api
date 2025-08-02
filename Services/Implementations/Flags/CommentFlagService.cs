@@ -2,6 +2,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Flags;
 using Education.Api.Dtos.Flags.Comments;
 using Education.Api.Dtos.Users;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Services.Abstractions.Flags;
@@ -106,8 +107,27 @@ public class CommentFlagService(ApplicationDbContext context, ILogger<CommentFla
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the specified user or comment to flag on is not found.
     /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if the specified user has already flagged the same comment.
+    /// </exception>
     public async Task<CommentFlagDto> AddAsync(int userId, int commentId, AddCommentFlagDto dto)
     {
+        //check if there isn't already an existing flag for the same comment by the same user
+        bool hasAlreadyFlagged = await _context
+            .CommentFlags
+            .Where(x => x.UserId.Equals(userId) && x.CommentId.Equals(commentId))
+            .AnyAsync();
+
+        if (hasAlreadyFlagged)
+        {
+            _logger.LogWarning(
+                "Flag ignored: User '{UserId}' has already submitted a flag for comment '{CommentId}'.",
+                userId,
+                commentId
+            );
+
+            throw new ConflictException($"You’ve already flagged this comment.");
+        }
         //check if the comment to flag on exists
         var comment = await _context
             .Comments

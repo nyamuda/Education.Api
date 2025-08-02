@@ -11,6 +11,7 @@ using Education.Api.Services.Abstractions.Comments;
 using Education.Api.Services.Abstractions.Flags;
 using Education.Api.Services.Abstractions.Questions;
 using Education.Api.Services.Abstractions.Upvotes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
@@ -33,6 +34,7 @@ public class QuestionsController(
     private readonly IUpvoteService _upvoteService = upvoteService;
     private readonly IQuestionFlagService _questionFlagService = questionFlagService;
 
+    //Gets a question by ID
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -51,6 +53,7 @@ public class QuestionsController(
         }
     }
 
+    //Gets a paginated list of questions
     [HttpGet]
     public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
     {
@@ -65,7 +68,9 @@ public class QuestionsController(
         }
     }
 
+    //Adds a new question
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Post(AddQuestionDto dto)
     {
         try
@@ -99,7 +104,9 @@ public class QuestionsController(
         }
     }
 
+    //Updates a question with a given ID
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Put(int id, UpdateQuestionDto dto)
     {
         try
@@ -137,7 +144,9 @@ public class QuestionsController(
         }
     }
 
+    //Deletes a question with a given ID
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -193,6 +202,7 @@ public class QuestionsController(
 
     //Adds a new comment for a question with a given ID
     [HttpPost("{questionId}/comments")]
+    [Authorize]
     public async Task<IActionResult> PostComment(int questionId, AddCommentDto dto)
     {
         try
@@ -256,6 +266,7 @@ public class QuestionsController(
 
     //Adds a new answer for a question with a given ID
     [HttpPost("{questionId}/answers")]
+    [Authorize]
     public async Task<IActionResult> PostAnswer(int questionId, AddAnswerDto dto)
     {
         try
@@ -299,6 +310,7 @@ public class QuestionsController(
 
     //Upvotes a question with a given ID
     [HttpPost("{questionId}/upvotes")]
+    [Authorize]
     public async Task<IActionResult> Upvote(int questionId)
     {
         try
@@ -332,8 +344,9 @@ public class QuestionsController(
         }
     }
 
-    //Removes an upvotes for a question with a given ID
+    //Removes an upvote for a question with a given ID
     [HttpDelete("{questionId}/upvotes")]
+    [Authorize]
     public async Task<IActionResult> RemoveUpvote(int questionId)
     {
         try
@@ -365,6 +378,7 @@ public class QuestionsController(
 
     //Flags a question with a given ID
     [HttpPost("{questionId}/flags")]
+    [Authorize]
     public async Task<IActionResult> Flag(int questionId, AddQuestionFlagDto dto)
     {
         try
@@ -396,9 +410,9 @@ public class QuestionsController(
         {
             return NotFound(ErrorResponse.Create(ex.Message));
         }
-        catch (InvalidOperationException ex)
+        catch (ConflictException ex)
         {
-            return BadRequest(ErrorResponse.Create(ex.Message));
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {

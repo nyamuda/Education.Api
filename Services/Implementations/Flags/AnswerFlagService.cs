@@ -2,6 +2,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Flags;
 using Education.Api.Dtos.Flags.Answers;
 using Education.Api.Dtos.Users;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Services.Abstractions.Flags;
@@ -106,8 +107,28 @@ public class AnswerFlagService(ApplicationDbContext context, ILogger<AnswerFlagS
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the specified user or answer to flag on is not found.
     /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if the specified user has already flagged the same answer.
+    /// </exception>
     public async Task<AnswerFlagDto> AddAsync(int userId, int answerId, AddAnswerFlagDto dto)
     {
+        //check if there isn't already an existing flag for the same answer by the same user
+        bool hasAlreadyFlagged = await _context
+            .AnswerFlags
+            .Where(x => x.UserId.Equals(userId) && x.AnswerId.Equals(answerId))
+            .AnyAsync();
+
+        if (hasAlreadyFlagged)
+        {
+            _logger.LogWarning(
+                "Flag ignored: User '{UserId}' has already submitted a flag for answer '{AnswerId}'.",
+                userId,
+                answerId
+            );
+
+            throw new ConflictException($"You’ve already flagged this answer.");
+        }
+
         //check if the answer to flag on exists
         var answer = await _context
             .Answers
