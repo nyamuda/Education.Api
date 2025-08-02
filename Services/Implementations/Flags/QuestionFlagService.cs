@@ -2,6 +2,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Flags;
 using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Dtos.Users;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Services.Abstractions.Flags;
@@ -106,8 +107,28 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
     /// <exception cref="KeyNotFoundException">
     /// Thrown if the specified user or question to flag on is not found.
     /// </exception>
+    ///  <exception cref="ConflictException">
+    /// Thrown if the specified user has already flagged the same question.
+    /// </exception>
     public async Task<QuestionFlagDto> AddAsync(int userId, int questionId, AddQuestionFlagDto dto)
     {
+        //check if there isn't already an existing flag for the same question by the same user
+        bool hasAlreadyFlagged = await _context
+            .QuestionFlags
+            .Where(qf => qf.UserId.Equals(userId) && qf.QuestionId.Equals(questionId))
+            .AnyAsync();
+
+        if (hasAlreadyFlagged)
+        {
+            _logger.LogWarning(
+                "Flag ignored: User '{UserId}' has already submitted a flag for question '{QuestionId}'.",
+                userId,
+                questionId
+            );
+
+            throw new ConflictException($"You’ve already flagged this question.");
+        }
+
         //check if the question to flag on exists
         var question = await _context
             .Questions
