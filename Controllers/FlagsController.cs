@@ -1,12 +1,14 @@
 using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Flags;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "Admin")]
 public class FlagsController(
     IQuestionFlagService questionFlagService,
     IAnswerFlagService answerFlagService,
@@ -35,15 +37,15 @@ public class FlagsController(
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
-    
-     //Deletes a question flag with a given ID
-    [HttpGet("questions/{id}", Name = "GetQuestionFlagById")]
-    public async Task<IActionResult> GetQuestionFlag(int id)
+
+    //Deletes a question flag with a given ID
+    [HttpDelete("questions/{id}")]
+    public async Task<IActionResult> DeleteQuestionFlag(int id)
     {
         try
         {
-            QuestionFlagDto questionFlag = await _questionFlagService.GetByIdAsync(id);
-            return Ok(questionFlag);
+            await _questionFlagService.DeleteAsync(id);
+            return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
