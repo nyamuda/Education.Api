@@ -128,7 +128,9 @@ public class CurriculumService(ApplicationDbContext context, ILogger<CurriculumS
     {
         var curriculum =
             await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Curriculum with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Update failed: curriculum with ID '{id}' does not exist."
+            );
 
         //curriculum name is unique.
         //check if there isn't already an existing curriculum with the new updated name
@@ -159,7 +161,9 @@ public class CurriculumService(ApplicationDbContext context, ILogger<CurriculumS
     {
         var curriculum =
             await _context.Curriculums.FirstOrDefaultAsync(c => c.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Curriculum with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Delete failed: curriculum with ID '{id}' does not exist."
+            );
 
         _context.Curriculums.Remove(curriculum);
 

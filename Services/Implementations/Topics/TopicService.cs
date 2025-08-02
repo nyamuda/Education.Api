@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Topics;
 
-public class TopicService(ApplicationDbContext context) : ITopicService
+public class TopicService(ApplicationDbContext context, ILogger<TopicService> logger)
+    : ITopicService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<TopicService> _logger = logger;
 
     //Gets a topic with a given ID
     public async Task<TopicDto> GetByIdAsync(int id)
@@ -95,6 +97,10 @@ public class TopicService(ApplicationDbContext context) : ITopicService
 
         if (alreadyExists)
         {
+            _logger.LogWarning(
+                "Failed to add topic. Topic with name {TopicName} already exists.",
+                dto.Name
+            );
             throw new ConflictException($"A topic with name '{dto.Name}' already exists.");
         }
 
@@ -107,7 +113,9 @@ public class TopicService(ApplicationDbContext context) : ITopicService
         //Make sure all the selected subjects exist
         if (selectedSubjects.Count != dto.SubjectIds.Count)
         {
-            throw new InvalidOperationException("One or more selected subjects do not exist.");
+            throw new InvalidOperationException(
+                "Failed to add topic: one or more selected subjects do not exist."
+            );
         }
 
         //add the new topic to the database
@@ -115,6 +123,8 @@ public class TopicService(ApplicationDbContext context) : ITopicService
         topic.Subjects.AddRange(selectedSubjects);
 
         await _context.Topics.AddAsync(topic);
+
+        _logger.LogInformation("New topic created with name {TopicName}", dto.Name);
 
         return TopicDto.MapFrom(topic);
     }
@@ -138,7 +148,9 @@ public class TopicService(ApplicationDbContext context) : ITopicService
     {
         var topic =
             await _context.Topics.FirstOrDefaultAsync(t => t.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Topic with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Cannot update topic. Topic with ID '{id}' does not exist."
+            );
 
         //topic name is unique.
         //check if there isn't already an existing topic with the new updated name
@@ -147,7 +159,14 @@ public class TopicService(ApplicationDbContext context) : ITopicService
             .AnyAsync(t => t.Name.ToLower().Equals(dto.Name.ToLower()) && t.Id != id);
         if (alreadyExists)
         {
-            throw new ConflictException($"A topic with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Update failed: topic with name {TopicName} already exists.",
+                dto.Name
+            );
+
+            throw new ConflictException(
+                $"Update failed: a topic with name '{dto.Name}' already exists."
+            );
         }
 
         //get the the selected subjects for the topic
@@ -159,13 +178,21 @@ public class TopicService(ApplicationDbContext context) : ITopicService
         //Make sure all the selected subjects exist
         if (selectedSubjects.Count != dto.SubjectIds.Count)
         {
-            throw new InvalidOperationException("One or more selected subjects do not exist.");
+            _logger.LogWarning(
+                "Update failed: one or more selected subjects do not exist for topic {TopicId}",
+                id
+            );
+            throw new InvalidOperationException(
+                "Topic update failed: one or more selected subjects do not exist."
+            );
         }
 
         topic.Name = dto.Name;
         topic.Subjects.AddRange(selectedSubjects);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully updated topic: {TopicId}", id);
     }
 
     //Deletes a topic with a given ID
@@ -173,10 +200,14 @@ public class TopicService(ApplicationDbContext context) : ITopicService
     {
         var topic =
             await _context.Topics.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Topic with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Delete failed: topic with ID '{id}' does not exist."
+            );
 
         _context.Topics.Remove(topic);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully deleted topic: {TopicId}", id);
     }
 }

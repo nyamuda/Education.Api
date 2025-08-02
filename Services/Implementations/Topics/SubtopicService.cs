@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Topics;
 
-public class SubtopicService(ApplicationDbContext context) : ISubtopicService
+public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicService> logger)
+    : ISubtopicService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<SubtopicService> _logger = logger;
 
     //Gets a subtopic with a given ID
     public async Task<SubtopicDto> GetByIdAsync(int id)
@@ -92,7 +94,9 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
         //get the selected topic for the subtopic
         var topic =
             await _context.Topics.AsNoTracking().FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId))
-            ?? throw new KeyNotFoundException($"Topic with ID '{dto.TopicId}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Failed to add subtopic. Topic with ID '{dto.TopicId}' does not exist."
+            );
 
         //Subtopic name is unique for each topic.
         //Check if there isn't already another subtopic with the given name under the selected topic.
@@ -102,6 +106,12 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
 
         if (alreadyExists)
         {
+            _logger.LogWarning(
+                "A subtopic with name {SubtopicName} already exists under the topic {TopicName}.",
+                dto.Name,
+                topic.Name
+            );
+
             throw new ConflictException(
                 $"A subtopic with name '{dto.Name}' already exists under the topic '{topic.Name}'."
             );
@@ -111,6 +121,8 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
         Subtopic subtopic = new() { Name = dto.Name, TopicId = dto.TopicId };
 
         await _context.Subtopics.AddAsync(subtopic);
+
+        _logger.LogInformation("Subtopic created successfully: {SubtopicName}", dto.Name);
 
         return SubtopicDto.MapFrom(subtopic);
     }
@@ -130,15 +142,19 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
     {
         var subtopic =
             await _context.Subtopics.FirstOrDefaultAsync(t => t.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Subtopic with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Update failed: subtopic with ID '{id}' does not exist."
+            );
 
         //get the selected topic for the subtopic
         var topic =
             await _context.Topics.AsNoTracking().FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId))
-            ?? throw new KeyNotFoundException($"Topic with ID '{dto.TopicId}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Cannot update subtopic: topic with ID '{dto.TopicId}' does not exist."
+            );
 
         //Subtopic name is unique for each topic.
-        //Check if there isn't already another subtopic with the new updated name under the selected topic
+        //Check if there isn't already another subtopic with the same updated name under the selected topic
         bool alreadyExists = await _context
             .Subtopics
             .AnyAsync(
@@ -150,6 +166,12 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
 
         if (alreadyExists)
         {
+            _logger.LogWarning(
+                "A subtopic with name {SubtopicName} already exists under the topic {TopicName}.",
+                dto.Name,
+                topic.Name
+            );
+
             throw new ConflictException(
                 $"A subtopic with name '{dto.Name}' already exists under the topic '{topic.Name}'."
             );
@@ -159,6 +181,8 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
         subtopic.TopicId = dto.TopicId;
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Subtopic updated successfully: {SubtopicId}", id);
     }
 
     //Deletes a subtopic with a given ID
@@ -166,10 +190,14 @@ public class SubtopicService(ApplicationDbContext context) : ISubtopicService
     {
         var subtopic =
             await _context.Subtopics.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Subtopic with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Delete failed: subtopic with ID '{id}' does not exist."
+            );
 
         _context.Subtopics.Remove(subtopic);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Subtopic deleted successfully: {SubtopicId}", id);
     }
 }
