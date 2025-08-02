@@ -1,9 +1,14 @@
 using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Comments;
+using Education.Api.Dtos.Flags;
+using Education.Api.Dtos.Flags.Answers;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Comments;
+using Education.Api.Services.Abstractions.Flags;
+using Education.Api.Services.Abstractions.Upvotes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,12 +19,16 @@ namespace Education.Api.Controllers;
 public class AnswersController(
     IAnswerService answerService,
     IJwtService jwtService,
-    IAnswerCommentService answerCommentService
+    IAnswerCommentService answerCommentService,
+    IUpvoteService upvoteService,
+    IAnswerFlagService answerFlagService
 ) : ControllerBase
 {
     private readonly IAnswerService _answerService = answerService;
     private readonly IJwtService _jwtService = jwtService;
     private readonly IAnswerCommentService _answerCommentService = answerCommentService;
+    private readonly IUpvoteService _upvoteService = upvoteService;
+    private readonly IAnswerFlagService _answerFlagService = answerFlagService;
 
     //Gets an answer by ID
     [HttpGet("{id}", Name = "GetAnswerById")]
@@ -173,6 +182,118 @@ public class AnswersController(
         catch (InvalidOperationException ex)
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Upvotes an answer with a given ID
+    [HttpPost("{answerId}/upvotes")]
+    [Authorize]
+    public async Task<IActionResult> Upvote(int answerId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _upvoteService.UpvoteAnswerAsync(userId: userId, answerId: answerId);
+
+            return StatusCode(201);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Removes an upvote for an answer with a given ID
+    [HttpDelete("{answerId}/upvotes")]
+    [Authorize]
+    public async Task<IActionResult> RemoveUpvote(int answerId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _upvoteService.RemoveAnswerUpvoteAsync(userId: userId, answerId: answerId);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Flags an answer with a given ID
+    [HttpPost("{answerId}/flags")]
+    [Authorize]
+    public async Task<IActionResult> Flag(int answerId, AddAnswerFlagDto dto)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            AnswerFlagDto answerFlag = await _answerFlagService.AddAsync(
+                userId: userId,
+                answerId: answerId,
+                dto
+            );
+
+            return CreatedAtRoute(
+                routeName: "GetAnswerFlagById",
+                routeValues: new { id = answerFlag.Id },
+                value: answerFlag
+            );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
