@@ -141,7 +141,9 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                 "Unable to add new answer.Cannot find the question: {QuestionId}.",
                 questionId
             );
-            throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
+            throw new KeyNotFoundException(
+                $"Cannot add answer. Question with ID '{questionId}' does not exist."
+            );
         }
 
         //check if the user adding the answer exists
@@ -152,7 +154,7 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
 
         if (user is null)
         {
-            _logger.LogWarning("Unable to add answer. User not found: {UserId}", userId);
+            _logger.LogWarning("Cannot add answer. User not found: {UserId}", userId);
 
             throw new KeyNotFoundException(
                 $"User with ID '{userId}' attempting to answer a question does not exist."

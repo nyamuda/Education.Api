@@ -246,8 +246,8 @@ public class QuestionsController(
     }
 
     //Adds a new answer for a question with a given ID
-    [HttpPost("{questionId}/comments")]
-    public async Task<IActionResult> PostAnswer(int questionId, AddCommentDto dto)
+    [HttpPost("{questionId}/answers")]
+    public async Task<IActionResult> PostAnswer(int questionId, AddAnswerDto dto)
     {
         try
         {
@@ -262,16 +262,16 @@ public class QuestionsController(
             //Validate the token and get the details of the user associated with it
             (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
 
-            CommentDto comment = await _questionCommentService.AddAsync(
+            AnswerDto answer = await _answerService.AddAsync(
                 userId: userId,
                 questionId: questionId,
                 dto
             );
 
             return CreatedAtRoute(
-                routeName: "GetCommentById",
-                routeValues: new { id = comment.Id },
-                value: comment
+                routeName: "GetAnswerById",
+                routeValues: new { id = answer.Id },
+                value: answer
             );
         }
         catch (KeyNotFoundException ex)
