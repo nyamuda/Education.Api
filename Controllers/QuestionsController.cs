@@ -224,20 +224,20 @@ public class QuestionsController(
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
-    
-     //Gets a paginated list of answers for a given question
+
+    //Gets a paginated list of answers for a given question
     [HttpGet("{questionId}/answers")]
     public async Task<IActionResult> GetAnswers(int questionId, int page = 1, int pageSize = 10)
     {
         try
         {
-            PageInfo<AnswerDto> comments = await _answerService.GetAsync(
+            PageInfo<AnswerDto> answers = await _answerService.GetAsync(
                 questionId: questionId,
                 page: page,
                 pageSize: pageSize
             );
 
-            return Ok(comments);
+            return Ok(answers);
         }
         catch (Exception ex)
         {

@@ -1,3 +1,4 @@
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 
@@ -24,6 +25,8 @@ public class CommentDto
     /// </summary>
     public int? AnswerId { get; set; }
 
+    public required List<UpvoteDto> Upvotes { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
@@ -40,6 +43,18 @@ public class CommentDto
                     : null,
             AnswerId = comment.AnswerId,
             QuestionId = comment.QuestionId,
+            Upvotes = comment
+                .Upvotes
+                .Select(
+                    upv =>
+                        new UpvoteDto
+                        {
+                            Id = upv.Id,
+                            UserId = upv.UserId,
+                            CommentId = upv.CommentId
+                        }
+                )
+                .ToList(),
             CreatedAt = comment.CreatedAt,
             UpdatedAt = comment.UpdatedAt
         };
