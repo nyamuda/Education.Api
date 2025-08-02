@@ -13,7 +13,7 @@ public class UsersController(IUserService userService, IJwtService jwtService) :
     private readonly IUserService _userService = userService;
     private readonly IJwtService _jwtService = jwtService;
 
-    //Gets a user with a given ID
+    // Retrieves the authenticated user's details by ID
     [HttpGet("{id}", Name = "GetUserById")]
     [Authorize]
     public async Task<IActionResult> Get(int id)
