@@ -79,4 +79,42 @@ public class QuestionsController(IQuestionService questionService, IJwtService j
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, UpdateQuestionDto dto)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _questionService.UpdateAsync(userId: userId, questionId: id, dto);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
 }
