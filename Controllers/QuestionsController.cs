@@ -244,4 +244,47 @@ public class QuestionsController(
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
+
+    //Adds a new answer for a question with a given ID
+    [HttpPost("{questionId}/comments")]
+    public async Task<IActionResult> PostAnswer(int questionId, AddCommentDto dto)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            CommentDto comment = await _questionCommentService.AddAsync(
+                userId: userId,
+                questionId: questionId,
+                dto
+            );
+
+            return CreatedAtRoute(
+                routeName: "GetCommentById",
+                routeValues: new { id = comment.Id },
+                value: comment
+            );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
 }
