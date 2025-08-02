@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Text;
 using Education.Api.Enums;
-using Education.Api.Helpers;
 using Education.Api.Models;
 using Education.Api.Models.Users;
 using Education.Api.Services.Abstractions.Auth;
@@ -102,18 +101,22 @@ public class JwtService : IJwtService
         string userId =
             claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? throw new UnauthorizedAccessException(
-                ErrorMessageHelper.MissingNameIdentifierClaimMessage
+                ErrorResponse.MissingNameIdentifierClaim().Message
             );
 
         // Extract the email from the claims
         string userEmail =
             claimsPrincipal.FindFirstValue(ClaimTypes.Email)
-            ?? throw new UnauthorizedAccessException(ErrorMessageHelper.MissingEmailClaimMessage);
+            ?? throw new UnauthorizedAccessException(
+                ErrorResponse.MissingEmailClaimMessage().Message
+            );
 
         // Extract the role from the claims
         string userRole =
             claimsPrincipal.FindFirstValue(ClaimTypes.Role)
-            ?? throw new UnauthorizedAccessException(ErrorMessageHelper.MissingRoleClaimMessage);
+            ?? throw new UnauthorizedAccessException(
+                ErrorResponse.MissingRoleClaimMessage().Message
+            );
 
         // Convert the user ID to an integer
         if (int.TryParse(userId, out int id))
@@ -126,6 +129,6 @@ public class JwtService : IJwtService
         }
 
         // If userId claim exists but isn't a valid integer, treat it as invalid
-        throw new UnauthorizedAccessException(ErrorMessageHelper.MissingNameIdentifierClaimMessage);
+        throw new UnauthorizedAccessException(ErrorResponse.MissingNameIdentifierClaim().Message);
     }
 }

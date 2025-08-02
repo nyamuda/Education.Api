@@ -124,7 +124,7 @@ public class AuthService(
         if (existingUser is null)
         {
             _logger.LogWarning(
-                "Password reset request aborted. User with email {Email} does not exist.",
+                "Password reset request failed: user with email {Email} does not exist.",
                 email
             );
 
@@ -242,6 +242,11 @@ public class AuthService(
                 HtmlBody = emailTemplate,
             };
         await _emailService.SendAsync(emailMessage);
+
+        _logger.LogInformation(
+            "Successfully sent an email verification OTP to email {Email}",
+            dto.Email
+        );
     }
 
     /// <summary>
@@ -259,9 +264,9 @@ public class AuthService(
 
         // Retrieve the user from the database using the provided email
         var user =
-            await _context.Users.FirstOrDefaultAsync(u => u.Id.Equals(verifyOtpDto.Email))
+            await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(verifyOtpDto.Email))
             ?? throw new KeyNotFoundException(
-                @$"User with email ""{verifyOtpDto.Email}"" does not exist."
+                @$"Email verification failed: user with email ""{verifyOtpDto.Email}"" does not exist."
             );
 
         // Mark the user as verified
@@ -269,6 +274,8 @@ public class AuthService(
 
         // Save the changes to the database
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Successfully verified email {Email}", verifyOtpDto.Email);
     }
 
     /// <summary>

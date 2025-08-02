@@ -35,7 +35,7 @@ public class ErrorResponse
         };
 
     // Factory method for missing NameIdentifier claim in the token
-    public static ErrorResponse MissingNameIdentifierClaim(string? details) =>
+    public static ErrorResponse MissingNameIdentifierClaim(string? details = null) =>
         new()
         {
             Message = "Access denied. Token lacks a valid name identifier claim.",
@@ -43,10 +43,10 @@ public class ErrorResponse
         };
 
     // Factory method for missing Email claim in the token
-    public static ErrorResponse MissingEmailClaimMessage(string? details) =>
+    public static ErrorResponse MissingEmailClaimMessage(string? details = null) =>
         new() { Message = "Access denied. Token lacks a valid email claim.", Details = details };
 
     // Factory method for missing Role claim in the token
-    public static ErrorResponse MissingRoleClaimMessage(string? details) =>
+    public static ErrorResponse MissingRoleClaimMessage(string? details = null) =>
         new() { Message = "Access denied. Token lacks a valid role claim.", Details = details };
 }

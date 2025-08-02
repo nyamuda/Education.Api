@@ -6,14 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Auth;
 
-public class OtpService : IOtpService
+public class OtpService(ApplicationDbContext context, ILogger<OtpService> logger) : IOtpService
 {
-    public ApplicationDbContext _context;
-
-    public OtpService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<OtpService> _logger = logger;
 
     /// <summary>
     /// Generates a cryptographically secure 6-digit one-time password (OTP).
@@ -67,7 +63,13 @@ public class OtpService : IOtpService
             userOtp.IsUsed = true;
 
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("OTP verification successful for {Email}", dto.Email);
+
+            return;
         }
+
+        _logger.LogWarning("OTP verification failed for {Email}", dto.Email);
 
         throw new UnauthorizedAccessException(
             "We couldn't verify your OTP. Double-check the code and try again."

@@ -5,14 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace Education.Api.Services.Implementations.Email;
 
-public class EmailTemplateBuilder : IEmailTemplateBuilder
+public class EmailTemplateBuilder(IOptions<Company> options) : IEmailTemplateBuilder
 {
-    private readonly Company _company;
-
-    public EmailTemplateBuilder(IOptions<Company> options)
-    {
-        _company = options.Value;
-    }
+    private readonly Company _company = options.Value;
 
     public string BuildPasswordResetRequestTemplate(string recipientName, string otp)
     {
