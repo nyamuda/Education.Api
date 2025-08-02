@@ -201,7 +201,7 @@ public class QuestionsController(
                 dto
             );
 
-            return CreatedAtAction(nameof(Get), new { id = question.Id }, question);
+            return CreatedAtRoute(routeName:"GetCommentById",routeValues:new {id=comment.Id},value:comment)
         }
         catch (KeyNotFoundException ex)
         {

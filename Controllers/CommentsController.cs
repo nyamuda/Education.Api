@@ -14,7 +14,7 @@ public class CommentsController(ICommentService commentService, IJwtService jwtS
     private readonly ICommentService _commentService = commentService;
     private readonly IJwtService _jwtService = jwtService;
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetCommentById")]
     public async Task<IActionResult> Get(int id)
     {
         try
