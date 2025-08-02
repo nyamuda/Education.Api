@@ -33,7 +33,7 @@ public class AuthService(
         if (userExists)
         {
             _logger.LogWarning(
-                "Registration failed: User with email {Email} already exists.",
+                "Registration failed: user with email {Email} already exists.",
                 dto.Email
             );
             throw new ConflictException("A user with this email is already registered.");
@@ -54,7 +54,10 @@ public class AuthService(
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Registration successful: New user with email {Email}.", dto.Email);
+        _logger.LogInformation(
+            "Registration successful: added new user with email {Email}.",
+            dto.Email
+        );
 
         return UserDto.MapFrom(user);
     }
@@ -79,7 +82,7 @@ public class AuthService(
         if (!isCorrectPassword)
         {
             _logger.LogWarning(
-                "Login failed: Invalid credentials for user with email {Email}.",
+                "Login failed: invalid credentials for user with email {Email}.",
                 loginDto.Email
             );
 
@@ -101,7 +104,7 @@ public class AuthService(
         );
 
         _logger.LogInformation(
-            "Login successful: User with with email {Email} is now logged in.",
+            "Login successful: user with with email {Email} is now logged in.",
             loginDto.Email
         );
 
@@ -161,17 +164,19 @@ public class AuthService(
                 HtmlBody = emailTemplate,
             };
         await _emailService.SendAsync(emailMessage);
+
+        _logger.LogInformation("Successfully sent a password reset OTP to email {Email}", email);
     }
 
     //Resets password by validating the reset token
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
         //Validate the reset token and extract the user details associated with it
-        (_, string userEmail, _) = _jwtService.ValidateTokenAndExtractUser(dto.ResetToken);
+        (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(dto.ResetToken);
 
         //check if user with the given email exists
-        var userExists =
-            await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.ResetToken))
+        var existingUser =
+            await _context.Users.FirstOrDefaultAsync(u => u.Id.Equals(userId))
             ?? throw new InvalidOperationException(
                 "Unable to reset password: no user found for the provided reset token."
             );
@@ -180,17 +185,31 @@ public class AuthService(
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         //update the password
-        userExists.Password = hashedPassword;
+        existingUser.Password = hashedPassword;
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Password successfully reset for user: {UserId}", userId);
     }
 
     public async Task RequestEmailVerificationAsync(EmailVerificationRequestDto dto)
     {
         //check to see if user with the given email exists
-        var existingUser =
-            await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.Equals(dto.Email))
-            ?? throw new KeyNotFoundException($@"User with email ""{dto.Email}"" does not exist.");
+        var existingUser = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email.Equals(dto.Email));
 
+        // if the specified user does not exist,
+        // quietly abort the email verification request operation
+        if (existingUser is null)
+        {
+            _logger.LogWarning(
+                "Email verification request failed: user with email {Email} does not exist.",
+                dto.Email
+            );
+
+            return;
+        }
         //create the verification OTP
         string verificationOtp = _otpService.Generate();
         //hash the OTP
