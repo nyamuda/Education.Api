@@ -30,6 +30,8 @@ public class QuestionFlagDto
 
     public required DateTime CreatedAt { get; set; }
 
+    public required QuestionFlagType FlagType { get; set; }
+
     public static QuestionFlagDto MapFrom(QuestionFlag questionFlag)
     {
         return new QuestionFlagDto
@@ -47,6 +49,7 @@ public class QuestionFlagDto
                     : null,
             QuestionId = questionFlag.QuestionId,
             Status = questionFlag.Status,
+            FlagType = questionFlag.FlagType,
             CreatedAt = questionFlag.CreatedAt,
         };
     }

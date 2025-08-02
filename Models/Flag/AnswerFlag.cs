@@ -16,5 +16,5 @@ public class AnswerFlag : BaseFlag
     /// <summary>
     /// The type or category of the flag (e.g., Spam, Offensive).
     /// </summary>
-    public required PostFlagType FlagType { get; set; }
+    public required AnswerFlagType FlagType { get; set; }
 }

@@ -43,6 +43,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
                                     ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                     : null,
                             QuestionId = x.QuestionId,
+                            FlagType = x.FlagType,
                             Status = x.Status,
                             CreatedAt = x.CreatedAt,
                         }
@@ -76,6 +77,7 @@ public class QuestionFlagService(ApplicationDbContext context, ILogger<QuestionF
                                 ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                 : null,
                         QuestionId = x.QuestionId,
+                        FlagType = x.FlagType,
                         Status = x.Status,
                         CreatedAt = x.CreatedAt,
                     }

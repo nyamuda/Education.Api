@@ -136,15 +136,6 @@ public class ApplicationDbContext : DbContext
         //Hence, there is a many-to-many relationship between Question and Subtopic
         modelBuilder.Entity<Question>().HasMany(q => q.Subtopics).WithMany(st => st.Questions);
 
-        //A Question can have multiple Likes while a Like can only belong to one Question.
-        //Hence, there is a one-to-many relationship between Question and Like
-        modelBuilder
-            .Entity<Question>()
-            .HasMany(q => q.Likes)
-            .WithOne(l => l.Question)
-            .HasForeignKey(l => l.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Likes for that question
-
         //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Upvote
         modelBuilder

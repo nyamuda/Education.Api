@@ -28,6 +28,8 @@ public class CommentFlagDto
     /// </summary>
     public required FlagStatus Status { get; set; }
 
+    public required CommentFlagType FlagType { get; set; }
+
     public required DateTime CreatedAt { get; set; }
 
     public static CommentFlagDto MapFrom(CommentFlag commentFlag)
@@ -46,6 +48,7 @@ public class CommentFlagDto
                     }
                     : null,
             CommentId = commentFlag.CommentId,
+            FlagType = commentFlag.FlagType,
             Status = commentFlag.Status,
             CreatedAt = commentFlag.CreatedAt,
         };

@@ -23,12 +23,15 @@ public class AnswerFlagDto
     public required int AnswerId { get; set; }
     public AnswerDto? Answer { get; set; }
 
+    public required AnswerFlagType FlagType { get; set; }
+
     /// <summary>
     /// The current status of the flag (e.g., pending review, resolved).
     /// </summary>
     public required FlagStatus Status { get; set; }
 
     public required DateTime CreatedAt { get; set; }
+    
 
     public static AnswerFlagDto MapFrom(AnswerFlag answerFlag)
     {
@@ -44,6 +47,7 @@ public class AnswerFlagDto
             AnswerId = answerFlag.AnswerId,
             Status = answerFlag.Status,
             CreatedAt = answerFlag.CreatedAt,
+            FlagType = answerFlag.FlagType
         };
     }
 }

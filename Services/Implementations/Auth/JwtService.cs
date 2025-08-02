@@ -4,6 +4,7 @@ using System.Text;
 using Education.Api.Enums;
 using Education.Api.Helpers;
 using Education.Api.Models;
+using Education.Api.Models.Users;
 using Education.Api.Services.Abstractions.Auth;
 using Microsoft.IdentityModel.Tokens;
 

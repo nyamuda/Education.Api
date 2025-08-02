@@ -43,6 +43,7 @@ public class CommentFlagService(ApplicationDbContext context, ILogger<CommentFla
                                     ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                     : null,
                             CommentId = x.CommentId,
+                            FlagType = x.FlagType,
                             Status = x.Status,
                             CreatedAt = x.CreatedAt,
                         }
@@ -76,6 +77,7 @@ public class CommentFlagService(ApplicationDbContext context, ILogger<CommentFla
                                 ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                 : null,
                         CommentId = x.CommentId,
+                        FlagType = x.FlagType,
                         Status = x.Status,
                         CreatedAt = x.CreatedAt,
                     }

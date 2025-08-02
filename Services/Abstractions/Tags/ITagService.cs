@@ -4,5 +4,5 @@ namespace Education.Api.Services.Abstractions.Tags;
 
 public interface ITagService
 {
-    Task<Tag> GetByName(string name);
+    Task<Tag> GetByNameAsync(string name);
 }

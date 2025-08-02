@@ -43,6 +43,7 @@ public class AnswerFlagService(ApplicationDbContext context, ILogger<AnswerFlagS
                                     ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                     : null,
                             AnswerId = x.AnswerId,
+                            FlagType = x.FlagType,
                             Status = x.Status,
                             CreatedAt = x.CreatedAt,
                         }
@@ -76,6 +77,7 @@ public class AnswerFlagService(ApplicationDbContext context, ILogger<AnswerFlagS
                                 ? new UserDto { Id = x.User.Id, Username = x.User.Username, }
                                 : null,
                         AnswerId = x.AnswerId,
+                        FlagType = x.FlagType,
                         Status = x.Status,
                         CreatedAt = x.CreatedAt,
                     }

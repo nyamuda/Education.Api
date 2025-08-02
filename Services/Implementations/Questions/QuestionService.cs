@@ -6,6 +6,7 @@ using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Tags;
 using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Questions;
@@ -84,6 +85,17 @@ public class QuestionService(
                             Tags = q.Tags
                                 .Select(t => new TagDto { Id = t.Id, Name = t.Name, })
                                 .ToList(),
+                            Upvotes = q.Upvotes
+                                .Select(
+                                    upv =>
+                                        new UpvoteDto
+                                        {
+                                            Id = upv.Id,
+                                            UserId = upv.UserId,
+                                            QuestionId = upv.QuestionId,
+                                        }
+                                )
+                                .ToList(),
                             CreatedAt = q.CreatedAt,
                             UpdatedAt = q.UpdatedAt
                         }
@@ -161,6 +173,17 @@ public class QuestionService(
                                 : null,
                         Tags = q.Tags
                             .Select(t => new TagDto { Id = t.Id, Name = t.Name, })
+                            .ToList(),
+                        Upvotes = q.Upvotes
+                            .Select(
+                                upv =>
+                                    new UpvoteDto
+                                    {
+                                        Id = upv.Id,
+                                        UserId = upv.UserId,
+                                        QuestionId = upv.QuestionId,
+                                    }
+                            )
                             .ToList(),
                         CreatedAt = q.CreatedAt,
                         UpdatedAt = q.UpdatedAt
@@ -282,14 +305,17 @@ public class QuestionService(
         // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            Tag tag = await _tagService.GetByName(tagName);
+            Tag tag = await _tagService.GetByNameAsync(tagName);
             question.Tags.Add(tag);
         }
 
         //STEP 7: Finally save the question to the database
         await _context.Questions.AddAsync(question);
 
-        _logger.LogInformation("Successfully created new question by user ID {UserId}.", userId);
+        _logger.LogInformation(
+            "Successfully created new question by user with ID {UserId}.",
+            userId
+        );
 
         return QuestionDto.MapFrom(question);
     }
@@ -418,7 +444,7 @@ public class QuestionService(
         // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            Tag tag = await _tagService.GetByName(tagName);
+            Tag tag = await _tagService.GetByNameAsync(tagName);
             existingQuestion.Tags.Add(tag);
         }
 

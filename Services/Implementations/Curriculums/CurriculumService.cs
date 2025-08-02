@@ -81,7 +81,6 @@ public class CurriculumService(ApplicationDbContext context) : ICurriculumServic
     /// <exception cref="ConflictException">
     /// Thrown if a curriculum with the same name already exists (case-insensitive).
     /// </exception>
-
     public async Task<CurriculumDto> AddAsync(AddCurriculumDto dto)
     {
         //Curriculum name is unique.

@@ -7,7 +7,7 @@ namespace Education.Api.Dtos.Flags;
 /// </summary>
 public class AddQuestionFlagDto
 {
-    public required PostFlagType FlagType { get; set; }
+    public required QuestionFlagType FlagType { get; set; }
 
     /// <summary>
     /// Optional description provided by the user when flagging the question.

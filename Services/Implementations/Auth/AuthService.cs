@@ -1,54 +1,51 @@
 ﻿using Education.Api.Data;
 using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
+using Education.Api.Exceptions;
 using Education.Api.Models;
+using Education.Api.Models.Users;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Email;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Auth;
 
-public class AuthService : IAuthService
+public class AuthService(
+    ApplicationDbContext context,
+    IJwtService jwtService,
+    IOtpService otpService,
+    IEmailService emailService,
+    IEmailTemplateBuilder emailTemplateBuilder,
+    ILogger<AuthService> logger
+) : IAuthService
 {
-    protected readonly ApplicationDbContext _context;
-    protected readonly IJwtService _jwtService;
-    private readonly IEmailService _emailService;
+    protected readonly ApplicationDbContext _context = context;
+    protected readonly IJwtService _jwtService = jwtService;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IEmailTemplateBuilder _emailTemplateBuilder = emailTemplateBuilder;
+    private readonly IOtpService _otpService = otpService;
+    private readonly ILogger<AuthService> _logger = logger;
 
-    private readonly IEmailTemplateBuilder _emailTemplateBuilder;
-    private readonly IOtpService _otpService;
-
-    public AuthService(
-        ApplicationDbContext context,
-        IJwtService jwtService,
-        IOtpService otpService,
-        IEmailService emailService,
-        IEmailTemplateBuilder emailTemplateBuilder
-    )
-    {
-        _context = context;
-        _jwtService = jwtService;
-        _emailService = emailService;
-        _emailTemplateBuilder = emailTemplateBuilder;
-        _otpService = otpService;
-    }
-
-    public async Task<UserDto> RegisterAsync(RegisterDto userRegisterDto)
+    public async Task<UserDto> RegisterAsync(RegisterDto dto)
     {
         // check if user with the provided email already exists
-        bool userExists = await _context.Users.AnyAsync(u => u.Email.Equals(userRegisterDto.Email));
+        bool userExists = await _context.Users.AnyAsync(u => u.Email.Equals(dto.Email));
         if (userExists)
         {
-            var message = "A user with this email is already registered.";
-            throw new InvalidOperationException(message);
+            _logger.LogWarning(
+                "Registration failed: User with email {Email} already exists.",
+                dto.Email
+            );
+            throw new ConflictException("A user with this email is already registered.");
         }
 
         // hash the password
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegisterDto.Password);
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         var user = new User
         {
-            Username = userRegisterDto.UserName,
-            Email = userRegisterDto.Email,
+            Username = dto.UserName,
+            Email = dto.Email,
             Password = hashedPassword,
             IsVerified = false,
         };
@@ -56,6 +53,9 @@ public class AuthService : IAuthService
         //add the user
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Registration successful: New user with email {Email}.", dto.Email);
+
         return UserDto.MapFrom(user);
     }
 
@@ -70,7 +70,7 @@ public class AuthService : IAuthService
         //check if user exists
         var user =
             await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email)
-            ?? throw new KeyNotFoundException("Invalid username or password");
+            ?? throw new KeyNotFoundException("Invalid credentials provided.");
 
         // Compare the provided password with the stored hashed password
         string hashedPassword = user.Password;
@@ -78,7 +78,12 @@ public class AuthService : IAuthService
 
         if (!isCorrectPassword)
         {
-            throw new UnauthorizedAccessException("Invalid username or password");
+            _logger.LogWarning(
+                "Login failed: Invalid credentials for user with email {Email}.",
+                loginDto.Email
+            );
+
+            throw new UnauthorizedAccessException("Invalid credentials provided.");
         }
 
         //create token since the provided password is correct
@@ -95,15 +100,33 @@ public class AuthService : IAuthService
             expiresInMinutes: refreshTokenLifespan
         );
 
+        _logger.LogInformation(
+            "Login successful: User with with email {Email} is now logged in.",
+            loginDto.Email
+        );
+
         return (accessToken, refreshToken);
     }
 
     public async Task RequestPasswordResetAsync(string email)
     {
         //check to see if user with the given email exists
-        var existingUser =
-            await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.Equals(email))
-            ?? throw new KeyNotFoundException($@"User with email ""{email}"" does not exist.");
+        var existingUser = await _context
+            .Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email.Equals(email));
+
+        // if the specified user does not exist,
+        // quietly abort the password reset request operation
+        if (existingUser is null)
+        {
+            _logger.LogWarning(
+                "Password reset request aborted. User with email {Email} does not exist.",
+                email
+            );
+
+            return;
+        }
 
         //create the password reset OTP
         string resetOtp = _otpService.Generate();

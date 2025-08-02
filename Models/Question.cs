@@ -12,9 +12,6 @@ public class Question
 
     public int? Marks { get; set; }
 
-    // public required int CurriculumId { get; set; }
-    // public Curriculum? Curriculum { get; set; }
-
     public required int ExamBoardId { get; set; }
     public ExamBoard? ExamBoard { get; set; }
 
@@ -30,7 +27,7 @@ public class Question
     public User? User { get; set; }
 
     public List<Tag> Tags { get; set; } = [];
-    public List<Like> Likes { get; set; } = [];
+
     public List<Upvote> Upvotes { get; set; } = [];
 
     public List<QuestionFlag> Flags { get; set; } = [];

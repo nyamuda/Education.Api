@@ -16,7 +16,7 @@ public class TagService(ApplicationDbContext context, ILogger<TagService> logger
     /// </summary>
     /// <param name="name">The name of the tag to retrieve or create.</param>
     /// <returns>The existing or newly created <see cref="Tag"/>.</returns>
-    public async Task<Tag> GetByName(string name)
+    public async Task<Tag> GetByNameAsync(string name)
     {
         var tag = await _context.Tags.AsNoTracking().FirstOrDefaultAsync(t => t.Name.Equals(name));
 
