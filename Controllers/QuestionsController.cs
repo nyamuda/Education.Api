@@ -1,11 +1,13 @@
 using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.Questions;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Comments;
 using Education.Api.Services.Abstractions.Questions;
+using Education.Api.Services.Abstractions.Upvotes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
@@ -16,13 +18,15 @@ public class QuestionsController(
     IQuestionService questionService,
     IJwtService jwtService,
     IQuestionCommentService commentService,
-    IAnswerService answerService
+    IAnswerService answerService,
+    IUpvoteService upvoteService
 ) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
     private readonly IJwtService _jwtService = jwtService;
     private readonly IQuestionCommentService _questionCommentService = commentService;
     private readonly IAnswerService _answerService = answerService;
+    private readonly IUpvoteService _upvoteService = upvoteService;
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
@@ -281,6 +285,41 @@ public class QuestionsController(
         catch (InvalidOperationException ex)
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Upvotes a question with a given ID
+    [HttpPost("{questionId}/upvotes")]
+    public async Task<IActionResult> Upvote(int questionId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _upvoteService.UpvoteQuestionAsync(userId: userId, questionId: questionId);
+
+            return StatusCode(201);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
