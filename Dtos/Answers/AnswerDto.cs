@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Questions;
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 
@@ -16,6 +17,8 @@ public class AnswerDto
 
     public UserDto? User { get; set; }
 
+    public required List<UpvoteDto> Upvotes { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
@@ -32,6 +35,18 @@ public class AnswerDto
                 answer.User != null
                     ? new UserDto { Id = answer.User.Id, Username = answer.User.Username, }
                     : null,
+            Upvotes = answer
+                .Upvotes
+                .Select(
+                    upv =>
+                        new UpvoteDto
+                        {
+                            Id = upv.Id,
+                            UserId = upv.UserId,
+                            AnswerId = upv.AnswerId
+                        }
+                )
+                .ToList(),
             CreatedAt = answer.CreatedAt,
             UpdatedAt = answer.UpdatedAt
         };

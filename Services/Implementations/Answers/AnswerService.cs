@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Answers;
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
@@ -31,6 +32,17 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                                 a.User != null
                                     ? new UserDto { Id = a.User.Id, Username = a.User.Username, }
                                     : null,
+                            Upvotes = a.Upvotes
+                                .Select(
+                                    upv =>
+                                        new UpvoteDto
+                                        {
+                                            Id = upv.Id,
+                                            UserId = upv.UserId,
+                                            AnswerId = upv.AnswerId
+                                        }
+                                )
+                                .ToList(),
                             CreatedAt = a.CreatedAt,
                             UpdatedAt = a.UpdatedAt
                         }
@@ -73,6 +85,17 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                             a.User != null
                                 ? new UserDto { Id = a.User.Id, Username = a.User.Username, }
                                 : null,
+                        Upvotes = a.Upvotes
+                            .Select(
+                                upv =>
+                                    new UpvoteDto
+                                    {
+                                        Id = upv.Id,
+                                        UserId = upv.UserId,
+                                        AnswerId = upv.AnswerId
+                                    }
+                            )
+                            .ToList(),
                         CreatedAt = a.CreatedAt,
                         UpdatedAt = a.UpdatedAt
                     }

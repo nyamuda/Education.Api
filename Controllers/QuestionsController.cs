@@ -1,6 +1,8 @@
+using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.Questions;
 using Education.Api.Models;
+using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Comments;
 using Education.Api.Services.Abstractions.Questions;
@@ -13,12 +15,14 @@ namespace Education.Api.Controllers;
 public class QuestionsController(
     IQuestionService questionService,
     IJwtService jwtService,
-    IQuestionCommentService commentService
+    IQuestionCommentService commentService,
+    IAnswerService answerService
 ) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
     private readonly IJwtService _jwtService = jwtService;
     private readonly IQuestionCommentService _questionCommentService = commentService;
+    private readonly IAnswerService _answerService = answerService;
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
@@ -201,7 +205,11 @@ public class QuestionsController(
                 dto
             );
 
-            return CreatedAtRoute(routeName:"GetCommentById",routeValues:new {id=comment.Id},value:comment)
+            return CreatedAtRoute(
+                routeName: "GetCommentById",
+                routeValues: new { id = comment.Id },
+                value: comment
+            );
         }
         catch (KeyNotFoundException ex)
         {
@@ -210,6 +218,26 @@ public class QuestionsController(
         catch (InvalidOperationException ex)
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+    
+     //Gets a paginated list of answers for a given question
+    [HttpGet("{questionId}/answers")]
+    public async Task<IActionResult> GetAnswers(int questionId, int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            PageInfo<AnswerDto> comments = await _answerService.GetAsync(
+                questionId: questionId,
+                page: page,
+                pageSize: pageSize
+            );
+
+            return Ok(comments);
         }
         catch (Exception ex)
         {
