@@ -160,7 +160,7 @@ public class QuestionsController(
 
     //Gets a paginated list of comments for a given question
     [HttpGet("{questionId}/comments")]
-    public async Task<IActionResult> Get(int questionId, int page = 1, int pageSize = 10)
+    public async Task<IActionResult> GetComments(int questionId, int page = 1, int pageSize = 10)
     {
         try
         {
@@ -171,6 +171,45 @@ public class QuestionsController(
             );
 
             return Ok(comments);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Adds a new comment for a question with a given ID
+    [HttpPost("{questionId}/comments")]
+    public async Task<IActionResult> PostComment(int questionId, AddCommentDto dto)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            CommentDto comment = await _questionCommentService.AddAsync(
+                userId: userId,
+                questionId: questionId,
+                dto
+            );
+
+            return CreatedAtAction(nameof(Get), new { id = question.Id }, question);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
