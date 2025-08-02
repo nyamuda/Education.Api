@@ -38,6 +38,28 @@ public class FlagsController(
         }
     }
 
+    //Gets a paginated list of question flags
+    [HttpGet("questions")]
+    public async Task<IActionResult> GetQuestionFlags(int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            PageInfo<QuestionFlagDto> flags = await _questionFlagService.GetAsync(
+                page: page,
+                pageSize: pageSize
+            );
+            return Ok(flags);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
     //Deletes a question flag with a given ID
     [HttpDelete("questions/{id}")]
     public async Task<IActionResult> DeleteQuestionFlag(int id)
