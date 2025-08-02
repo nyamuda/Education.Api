@@ -1,11 +1,14 @@
 using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Comments;
+using Education.Api.Dtos.Flags;
+using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Dtos.Questions;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Comments;
+using Education.Api.Services.Abstractions.Flags;
 using Education.Api.Services.Abstractions.Questions;
 using Education.Api.Services.Abstractions.Upvotes;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +22,8 @@ public class QuestionsController(
     IJwtService jwtService,
     IQuestionCommentService commentService,
     IAnswerService answerService,
-    IUpvoteService upvoteService
+    IUpvoteService upvoteService,
+    IQuestionFlagService questionFlagService
 ) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
@@ -27,6 +31,7 @@ public class QuestionsController(
     private readonly IQuestionCommentService _questionCommentService = commentService;
     private readonly IAnswerService _answerService = answerService;
     private readonly IUpvoteService _upvoteService = upvoteService;
+    private readonly IQuestionFlagService _questionFlagService = questionFlagService;
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
@@ -351,6 +356,49 @@ public class QuestionsController(
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Flags a question with a given ID
+    [HttpPost("{questionId}/flags")]
+    public async Task<IActionResult> Flag(int questionId, AddQuestionFlagDto dto)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            QuestionFlagDto questionFlag = await _questionFlagService.AddAsync(
+                userId: userId,
+                questionId: questionId,
+                dto
+            );
+
+            return CreatedAtRoute(
+                routeName: "GetQuestionFlagById",
+                routeValues: new { id = questionFlag.Id },
+                value: questionFlag
+            );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
