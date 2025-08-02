@@ -472,15 +472,17 @@ public class QuestionService(
 
         if (question is null)
         {
-            _logger.LogWarning("Question not found: {QuestionId}", questionId);
+            _logger.LogWarning("Delete failed. Question not found: {QuestionId}", questionId);
 
-            throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
+            throw new KeyNotFoundException(
+                $"Delete failed. Question with ID '{questionId}' does not exist."
+            );
         }
         //Make sure the question belongs to the specified user
         if (question.UserId != userId)
         {
             _logger.LogWarning(
-                "Question {QuestionId} does not belong to user {UserId}.",
+                "Delete failed. Question {QuestionId} does not belong to user {UserId}.",
                 questionId,
                 userId
             );
