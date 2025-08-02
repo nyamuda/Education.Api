@@ -1,6 +1,8 @@
+using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.Questions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Comments;
 using Education.Api.Services.Abstractions.Questions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +10,15 @@ namespace Education.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class QuestionsController(IQuestionService questionService, IJwtService jwtService)
-    : ControllerBase
+public class QuestionsController(
+    IQuestionService questionService,
+    IJwtService jwtService,
+    IQuestionCommentService commentService
+) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
     private readonly IJwtService _jwtService = jwtService;
+    private readonly IQuestionCommentService _questionCommentService = commentService;
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
@@ -145,6 +151,26 @@ public class QuestionsController(IQuestionService questionService, IJwtService j
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Gets a paginated list of comments for a given question
+    [HttpGet("{questionId}/comments")]
+    public async Task<IActionResult> Get(int questionId, int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            PageInfo<CommentDto> comments = await _questionCommentService.GetAsync(
+                questionId: questionId,
+                page: page,
+                pageSize: pageSize
+            );
+
+            return Ok(comments);
         }
         catch (Exception ex)
         {
