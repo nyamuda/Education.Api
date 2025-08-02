@@ -86,7 +86,7 @@ public class CommentsController(ICommentService commentService, IJwtService jwtS
             //Validate the token and get the details of the user associated with it
             (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
 
-            await _questionService.DeleteAsync(userId: userId, questionId: id);
+            await _commentService.DeleteAsync(userId: userId, commentId: id);
 
             return NoContent();
         }
