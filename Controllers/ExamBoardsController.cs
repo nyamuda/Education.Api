@@ -1,0 +1,116 @@
+using Education.Api.Dtos.ExamBoards;
+using Education.Api.Exceptions;
+using Education.Api.Models;
+using Education.Api.Services.Abstractions.ExamBoards;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Education.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ExamBoardsController(IExamBoardService examBoardService) : ControllerBase
+{
+    private readonly IExamBoardService _examBoardService = examBoardService;
+
+    //Gets an exam board by ID
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        try
+        {
+            var examBoard = await _examBoardService.GetByIdAsync(id);
+            return Ok(examBoard);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Gets a paginated list of exam boards
+    [HttpGet]
+    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            var examBoards = await _examBoardService.GetAsync(page: page, pageSize: pageSize);
+            return Ok(examBoards);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Adds a new exam board
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Post(AddExamBoardDto dto)
+    {
+        try
+        {
+            ExamBoardDto examBoard = await _examBoardService.AddAsync(dto);
+
+            return CreatedAtAction(nameof(Get), new { id = examBoard.Id }, examBoard);
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Updates an exam board with a given ID
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Put(int id, UpdateExamBoardDto dto)
+    {
+        try
+        {
+            await _examBoardService.UpdateAsync(id, dto);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Deletes an exam board with a given ID
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            await _examBoardService.DeleteAsync(id);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+}

@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.ExamBoards;
 
-public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
+public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardService> logger)
+    : IExamBoardService
 {
     private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<ExamBoardService> _logger = logger;
 
     //Gets an exam board with a given ID
     public async Task<ExamBoardDto> GetByIdAsync(int id)
@@ -104,7 +106,14 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
             .AnyAsync(eb => eb.Name.ToLower().Equals(dto.Name.ToLower()));
         if (alreadyExists)
         {
-            throw new ConflictException($"Exam board with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Cannot add exam board. Exam board with name {ExamBoardName} already exists.",
+                dto.Name
+            );
+
+            throw new ConflictException(
+                $"Failed to create exam board. Exam board with name '{dto.Name}' already exists."
+            );
         }
         //check if the curriculum with the given ID exists
         var _ =
@@ -119,6 +128,8 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         //add the new exam board to the database
         ExamBoard examBoard = new() { Name = dto.Name, CurriculumId = dto.CurriculumId };
         await _context.ExamBoards.AddAsync(examBoard);
+
+        _logger.LogInformation("Exam board successfully created: {ExamBoardName}", dto.Name);
 
         return ExamBoardDto.MapFrom(examBoard);
     }
@@ -148,12 +159,21 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
 
         if (alreadyExists)
         {
-            throw new ConflictException($"An exam board with name '{dto.Name}' already exists.");
+            _logger.LogWarning(
+                "Update failed: exam board with name {ExamBoardName} already exists.",
+                dto.Name
+            );
+
+            throw new ConflictException(
+                $"Update failed: an exam board with name '{dto.Name}' already exists."
+            );
         }
 
         examBoard.Name = dto.Name;
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Exam board successfully updated: {ExamBoardId}", id);
     }
 
     //Deletes an exam board with a given ID
@@ -166,5 +186,7 @@ public class ExamBoardService(ApplicationDbContext context) : IExamBoardService
         _context.ExamBoards.Remove(examBoard);
 
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Exam board successfully deleted: {ExamBoardId}", id);
     }
 }
