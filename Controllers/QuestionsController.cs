@@ -326,4 +326,35 @@ public class QuestionsController(
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
+
+    //Removes an upvotes for a question with a given ID
+    [HttpDelete("{questionId}/upvotes")]
+    public async Task<IActionResult> RemoveUpvote(int questionId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _upvoteService.RemoveQuestionUpvoteAsync(userId: userId, questionId: questionId);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
 }
