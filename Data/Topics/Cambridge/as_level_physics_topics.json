@@ -1,0 +1,181 @@
+[
+  {
+    "topic": "Physical quantities and units",
+    "subtopics": [
+      "Physical quantities",
+      "SI units",
+      "Errors and uncertainties",
+      "Scalars and vectors"
+    ]
+  },
+  {
+    "topic": "Kinematics",
+    "subtopics": ["Equations of motion"]
+  },
+  {
+    "topic": "Dynamics",
+    "subtopics": [
+      "Momentum and Newton’s laws of motion",
+      "Non-uniform motion",
+      "Linear momentum and its conservation"
+    ]
+  },
+  {
+    "topic": "Forces, density and pressure",
+    "subtopics": [
+      "Turning effects of forces",
+      "Equilibrium of forces",
+      "Density and pressure"
+    ]
+  },
+  {
+    "topic": "Work, energy and power",
+    "subtopics": [
+      "Energy conservation",
+      "Gravitational potential energy and kinetic energy"
+    ]
+  },
+  {
+    "topic": "Deformation of solids",
+    "subtopics": ["Stress and strain", "Elastic and plastic behaviour"]
+  },
+  {
+    "topic": "Waves",
+    "subtopics": [
+      "Progressive waves",
+      "Transverse and longitudinal waves",
+      "Doppler effect for sound waves",
+      "Electromagnetic spectrum",
+      "Polarisation"
+    ]
+  },
+  {
+    "topic": "Superposition",
+    "subtopics": [
+      "Stationary waves",
+      "Diffraction",
+      "Interference",
+      "The diffraction grating"
+    ]
+  },
+  {
+    "topic": "Electricity",
+    "subtopics": [
+      "Electric current",
+      "Potential difference and power",
+      "Resistance and resistivity"
+    ]
+  },
+  {
+    "topic": "D.C. circuits",
+    "subtopics": [
+      "Practical circuits",
+      "Kirchhoff’s laws",
+      "Potential dividers"
+    ]
+  },
+  {
+    "topic": "Particle physics",
+    "subtopics": ["Atoms, nuclei and radiation", "Fundamental particles"]
+  },
+  {
+    "topic": "Motion in a circle"
+  },
+  {
+    "topic": "Gravitational fields",
+    "subtopics": [
+      "Gravitational field",
+      "Gravitational force between point masses",
+      "Gravitational field of a point mass",
+      "Gravitational potential"
+    ]
+  },
+  {
+    "topic": "Temperature",
+    "subtopics": [
+      "Thermal equilibrium",
+      "Temperature scales",
+      "Specific heat capacity and specific latent heat"
+    ]
+  },
+  {
+    "topic": "Ideal gases",
+    "subtopics": ["The mole", "Equation of state", "Kinetic theory of gases"]
+  },
+  {
+    "topic": "Thermodynamics",
+    "subtopics": ["Internal energy", "The first law of thermodynamics"]
+  },
+  {
+    "topic": "Oscillations",
+    "subtopics": [
+      "Simple harmonic oscillations",
+      "Energy in simple harmonic motion",
+      "Damped and forced oscillations, resonance"
+    ]
+  },
+  {
+    "topic": "Electric fields",
+    "subtopics": [
+      "Electric fields and field lines",
+      "Uniform electric fields",
+      "Electric force between point charges",
+      "Electric field of a point charge",
+      "Electric potential"
+    ]
+  },
+  {
+    "topic": "Capacitance",
+    "subtopics": [
+      "Capacitors and capacitance",
+      "Energy stored in a capacitor",
+      "Discharging a capacitor"
+    ]
+  },
+  {
+    "topic": "Magnetic fields",
+    "subtopics": [
+      "Concept of a magnetic field",
+      "Force on a current-carrying conductor",
+      "Force on a moving charge",
+      "Magnetic fields due to currents",
+      "Electromagnetic induction"
+    ]
+  },
+  {
+    "topic": "Alternating currents",
+    "subtopics": [
+      "Characteristics of alternating currents",
+      "Rectification and smoothing"
+    ]
+  },
+  {
+    "topic": "Quantum physics",
+    "subtopics": [
+      "Energy and momentum of a photon",
+      "Photoelectric effect",
+      "Wave-particle duality",
+      "Energy levels in atoms and line spectra"
+    ]
+  },
+  {
+    "topic": "Nuclear physics",
+    "subtopics": ["Mass defect and nuclear binding energy", "Radioactive decay"]
+  },
+  {
+    "topic": "Medical physics",
+    "subtopics": [
+      "Production and use of ultrasound",
+      "Production and use of X-rays",
+      "PET scanning"
+    ]
+  },
+  {
+    "topic": "Astronomy and cosmology",
+    "subtopics": [
+      "Standard candles",
+      "Stellar radii",
+      "Hubble’s law and the Big Bang theory"
+    ]
+  }
+]

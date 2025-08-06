@@ -1,0 +1,11 @@
+namespace Education.Api.Models;
+
+public class Level
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+
+    public required int ExamBoardId { get; set; }
+
+    public ExamBoard? ExamBoard { get; set; }
+}

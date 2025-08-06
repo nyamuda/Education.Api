@@ -1,0 +1,80 @@
+[
+  {
+    "curriculum": "Cambridge International",
+    "examBoards": [
+      {
+        "name": "Cambridge Assessment",
+        "levels": ["Lower Secondary", "IGCSE", "AS Level", "A Level"]
+      }
+    ]
+  },
+  {
+    "curriculum": "UK National Curriculum",
+    "examBoards": [
+      {
+        "name": "AQA",
+        "levels": ["Key Stage 3 (KS3)", "GCSE", "AS Level", "A Level"]
+      },
+      {
+        "name": "Edexcel",
+        "levels": ["Key Stage 3 (KS3)", "GCSE", "AS Level", "A Level"]
+      },
+      {
+        "name": "OCR",
+        "levels": ["Key Stage 3 (KS3)", "GCSE", "AS Level", "A Level"]
+      }
+    ]
+  },
+  {
+    "curriculum": "South African CAPS",
+    "examBoards": [
+      {
+        "name": "DBE",
+        "levels": [
+          "Grade 7",
+          "Grade 8",
+          "Grade 9",
+          "Grade 10",
+          "Grade 11",
+          "Grade 12"
+        ]
+      },
+      {
+        "name": "IEB",
+        "levels": ["Grade 10", "Grade 11", "Grade 12"]
+      }
+    ]
+  },
+  {
+    "curriculum": "US Common Core",
+    "examBoards": [
+      {
+        "name": "Common Core State Standards",
+        "levels": [
+          "Grade 9 – Freshman",
+          "Grade 10 – Sophomore",
+          "Grade 11 – Junior",
+          "Grade 12 – Senior"
+        ]
+      }
+    ]
+  },
+  {
+    "curriculum": "Advanced Placement (AP)",
+    "examBoards": [
+      {
+        "name": "College Board",
+        "levels": ["Grade 10 – AP", "Grade 11 – AP", "Grade 12 – AP"]
+      }
+    ]
+  },
+  {
+    "curriculum": "International Baccalaureate (IB)",
+    "examBoards": [
+      {
+        "name": "IBO",
+        "levels": ["IB DP Year 1", "IB DP Year 2"]
+      }
+    ]
+  }
+]
