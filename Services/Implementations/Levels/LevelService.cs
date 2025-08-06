@@ -117,13 +117,13 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         if (hasLevelWithSameName)
         {
             _logger.LogWarning(
-                "Cannot create level: Level with the same name {levelName} already exists under exam board {examBoardId}",
+                "Level with the same name {levelName} already exists under exam board {examBoardId}.",
                 dto.Name,
                 examBoardId
             );
 
             throw new ConflictException(
-                $"Level with the same name already exists under exam board with ID '{examBoardId}'"
+                $"Level with the same name already exists under exam board with ID '{examBoardId}'."
             );
         }
 
@@ -131,9 +131,80 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         Level level = new() { Name = dto.Name, ExamBoardId = examBoardId };
 
         await _context.Levels.AddAsync(level);
+
+        return LevelDto.MapFrom(level);
     }
 
-    Task UpdateAsync(int examBoardId, int levelId, UpdateLevelDto dto);
+    /// <summary>
+    /// Updates a level with a given ID under a specific exam board.
+    /// </summary>
+    /// <param name="examBoardId">The ID of the exam board the level is under.</param>
+    /// <param name="levelId">The ID of the soon to be updated level.</param>
+    /// <param name="dto">A DTO containing the level's updated details.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified level or exam board is not found.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if there is already an existing level with the same name under the specified exam board.
+    /// </exception>
+    /// <remarks>
+    /// The name of a level must be unique for each exam board.
+    /// This means an exam board cannot have two or more levels with the same name.
+    /// </remarks>
+    public async Task UpdateAsync(int examBoardId, int levelId, UpdateLevelDto dto)
+    {
+        //check if the specified level exists
+        var level = await _context.Levels.FirstOrDefaultAsync(l => l.Id.Equals(levelId));
+        if (level is null)
+        {
+            _logger.LogWarning("Level update failed: level {levelId} not found.", levelId);
+            throw new KeyNotFoundException(
+                $"Level update failed: level with ID '{levelId}' does not exist."
+            );
+        }
+
+        //check if the specified exam board exists
+        var examBoard = await _context
+            .ExamBoards
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id.Equals(examBoardId));
+        if (examBoard is null)
+        {
+            _logger.LogWarning(
+                "Level update failed: exam board {examBoardId} not found.",
+                examBoardId
+            );
+            throw new KeyNotFoundException(
+                $"Level update failed: exam board with ID '{examBoardId}' does not exist."
+            );
+        }
+        //level name must be unique for exam board
+        //check if there isn't already another level
+        //with the same name under the specified exam board
+        var hasLevelWithSameName = await _context
+            .Levels
+            .AnyAsync(
+                l => l.Name.Equals(dto.Name) && l.ExamBoardId.Equals(examBoardId) && l.Id != levelId
+            );
+        if (hasLevelWithSameName)
+        {
+            _logger.LogWarning(
+                "Update failed: level with the same name {levelName} already exists under exam board {examBoardId}.",
+                dto.Name,
+                examBoardId
+            );
+
+            throw new ConflictException(
+                $"Level with the same name already exists under exam board with ID '{examBoardId}'."
+            );
+        }
+
+        //update level and persist changes to the database
+        level.Name = dto.Name;
+        level.ExamBoardId = examBoardId;
+
+        await _context.SaveChangesAsync();
+    }
 
     Task DeleteAsync(int id);
 }
