@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<CommentFlag> CommentFlags { get; set; }
     public DbSet<Curriculum> Curriculums { get; set; }
     public DbSet<ExamBoard> ExamBoards { get; set; }
+    public DbSet<Level> Levels { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<QuestionFlag> QuestionFlags { get; set; }
     public DbSet<Subject> Subjects { get; set; }
