@@ -8,4 +8,6 @@ public class Level
     public required int ExamBoardId { get; set; }
 
     public ExamBoard? ExamBoard { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

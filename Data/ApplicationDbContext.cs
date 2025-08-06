@@ -89,6 +89,15 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(q => q.ExamBoardId)
             .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Questions for that exam board
 
+        //An ExamBoard can have multiple Levels and a Level can only belong to one ExamBoard.
+        //Hence, there is a one-to-many relationship between ExamBoard and Level.
+        modelBuilder
+            .Entity<ExamBoard>()
+            .HasMany(eb => eb.Levels)
+            .WithOne(l => l.ExamBoard)
+            .HasForeignKey(l => l.ExamBoardId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Levels for that exam board
+
         //A Subject can have multiple Topics and the a Topic can exist in multiple Subjects.
         //Hence, there is a many-to-many relationship between Subject and Topic.
         modelBuilder.Entity<Subject>().HasMany(s => s.Topics).WithMany(t => t.Subjects);
@@ -189,15 +198,6 @@ public class ApplicationDbContext : DbContext
             .WithOne(upv => upv.Answer)
             .HasForeignKey(upv => upv.AnswerId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Upvotes for that answer
-
-        //An Answer can have multiple Likes while a Like can only belong to one Answer.
-        //Hence, there is a one-to-many relationship between Answer and Like
-        modelBuilder
-            .Entity<Answer>()
-            .HasMany(a => a.Likes)
-            .WithOne(l => l.Answer)
-            .HasForeignKey(l => l.AnswerId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Answer -> delete Likes for that answer
 
         //An Answer can have multiple Comments while a Comment can only belong to one Answer.
         //Hence, there is a one-to-many relationship between Answer and Comment
