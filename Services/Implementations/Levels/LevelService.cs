@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Levels;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Levels;
 using Microsoft.EntityFrameworkCore;
@@ -11,21 +12,26 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<LevelService> _logger = logger;
-    
-    
-    //Gets a level with a given ID
-     public async Task<LevelDto> GetByIdAsync(int id) 
-     {
-        return await _context.Levels.AsNoTracking().Select(l => new LevelDto
-        {
-            Id =l.Id,
-            Name = l.Name,
-            ExamBoardId = l.ExamBoardId,
-            CreatedAt = l.CreatedAt
-        }).FirstOrDefaultAsync(l => l.Id.Equals(id)) ??
-        throw new KeyNotFoundException($"Level not found: ID '{id}'");
-     }
 
+    //Gets a level with a given ID
+    public async Task<LevelDto> GetByIdAsync(int id)
+    {
+        return await _context
+                .Levels
+                .AsNoTracking()
+                .Select(
+                    l =>
+                        new LevelDto
+                        {
+                            Id = l.Id,
+                            Name = l.Name,
+                            ExamBoardId = l.ExamBoardId,
+                            CreatedAt = l.CreatedAt
+                        }
+                )
+                .FirstOrDefaultAsync(l => l.Id.Equals(id))
+            ?? throw new KeyNotFoundException($"Level not found: ID '{id}'");
+    }
 
     /// <summary>
     /// Retrieves a paginated list of levels for a given exam board.
@@ -36,21 +42,25 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
     /// A <see cref="PageInfo{LevelDto}"/> containing the list of levels for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<LevelDto>> GetAsync(int examBoardId, int page, int pageSize) 
+    public async Task<PageInfo<LevelDto>> GetAsync(int examBoardId, int page, int pageSize)
     {
         var query = _context.Levels.Where(l => l.ExamBoardId.Equals(examBoardId)).AsQueryable();
 
         List<LevelDto> items = await query
-        .Skip((page = 1) * pageSize)
-        .Take(pageSize)
-        .AsNoTracking()
-        .Select(l => new LevelDto
-        {
-            Id = l.Id,
-            Name = l.Name,
-            ExamBoardId = l.ExamBoardId,
-            CreatedAt = l.CreatedAt
-        }).ToListAsync();
+            .Skip((page = 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .Select(
+                l =>
+                    new LevelDto
+                    {
+                        Id = l.Id,
+                        Name = l.Name,
+                        ExamBoardId = l.ExamBoardId,
+                        CreatedAt = l.CreatedAt
+                    }
+            )
+            .ToListAsync();
 
         //pagination metadata
         int totalItems = await query.CountAsync();
@@ -63,13 +73,67 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
             Page = page,
             PageSize = pageSize
         };
-        
     }
 
-    Task<LevelDto> AddAsync(AddLevelDto dto);
+    /// <summary>
+    /// Creates a new level for a specific exam board.
+    /// </summary>
+    /// <param name="examBoardId">The ID of the exam board the level is being added to.</param>
+    /// <param name="dto">A DTO containing the level's details.</param>
+    /// <returns>The newly created level.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified exam board is not found.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if there is already an existing level with the same name under the specified exam board.
+    /// </exception>
+    /// <remarks>
+    /// The name of a level must be unique for each exam board.
+    /// This means an exam board cannot have two or more levels with the same name.
+    /// </remarks>
+    public async Task<LevelDto> AddAsync(int examBoardId, AddLevelDto dto)
+    {
+        //check if the specified exam board exists
+        var examBoard = await _context
+            .ExamBoards
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id.Equals(examBoardId));
+        if (examBoard is null)
+        {
+            _logger.LogWarning(
+                "Failed to create new level: exam board {examBoardId} not found.",
+                examBoardId
+            );
+            throw new KeyNotFoundException(
+                $"Failed to create new level: exam board with ID '{examBoardId}' does not exist."
+            );
+        }
+        //level name must be unique for exam board
+        //check if there isn't already another level
+        //with the same name under the specified exam board
+        var hasLevelWithSameName = await _context
+            .Levels
+            .AnyAsync(l => l.Name.Equals(dto.Name) && l.ExamBoardId.Equals(examBoardId));
+        if (hasLevelWithSameName)
+        {
+            _logger.LogWarning(
+                "Cannot create level: Level with the same name {levelName} already exists under exam board {examBoardId}",
+                dto.Name,
+                examBoardId
+            );
 
-    Task UpdateAsync(int id, UpdateLevelDto dto);
+            throw new ConflictException(
+                $"Level with the same name already exists under exam board with ID '{examBoardId}'"
+            );
+        }
+
+        //create new level and save it to the database
+        Level level = new() { Name = dto.Name, ExamBoardId = examBoardId };
+
+        await _context.Levels.AddAsync(level);
+    }
+
+    Task UpdateAsync(int examBoardId, int levelId, UpdateLevelDto dto);
 
     Task DeleteAsync(int id);
-}
 }

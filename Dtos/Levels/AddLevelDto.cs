@@ -6,7 +6,4 @@ public class AddLevelDto
 {
     [Required]
     public required string Name { get; set; }
-
-    [Required]
-    public required int ExamBoardId { get; set; }
 }
