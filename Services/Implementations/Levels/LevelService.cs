@@ -206,5 +206,19 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         await _context.SaveChangesAsync();
     }
 
-    Task DeleteAsync(int id);
+    //Deletes a level with a given ID
+    public async Task DeleteAsync(int id)
+    {
+        //check if the specified level exists
+        var level = await _context.Levels.FirstOrDefaultAsync(l => l.Id.Equals(id));
+        if (level is null)
+        {
+            _logger.LogWarning("Delete failed: level {levelId} not found.", id);
+            throw new KeyNotFoundException($"Delete failed: level with ID '{id}' does not exist.");
+        }
+
+        _context.Levels.Remove(level);
+
+        await _context.SaveChangesAsync();
+    }
 }
