@@ -1,14 +1,17 @@
+using Education.Api.Dtos.Levels;
+using Education.Api.Models;
+
 namespace Education.Api.Services.Abstractions.Levels;
 
-public interface ILevelService 
+public interface ILevelService
 {
-    Task<CurriculumDto> GetByIdAsync(int id);
+    Task<LevelDto> GetByIdAsync(int id);
 
-    Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<LevelDto>> GetAsync(int page, int pageSize);
 
-    Task<CurriculumDto> AddAsync(AddCurriculumDto dto);
+    Task<LevelDto> AddAsync(AddLevelDto dto);
 
-    Task UpdateAsync(int id, UpdateCurriculumDto dto);
+    Task UpdateAsync(int id, UpdateLevelDto dto);
 
     Task DeleteAsync(int id);
 }
