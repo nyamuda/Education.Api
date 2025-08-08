@@ -49,7 +49,7 @@ public class ApplicationDbContext : DbContext
             .HasMany(c => c.Upvotes)
             .WithOne(uv => uv.Comment)
             .HasForeignKey(uv => uv.CommentId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Comment -> delete Upvotes for that comment
+            .OnDelete(DeleteBehavior.NoAction); //Delete Comment -> set foreign key to null
 
         //A Comment can only belong to one User while a User can have multiple Comments.
         //Hence, there is a many-to-one relationship between Comment and User

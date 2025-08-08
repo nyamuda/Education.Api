@@ -111,6 +111,11 @@ public class CommentService(ApplicationDbContext context, ILogger<CommentService
     ///  <exception cref="UnauthorizedAccessException">
     /// Thrown if the comment doesn't belong to the specified user.
     /// </exception>
+    /// <remarks>
+    /// Deleting a comment does not automatically delete its related upvotes because
+    /// the cascade delete behavior is set to NoAction.
+    /// The upvotes must be deleted manually to avoid orphaned records.
+    /// </remarks>
     public async Task DeleteAsync(int userId, int commentId)
     {
         //check if the comment exists
@@ -140,6 +145,9 @@ public class CommentService(ApplicationDbContext context, ILogger<CommentService
         //remove the comment from the database
         _context.Comments.Remove(comment);
         await _context.SaveChangesAsync();
+
+        // Manually delete all upvotes linked to this comment
+        await _context.Upvotes.Where(up => up.CommentId == commentId).ExecuteDeleteAsync();
 
         _logger.LogInformation("Successfully deleted comment: {CommentId}", commentId);
     }

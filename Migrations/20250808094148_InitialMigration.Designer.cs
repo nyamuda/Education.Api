@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250808092549_InitialMigration")]
+    [Migration("20250808094148_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -613,7 +613,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Question", "Question")
                         .WithMany("Comments")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Education.Api.Models.Users.User", "User")
                         .WithMany()

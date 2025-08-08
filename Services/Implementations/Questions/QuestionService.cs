@@ -468,7 +468,7 @@ public class QuestionService(
     /// <remarks>
     /// Deleting a question does not automatically delete its related comments because
     /// the cascade delete behavior is set to NoAction.
-    /// The comments must be deleted manually.
+    /// The comments must be deleted manually to avoid orphaned records.
     /// </remarks>
     public async Task DeleteAsync(int userId, int questionId)
     {
@@ -498,8 +498,6 @@ public class QuestionService(
         //delete the question
         _context.Questions.Remove(question);
 
-        //Because the relationship between Question and Comment has DeleteBehavior set to NoAction,
-        // related comments are NOT automatically deleted.
         // Manually delete all comments linked to this question
         await _context.Comments.Where(c => c.QuestionId == questionId).ExecuteDeleteAsync();
 
