@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Comments;
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Comments;
@@ -44,6 +45,17 @@ public class QuestionCommentService(ApplicationDbContext context, ILogger<Commen
                                 ? new UserDto { Id = c.User.Id, Username = c.User.Username }
                                 : null,
                         QuestionId = c.QuestionId,
+                        Upvotes = c.Upvotes
+                            .Select(
+                                upv =>
+                                    new UpvoteDto
+                                    {
+                                        Id = upv.Id,
+                                        UserId = upv.UserId,
+                                        CommentId = upv.CommentId
+                                    }
+                            )
+                            .ToList(),
                         CreatedAt = c.CreatedAt,
                         UpdatedAt = c.UpdatedAt
                     }

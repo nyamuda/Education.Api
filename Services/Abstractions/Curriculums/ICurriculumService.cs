@@ -14,4 +14,6 @@ public interface ICurriculumService
     Task UpdateAsync(int id, UpdateCurriculumDto dto);
 
     Task DeleteAsync(int id);
+
+    Task<List<Curriculum>> DeserializeCurriculumsFromFileAsync();
 }

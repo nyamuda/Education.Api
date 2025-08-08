@@ -144,7 +144,14 @@ public class ApplicationDbContext : DbContext
 
         //A Question can fall under multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic
-        modelBuilder.Entity<Question>().HasMany(q => q.Subtopics).WithMany(st => st.Questions);
+        modelBuilder
+            .Entity<Question>()
+            .HasMany(q => q.Subtopics)
+            .WithMany()
+            .UsingEntity(
+                r => r.HasOne(typeof(Question)).WithMany().OnDelete(DeleteBehavior.NoAction),
+                l => l.HasOne(typeof(Subtopic)).WithMany().OnDelete(DeleteBehavior.NoAction)
+            );
 
         //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Upvote

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Exceptions;
@@ -7,11 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Services.Implementations.Curriculums;
 
-public class CurriculumService(ApplicationDbContext context, ILogger<CurriculumService> logger)
-    : ICurriculumService
+public class CurriculumService(
+    ApplicationDbContext context,
+    ILogger<CurriculumService> logger,
+    IWebHostEnvironment env
+) : ICurriculumService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<CurriculumService> _logger = logger;
+    private readonly IWebHostEnvironment _env = env;
+    private static readonly JsonSerializerOptions _jsonOptions =
+        new() { PropertyNameCaseInsensitive = true };
 
     //Gets a curriculum with a given ID
     public async Task<CurriculumDto> GetByIdAsync(int id)
@@ -170,5 +177,46 @@ public class CurriculumService(ApplicationDbContext context, ILogger<CurriculumS
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully deleted curriculum: {CurriculumId}", id);
+    }
+
+    /// <summary>
+    /// Loads and deserializes curriculums from a JSON a file.
+    /// </summary>
+    /// <returns>A list of the deserialized curriculums.</returns>
+    /// <exception cref="FileNotFoundException">
+    /// Thrown when the JSON file cannot be found at the expected path.
+    /// </exception>
+    /// <exception cref="Exception">
+    /// Thrown when the JSON content cannot be deserialized into the expected list of curriculums.
+    /// </exception>
+    public async Task<List<Curriculum>> DeserializeCurriculumsFromFileAsync()
+    {
+        string fileName = "curriculums.json";
+        //first, get the full file path
+        var filePath = Path.Combine(_env.ContentRootPath, "Data", "Curriculums", fileName);
+
+        //next, check if the file exists
+        if (!File.Exists(filePath))
+        {
+            _logger.LogWarning(
+                "Deserialization failed. Curriculums JSON file {fileName} not found.",
+                filePath
+            );
+
+            throw new FileNotFoundException(
+                $"Unable to deserialize curriculums. File {fileName} could not be found."
+            );
+        }
+        //read the json file
+        var json = await File.ReadAllTextAsync(filePath);
+
+        //finally, deserialize the JSON
+        var curriculums =
+            JsonSerializer.Deserialize<List<Curriculum>>(json, _jsonOptions)
+            ?? throw new Exception(
+                $"Curriculum deserialization failed: unable to deserialize the '{fileName}' file."
+            );
+
+        return curriculums;
     }
 }
