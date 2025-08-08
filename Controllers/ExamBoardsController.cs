@@ -119,7 +119,7 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
     }
 
     //Gets a paginated list of levels for a specific exam board
-    [HttpGet]
+    [HttpGet("{examBoardId}/levels")]
     public async Task<IActionResult> GetLevels(int examBoardId, int page = 1, int pageSize = 10)
     {
         try
@@ -134,7 +134,7 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
     }
 
     //Adds a new level for a specific exam board
-    [HttpPost]
+    [HttpPost("{examBoardId}/levels")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PostLevel(int examBoardId, AddLevelDto dto)
     {
@@ -154,7 +154,32 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(ErrorResponse.Create(ex.Message);)
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Updates a level for a specific exam board
+    [HttpPut("{examBoardId}/levels/{levelId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateLevel(int examBoardId, int levelId, UpdateLevelDto dto)
+    {
+        try
+        {
+            await _levelService.UpdateAsync(examBoardId: examBoardId, levelId: levelId, dto);
+
+            return NoContent();
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
