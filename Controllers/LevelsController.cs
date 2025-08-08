@@ -29,4 +29,23 @@ public class LevelsController(ILevelService levelService) : ControllerBase
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
         }
     }
+
+    //Deletes a level with a given ID
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            await _levelService.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
 }
