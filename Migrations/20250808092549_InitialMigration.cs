@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Education.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class CurriculumMigration : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -330,23 +330,21 @@ namespace Education.Api.Migrations
                 columns: table => new
                 {
                     QuestionId = table.Column<int>(type: "int", nullable: false),
-                    SubtopicsId = table.Column<int>(type: "int", nullable: false)
+                    SubtopicId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuestionSubtopic", x => new { x.QuestionId, x.SubtopicsId });
+                    table.PrimaryKey("PK_QuestionSubtopic", x => new { x.QuestionId, x.SubtopicId });
                     table.ForeignKey(
                         name: "FK_QuestionSubtopic_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_QuestionSubtopic_Subtopics_SubtopicsId",
-                        column: x => x.SubtopicsId,
+                        name: "FK_QuestionSubtopic_Subtopics_SubtopicId",
+                        column: x => x.SubtopicId,
                         principalTable: "Subtopics",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -609,9 +607,9 @@ namespace Education.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuestionSubtopic_SubtopicsId",
+                name: "IX_QuestionSubtopic_SubtopicId",
                 table: "QuestionSubtopic",
-                column: "SubtopicsId");
+                column: "SubtopicId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionTag_TagsId",

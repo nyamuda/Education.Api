@@ -465,6 +465,11 @@ public class QuestionService(
     /// <exception cref="UnauthorizedAccessException">
     /// Thrown if the question does not belong to the specified user.
     /// </exception>
+    /// <remarks>
+    /// Deleting a question does not automatically delete its related comments because
+    /// the cascade delete behavior is set to NoAction.
+    /// The comments must be deleted manually.
+    /// </remarks>
     public async Task DeleteAsync(int userId, int questionId)
     {
         //Check if the question exists
@@ -492,6 +497,11 @@ public class QuestionService(
 
         //delete the question
         _context.Questions.Remove(question);
+
+        //Because the relationship between Question and Comment has DeleteBehavior set to NoAction,
+        // related comments are NOT automatically deleted.
+        // Manually delete all comments linked to this question
+        await _context.Comments.Where(c => c.QuestionId == questionId).ExecuteDeleteAsync();
 
         _logger.LogInformation("Successfully deleted question: {QuestionId}", questionId);
     }

@@ -10,5 +10,13 @@ public class Subtopic
 
     public Topic? Topic { get; set; }
 
+    public List<Question> Questions { get; set; } = [];
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class QuestionSubtopic
+{
+    public int QuestionId { get; set; }
+    public int SubtopicId { get; set; }
 }

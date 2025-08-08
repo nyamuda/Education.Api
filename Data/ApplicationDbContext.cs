@@ -1,4 +1,5 @@
-﻿using Education.Api.Models;
+﻿using Education.Api.Controllers;
+using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
@@ -142,15 +143,15 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(q => q.TopicId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Topic -> delete Questions for that topic
 
-        //A Question can fall under multiple Subtopics and a Subtopic can exist in multiple Questions
+        //A Question can have multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic
         modelBuilder
             .Entity<Question>()
             .HasMany(q => q.Subtopics)
-            .WithMany()
-            .UsingEntity(
-                r => r.HasOne(typeof(Question)).WithMany().OnDelete(DeleteBehavior.NoAction),
-                l => l.HasOne(typeof(Subtopic)).WithMany().OnDelete(DeleteBehavior.NoAction)
+            .WithMany(s => s.Questions)
+            .UsingEntity<QuestionSubtopic>(
+                r => r.HasOne<Subtopic>().WithMany().OnDelete(DeleteBehavior.NoAction),
+                l => l.HasOne<Question>().WithMany().OnDelete(DeleteBehavior.NoAction)
             );
 
         //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
@@ -178,7 +179,7 @@ public class ApplicationDbContext : DbContext
             .HasMany(q => q.Comments)
             .WithOne(c => c.Question)
             .HasForeignKey(c => c.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Comments for that question
+            .OnDelete(DeleteBehavior.NoAction); //Delete Question -> Set foreign key to null
 
         //An User can have multiple Question while a Question can only belong to one User.
         //Hence, there is a one-to-many relationship between User and Question

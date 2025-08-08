@@ -368,6 +368,21 @@ namespace Education.Api.Migrations
                     b.ToTable("Tags");
                 });
 
+            modelBuilder.Entity("Education.Api.Models.Topics.QuestionSubtopic", b =>
+                {
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubtopicId")
+                        .HasColumnType("int");
+
+                    b.HasKey("QuestionId", "SubtopicId");
+
+                    b.HasIndex("SubtopicId");
+
+                    b.ToTable("QuestionSubtopic");
+                });
+
             modelBuilder.Entity("Education.Api.Models.Topics.Subtopic", b =>
                 {
                     b.Property<int>("Id")
@@ -534,21 +549,6 @@ namespace Education.Api.Migrations
                     b.HasIndex("SubjectsId");
 
                     b.ToTable("ExamBoardSubject");
-                });
-
-            modelBuilder.Entity("QuestionSubtopic", b =>
-                {
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubtopicsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("QuestionId", "SubtopicsId");
-
-                    b.HasIndex("SubtopicsId");
-
-                    b.ToTable("QuestionSubtopic");
                 });
 
             modelBuilder.Entity("QuestionTag", b =>
@@ -746,6 +746,21 @@ namespace Education.Api.Migrations
                         .HasForeignKey("CurriculumId");
                 });
 
+            modelBuilder.Entity("Education.Api.Models.Topics.QuestionSubtopic", b =>
+                {
+                    b.HasOne("Education.Api.Models.Question", null)
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Education.Api.Models.Topics.Subtopic", null)
+                        .WithMany()
+                        .HasForeignKey("SubtopicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Education.Api.Models.Topics.Subtopic", b =>
                 {
                     b.HasOne("Education.Api.Models.Topics.Topic", "Topic")
@@ -811,21 +826,6 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Subject", null)
                         .WithMany()
                         .HasForeignKey("SubjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("QuestionSubtopic", b =>
-                {
-                    b.HasOne("Education.Api.Models.Question", null)
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Education.Api.Models.Topics.Subtopic", null)
-                        .WithMany()
-                        .HasForeignKey("SubtopicsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
