@@ -466,9 +466,9 @@ public class QuestionService(
     /// Thrown if the question does not belong to the specified user.
     /// </exception>
     /// <remarks>
-    /// Deleting a question does not automatically delete its related comments because
+    /// Deleting a question does not automatically delete its related comments and upvotes because
     /// the cascade delete behavior is set to NoAction.
-    /// The comments must be deleted manually to avoid orphaned records.
+    /// The comments and upvotes must be deleted manually to avoid orphaned records.
     /// </remarks>
     public async Task DeleteAsync(int userId, int questionId)
     {
@@ -500,6 +500,9 @@ public class QuestionService(
 
         // Manually delete all comments linked to this question
         await _context.Comments.Where(c => c.QuestionId == questionId).ExecuteDeleteAsync();
+
+        // Manually delete all upvotes linked to this question
+        await _context.Upvotes.Where(up => up.QuestionId == questionId).ExecuteDeleteAsync();
 
         _logger.LogInformation("Successfully deleted question: {QuestionId}", questionId);
     }

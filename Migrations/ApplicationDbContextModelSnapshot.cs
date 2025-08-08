@@ -782,7 +782,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Comment", "Comment")
                         .WithMany("Upvotes")
                         .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Education.Api.Models.Question", "Question")
                         .WithMany("Upvotes")
