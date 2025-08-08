@@ -1,7 +1,9 @@
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
+using Education.Api.Services.Abstractions.Levels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +11,11 @@ namespace Education.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ExamBoardsController(IExamBoardService examBoardService) : ControllerBase
+public class ExamBoardsController(IExamBoardService examBoardService, ILevelService levelService)
+    : ControllerBase
 {
     private readonly IExamBoardService _examBoardService = examBoardService;
+    private readonly ILevelService _levelService = levelService;
 
     //Gets an exam board by ID
     [HttpGet("{id}")]
@@ -107,6 +111,50 @@ public class ExamBoardsController(IExamBoardService examBoardService) : Controll
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Gets a paginated list of levels for a specific exam board
+    [HttpGet]
+    public async Task<IActionResult> GetLevels(int examBoardId, int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            PageInfo<LevelDto> levels = await _levelService.GetAsync(examBoardId, page, pageSize);
+            return Ok(levels);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Adds a new level for a specific exam board
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> PostLevel(int examBoardId, AddLevelDto dto)
+    {
+        try
+        {
+            LevelDto level = await _levelService.AddAsync(examBoardId, dto);
+
+            return CreatedAtRoute(
+                routeName: "GetLevelById",
+                routeValues: new { id = level.Id },
+                level
+            );
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message);)
         }
         catch (Exception ex)
         {

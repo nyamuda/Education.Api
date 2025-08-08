@@ -1,6 +1,7 @@
 using Education.Api.Dtos.Levels;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Levels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
@@ -12,7 +13,7 @@ public class LevelsController(ILevelService levelService) : ControllerBase
     private readonly ILevelService _levelService = levelService;
 
     //Gets a level with a given ID
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetLevelById")]
     public async Task<IActionResult> Get(int id)
     {
         try
@@ -32,6 +33,7 @@ public class LevelsController(ILevelService levelService) : ControllerBase
 
     //Deletes a level with a given ID
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         try
