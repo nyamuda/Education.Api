@@ -272,7 +272,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(u => u.CurriculumId)
             .OnDelete(DeleteBehavior.NoAction); //Delete Curriculum -> set foreign key UserId to null
-            
-            
+
+        //A User can only study one ExamBoard while an ExamBoard can have multiple Users.
+        //Hence, there is a one-to-many relationship between ExamBoard and User
+        modelBuilder
+            .Entity<User>()
+            .HasOne(u => u.ExamBoard)
+            .WithMany()
+            .HasForeignKey(u => u.ExamBoardId)
+            .OnDelete(DeleteBehavior.NoAction); //Delete ExamBoard -> set foreign key UserId to null
     }
 }
