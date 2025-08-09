@@ -5,8 +5,7 @@ namespace Education.Api.Dtos.Auth;
 public class RegisterDto
 {
     [Required]
-    [MinLength(3)]
-    public required string UserName { get; set; }
+    public required string Username { get; set; }
 
     [EmailAddress]
     public required string Email { get; set; }
@@ -17,4 +16,10 @@ public class RegisterDto
         ErrorMessage = "Password must be at least 8 characters long and contain a mix of letters, numbers, and special characters"
     )]
     public required string Password { get; set; }
+
+    public int? CurriculumId { get; set; }
+
+    public int? ExamBoardId { get; set; }
+
+    public List<int> LevelIds { get; set; } = [];
 }

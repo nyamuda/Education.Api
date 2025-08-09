@@ -1,7 +1,10 @@
 using Education.Api.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Models.Users;
 
+[Index(nameof(Username), IsUnique = true)]
+[Index(nameof(Email), IsUnique = true)]
 public class User
 {
     public int Id { get; set; }

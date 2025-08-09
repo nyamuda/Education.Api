@@ -28,7 +28,7 @@ public class AuthService(
 
     public async Task<UserDto> RegisterAsync(RegisterDto dto)
     {
-        // check if user with the provided email already exists
+        // check if a user with the provided email already exists
         bool userExists = await _context.Users.AnyAsync(u => u.Email.Equals(dto.Email));
         if (userExists)
         {
@@ -38,13 +38,20 @@ public class AuthService(
             );
             throw new ConflictException("A user with this email is already registered.");
         }
+        //check if a user with the provided username already exists
+        string username = dto.Username;
+        var rand = new Random();
+        while (await _context.Users.AnyAsync(u => u.Username.Equals(username)))
+        {
+            username += rand.Next(1_000_000);
+        }
 
         // hash the password
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         var user = new User
         {
-            Username = dto.UserName,
+            Username = username,
             Email = dto.Email,
             Password = hashedPassword,
             IsVerified = false,
