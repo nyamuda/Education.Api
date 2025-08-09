@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Curriculums;
@@ -32,6 +34,28 @@ public class CurriculumService(
                         {
                             Id = c.Id,
                             Name = c.Name,
+                            ExamBoards = c.ExamBoards
+                                .Select(
+                                    x =>
+                                        new ExamBoardDto
+                                        {
+                                            Id = x.Id,
+                                            Name = x.Name,
+                                            CurriculumId = x.CurriculumId,
+                                            Levels = x.Levels
+                                                .Select(
+                                                    l =>
+                                                        new LevelDto
+                                                        {
+                                                            Id = l.Id,
+                                                            Name = l.Name,
+                                                            ExamBoardId = l.ExamBoardId
+                                                        }
+                                                )
+                                                .ToList()
+                                        }
+                                )
+                                .ToList(),
                             CreatedAt = c.CreatedAt
                         }
                 )
@@ -50,7 +74,7 @@ public class CurriculumService(
     /// </returns>
     public async Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize)
     {
-        var query = _context.Curriculums.OrderByDescending(c => c.CreatedAt).AsQueryable();
+        var query = _context.Curriculums.OrderBy(c => c.Name).AsQueryable();
 
         List<CurriculumDto> items = await query
             .Skip((page - 1) * pageSize)
@@ -62,6 +86,28 @@ public class CurriculumService(
                     {
                         Id = c.Id,
                         Name = c.Name,
+                        ExamBoards = c.ExamBoards
+                            .Select(
+                                x =>
+                                    new ExamBoardDto
+                                    {
+                                        Id = x.Id,
+                                        Name = x.Name,
+                                        CurriculumId = x.CurriculumId,
+                                        Levels = x.Levels
+                                            .Select(
+                                                l =>
+                                                    new LevelDto
+                                                    {
+                                                        Id = l.Id,
+                                                        Name = l.Name,
+                                                        ExamBoardId = l.ExamBoardId
+                                                    }
+                                            )
+                                            .ToList()
+                                    }
+                            )
+                            .ToList(),
                         CreatedAt = c.CreatedAt
                     }
             )
