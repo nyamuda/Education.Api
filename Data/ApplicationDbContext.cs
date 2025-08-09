@@ -281,5 +281,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(u => u.ExamBoardId)
             .OnDelete(DeleteBehavior.NoAction); //Delete ExamBoard -> set foreign key UserId to null
+
+        //A User can be enrolled in multiple educational Levels and an educational Level can be taken by multiple Users.
+        //Hence, there is a many-to-many relationship between User and Level
+        modelBuilder.Entity<User>().HasMany(u => u.Levels).WithMany();
     }
 }
