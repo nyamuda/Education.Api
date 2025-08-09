@@ -1,4 +1,5 @@
-﻿using Education.Api.Data;
+﻿using System.Security.Cryptography;
+using Education.Api.Data;
 using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
 using Education.Api.Exceptions;
@@ -37,13 +38,6 @@ public class AuthService(
                 dto.Email
             );
             throw new ConflictException("A user with this email is already registered.");
-        }
-        //check if a user with the provided username already exists
-        string username = dto.Username;
-        var rand = new Random();
-        while (await _context.Users.AnyAsync(u => u.Username.Equals(username)))
-        {
-            username += rand.Next(1_000_000);
         }
 
         // hash the password
@@ -305,5 +299,41 @@ public class AuthService(
         string token = _jwtService.GenerateJwtToken(user: user, expiresInMinutes: tokenLifespan);
 
         return token;
+    }
+
+    /// <summary>
+    /// Ensures that the provided username is unique in the database.
+    /// If it already exists, appends a cryptographically random number
+    /// and retries until a unique username is found or the maximum number of attempts is reached.
+    /// </summary>
+    /// <param name="username">The base username to check.</param>
+    /// <param name="maxAttempts">The maximum number of attempts to generate a unique username.</param>
+    /// <returns>A unique username guaranteed not to exist in the database at the time of check.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when a unique username cannot be generated after the maximum number of attempts.
+    /// </exception>
+    public async Task<string> GenerateUniqueUsernameAsync(string username, int maxAttempts = 10)
+    {
+        string candidate = username;
+        int attempt = 0;
+
+        while (await _context.Users.AnyAsync(u => u.Username == candidate) && attempt < maxAttempts)
+        {
+            int randomValue = RandomNumberGenerator.GetInt32(0, 1_000_000); // 0 to 999999
+            candidate = $"{username}{randomValue}";
+            attempt++;
+        }
+
+        if (await _context.Users.AnyAsync(u => u.Username == candidate))
+        {
+            _logger.LogWarning(
+                "Unable to generate a unique username after {MaxAttempts} attempts. Last attempted: {Username}",
+                maxAttempts,
+                candidate
+            );
+            throw new InvalidOperationException("Unable to generate a unique username.");
+        }
+
+        return candidate;
     }
 }

@@ -18,4 +18,6 @@ public interface IAuthService
     Task VerifyEmailAsync(VerifyOtpDto verifyOtpDto);
 
     Task<string> RefreshTokenAsync(int userId);
+
+    Task<string> GenerateUniqueUsernameAsync(string username, int maxAttempts = 10);
 }
