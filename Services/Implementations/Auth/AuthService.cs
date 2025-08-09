@@ -39,17 +39,62 @@ public class AuthService(
             );
             throw new ConflictException("A user with this email is already registered.");
         }
+        //Make sure the provided username is unique
+        var uniqueUsername = await GenerateUniqueUsernameAsync(username: dto.Username);
 
         // hash the password
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         var user = new User
         {
-            Username = username,
+            Username = uniqueUsername,
             Email = dto.Email,
             Password = hashedPassword,
             IsVerified = false,
         };
+
+        //make sure the selected curriculum and exam board exist
+        if (dto.CurriculumId is not null & dto.CurriculumId != 0)
+        {
+            var curriculum =
+                await _context
+                    .Curriculums
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == dto.CurriculumId)
+                ?? throw new KeyNotFoundException("The selected curriculum does not exist");
+            var examBoard =
+                await _context
+                    .ExamBoards
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.Id == dto.ExamBoardId && x.CurriculumId == dto.CurriculumId
+                    )
+                ?? throw new KeyNotFoundException(
+                    "The selected exam board does not exist under the selected curriculum"
+                );
+
+            //make sure the select educational levels exist under the selected exam board
+            if (dto.LevelIds.Count > 0)
+            {
+                var levels = await _context
+                    .Levels
+                    .Where(x => dto.LevelIds.Contains(x.Id) && x.ExamBoardId == examBoard.Id)
+                    .ToListAsync();
+
+                if (levels.Count != dto.LevelIds.Count)
+                {
+                    throw new InvalidOperationException(
+                        "One or more selected levels do not exist under the selected exam board"
+                    );
+                }
+                //add selected levels to user
+                user.Levels.AddRange(levels);
+            }
+
+            //add the selected curriculum, exam board
+            user.CurriculumId = curriculum.Id;
+            user.ExamBoardId = examBoard.Id;
+        }
 
         //add the user
         _context.Users.Add(user);
@@ -335,5 +380,81 @@ public class AuthService(
         }
 
         return candidate;
+    }
+
+    /// <summary>
+    /// Builds a new User entity with the provided registration details.
+    /// Ensures Curriculum, Exam Board, and Levels are valid and related.
+    /// </summary>
+    /// <param name="dto">Registration request DTO.</param>
+    /// <param name="uniqueUsername">The already-generated unique username.</param>
+    /// <param name="hashedPassword">The hashed password string.</param>
+    /// <returns>A fully constructed User entity.</returns>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when curriculum, exam board, or levels are not found.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when levels do not match the selected exam board.
+    /// </exception>
+    private async Task<User> BuildUserAsync(
+        RegisterDto dto,
+        string uniqueUsername,
+        string hashedPassword
+    )
+    {
+        var user = new User
+        {
+            Username = uniqueUsername,
+            Email = dto.Email,
+            Password = hashedPassword,
+            IsVerified = false,
+        };
+
+        // Validate curriculum and exam board
+        if (dto.CurriculumId is not null && dto.CurriculumId != 0)
+        {
+            var curriculum =
+                await _context
+                    .Curriculums
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == dto.CurriculumId)
+                ?? throw new KeyNotFoundException(
+                    $"Curriculum with ID '{dto.CurriculumId}' was not found."
+                );
+
+            var examBoard =
+                await _context
+                    .ExamBoards
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.Id == dto.ExamBoardId && x.CurriculumId == dto.CurriculumId
+                    )
+                ?? throw new KeyNotFoundException(
+                    $"Exam board with ID '{dto.ExamBoardId}' does not belong to curriculum '{dto.CurriculumId}'."
+                );
+
+            // Validate levels
+            if (dto.LevelIds.Count > 0)
+            {
+                var levels = await _context
+                    .Levels
+                    .Where(x => dto.LevelIds.Contains(x.Id) && x.ExamBoardId == examBoard.Id)
+                    .ToListAsync();
+
+                if (levels.Count != dto.LevelIds.Count)
+                {
+                    throw new InvalidOperationException(
+                        "One or more selected educational levels do not exist under the chosen exam board."
+                    );
+                }
+
+                user.Levels.AddRange(levels);
+            }
+
+            user.CurriculumId = curriculum.Id;
+            user.ExamBoardId = examBoard.Id;
+        }
+
+        return user;
     }
 }

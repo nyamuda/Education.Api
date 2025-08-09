@@ -1,5 +1,6 @@
 ﻿using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
+using Education.Api.Models.Users;
 
 namespace Education.Api.Services.Abstractions.Auth;
 
