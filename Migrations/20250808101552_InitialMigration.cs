@@ -493,8 +493,7 @@ namespace Education.Api.Migrations
                         name: "FK_Upvotes_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Upvotes_Users_UserId",
                         column: x => x.UserId,

@@ -3,15 +3,14 @@ using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
+using Education.Api.Services.Abstractions.Curriculums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : DbContext(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
-
     public DbSet<Answer> Answers { get; set; }
     public DbSet<AnswerFlag> AnswerFlags { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -28,6 +27,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Upvote> Upvotes { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserOtp> UserOtps { get; set; }
+
+    //Seed the database
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -74,7 +76,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder
             .Entity<ExamBoard>()
             .HasOne(eb => eb.Curriculum)
-            .WithMany()
+            .WithMany(c => c.ExamBoards)
             .HasForeignKey(eb => eb.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
 

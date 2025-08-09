@@ -47,7 +47,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         var query = _context.Levels.Where(l => l.ExamBoardId.Equals(examBoardId)).AsQueryable();
 
         List<LevelDto> items = await query
-            .Skip((page = 1) * pageSize)
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .AsNoTracking()
             .Select(

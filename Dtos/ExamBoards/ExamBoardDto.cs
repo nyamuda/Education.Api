@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.Levels;
 using Education.Api.Models;
 
 namespace Education.Api.Dtos.ExamBoards;
@@ -11,7 +12,7 @@ public class ExamBoardDto
 
     public required int CurriculumId { get; set; }
     public CurriculumDto? Curriculum { get; set; }
-
+    public List<LevelDto> Levels { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 
     public static ExamBoardDto MapFrom(ExamBoard examBoard)
@@ -29,6 +30,18 @@ public class ExamBoardDto
                         Name = examBoard.Curriculum.Name
                     }
                     : null,
+            Levels = examBoard
+                .Levels
+                .Select(
+                    l =>
+                        new LevelDto
+                        {
+                            Id = l.Id,
+                            Name = l.Name,
+                            ExamBoardId = l.ExamBoardId
+                        }
+                )
+                .ToList(),
             CreatedAt = examBoard.CreatedAt,
         };
     }

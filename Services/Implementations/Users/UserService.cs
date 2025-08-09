@@ -3,7 +3,7 @@ using Education.Api.Dtos.Users;
 using Education.Api.Services.Abstractions.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace Education.Api.Services.Implementations.Auth;
+namespace Education.Api.Services.Implementations.Users;
 
 public class UserService(ApplicationDbContext context) : IUserService
 {

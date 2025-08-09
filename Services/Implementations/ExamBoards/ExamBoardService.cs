@@ -1,6 +1,7 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
@@ -35,6 +36,17 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
                                         Name = eb.Curriculum.Name
                                     }
                                     : null,
+                            Levels = eb.Levels
+                                .Select(
+                                    l =>
+                                        new LevelDto
+                                        {
+                                            Id = l.Id,
+                                            Name = l.Name,
+                                            ExamBoardId = l.ExamBoardId
+                                        }
+                                )
+                                .ToList(),
                             CreatedAt = eb.CreatedAt
                         }
                 )
@@ -66,6 +78,17 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
                         Id = eb.Id,
                         Name = eb.Name,
                         CurriculumId = eb.CurriculumId,
+                        Levels = eb.Levels
+                            .Select(
+                                l =>
+                                    new LevelDto
+                                    {
+                                        Id = l.Id,
+                                        Name = l.Name,
+                                        ExamBoardId = l.ExamBoardId
+                                    }
+                            )
+                            .ToList(),
                         CreatedAt = eb.CreatedAt
                     }
             )

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250808101100_InitialMigration")]
+    [Migration("20250808101552_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -790,7 +790,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Question", "Question")
                         .WithMany("Upvotes")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Education.Api.Models.Users.User", "User")
                         .WithMany()

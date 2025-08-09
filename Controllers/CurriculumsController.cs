@@ -39,6 +39,7 @@ public class CurriculumsController(ICurriculumService curriculumService) : Contr
         try
         {
             var curriculums = await _curriculumService.GetAsync(page: page, pageSize: pageSize);
+            // var curriculums = await _curriculumService.DeserializeCurriculumsFromFileAsync();
             return Ok(curriculums);
         }
         catch (Exception ex)

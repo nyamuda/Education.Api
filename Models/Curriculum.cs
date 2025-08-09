@@ -10,5 +10,7 @@ public class Curriculum
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public required List<ExamBoard> ExamBoards { get; set; } = [];
+
     public List<Subject> Subjects { get; set; } = [];
 }

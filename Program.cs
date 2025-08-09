@@ -5,10 +5,21 @@ using DrivingSchool.API.Services.Implementations.Auth;
 using Education.Api.Data;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Curriculums;
 using Education.Api.Services.Abstractions.Email;
+using Education.Api.Services.Abstractions.ExamBoards;
+using Education.Api.Services.Abstractions.Levels;
+using Education.Api.Services.Abstractions.Subjects;
+using Education.Api.Services.Abstractions.Topics;
 using Education.Api.Services.Abstractions.Users;
 using Education.Api.Services.Implementations.Auth;
+using Education.Api.Services.Implementations.Curriculums;
 using Education.Api.Services.Implementations.Email;
+using Education.Api.Services.Implementations.ExamBoards;
+using Education.Api.Services.Implementations.Levels;
+using Education.Api.Services.Implementations.Subjects;
+using Education.Api.Services.Implementations.Topics;
+using Education.Api.Services.Implementations.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,8 +32,15 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<ICurriculumService, CurriculumService>();
+builder.Services.AddScoped<IExamBoardService, ExamBoardService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<ILevelService, LevelService>();
+builder.Services.AddScoped<ITopicService, TopicService>();
+builder.Services.AddScoped<ISubtopicService, SubtopicService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddSingleton<IEmailTemplateBuilder, EmailTemplateBuilder>();
-
+builder.Services.AddTransient<DbSeeder>();
 
 //Configure the database
 string connectionString =
@@ -121,6 +139,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+//seed curriculums
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+    await seeder.SeedCurriculums();
+}
 
 // Configure OpenApi
 if (app.Environment.IsDevelopment())
