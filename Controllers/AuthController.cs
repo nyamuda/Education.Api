@@ -91,6 +91,32 @@ public class AuthController : ControllerBase
         }
     }
 
+    // POST api/<AccountController>/logout
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            // Overwrite the existing HTTP-only refresh token cookie
+            // with an expired one ensuring the browser deletes it
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(-2) // past date = delete
+            };
+
+            HttpContext.Response.Cookies.Append("refreshToken", string.Empty, cookieOptions);
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
+        }
+    }
+
     [HttpPost("password-reset/request")]
     public async Task<IActionResult> RequestPasswordReset(PasswordResetRequestDto dto)
     {

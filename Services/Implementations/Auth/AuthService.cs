@@ -77,7 +77,7 @@ public class AuthService(
         //check if user exists
         var user =
             await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email)
-            ?? throw new KeyNotFoundException("Invalid credentials provided.");
+            ?? throw new KeyNotFoundException("Invalid email or password.");
 
         // Compare the provided password with the stored hashed password
         string hashedPassword = user.Password;
@@ -90,7 +90,7 @@ public class AuthService(
                 loginDto.Email
             );
 
-            throw new UnauthorizedAccessException("Invalid credentials provided.");
+            throw new UnauthorizedAccessException("Invalid email or password.");
         }
 
         //create token since the provided password is correct
