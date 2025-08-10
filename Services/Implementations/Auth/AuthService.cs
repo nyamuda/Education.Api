@@ -214,6 +214,15 @@ public class AuthService(
 
             return;
         }
+        //check if the user email hasn't been already verified
+        if (existingUser.IsVerified)
+        {
+            _logger.LogWarning(
+                "Verification not required — email {email} already confirmed.",
+                dto.Email
+            );
+            throw new ConflictException("This email has already been verified.");
+        }
         //create the verification OTP
         string verificationOtp = _otpService.Generate();
         //hash the OTP

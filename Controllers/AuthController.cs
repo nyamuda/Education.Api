@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
         }
         catch (ConflictException ex)
         {
-            return BadRequest(ErrorResponse.Create(ex.Message));
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
@@ -147,6 +147,10 @@ public class AuthController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
