@@ -48,7 +48,7 @@ public class OtpService(ApplicationDbContext context, ILogger<OtpService> logger
                         && uo.ExpirationTime > DateTime.UtcNow
                         && !uo.IsUsed
                 )
-                .OrderByDescending(o => o.CreatedAt)
+                .OrderByDescending(uo => uo.CreatedAt)
                 .FirstOrDefaultAsync()
             ?? throw new InvalidOperationException(
                 "Your code has expired or is invalid. Please request a new one."

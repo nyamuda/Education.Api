@@ -1,5 +1,6 @@
 using Education.Api.Dtos.Auth;
 using Education.Api.Dtos.Users;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Auth;
 using Education.Api.Services.Abstractions.Users;
@@ -30,7 +31,7 @@ public class AuthController : ControllerBase
 
     // POST api/<AccountController>/register
     [HttpPost("register")]
-    public async Task<IActionResult> Post(RegisterDto registerDto)
+    public async Task<IActionResult> Register(RegisterDto registerDto)
     {
         try
         {
@@ -46,6 +47,10 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
         }
+        catch (ConflictException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
@@ -54,7 +59,7 @@ public class AuthController : ControllerBase
 
     // POST api/<AccountController>/login
     [HttpPost("login")]
-    public async Task<IActionResult> Post(LoginDto loginDto)
+    public async Task<IActionResult> Login(LoginDto loginDto)
     {
         try
         {
@@ -150,7 +155,7 @@ public class AuthController : ControllerBase
     }
 
     //verify email by validating otp code
-    [HttpPut("email-verification/verify")]
+    [HttpPost("email-verification/verify")]
     public async Task<IActionResult> VerifyEmail(VerifyOtpDto dto)
     {
         try
@@ -159,6 +164,10 @@ public class AuthController : ControllerBase
             await _authService.VerifyEmailAsync(dto);
 
             return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (KeyNotFoundException ex)
         {
