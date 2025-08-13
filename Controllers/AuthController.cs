@@ -136,6 +136,24 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("password-reset/verify-otp")]
+    public async Task<IActionResult> VerifyPasswordResetOtp(VerifyOtpDto dto)
+    {
+        try
+        {
+            string token = await _authService.VerifyOtpAndGenerateResetToken(dto);
+            return Ok(new { resetToken = token });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(details: ex.Message));
+        }
+    }
+
     [HttpPost("password-reset/reset")]
     public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
     {

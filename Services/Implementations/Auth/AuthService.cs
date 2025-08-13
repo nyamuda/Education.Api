@@ -173,10 +173,11 @@ public class AuthService(
     }
 
     /// <summary>
-    /// Verifies the password reset OTP and generates a secure JWT token for password reset if the OTP is valid.
+    /// Verifies a password reset OTP and generates a secure JWT token for password reset if the OTP is valid.
     /// </summary>
     /// <param name="dto">DTO containing the user's email and OTP.</param>
     /// <returns>A JWT token that can be used to reset the user's password.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if no user with the given email is found.</exception>
     public async Task<string> VerifyOtpAndGenerateResetToken(VerifyOtpDto dto)
     {
         //verify OTP
