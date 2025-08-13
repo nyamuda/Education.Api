@@ -12,6 +12,8 @@ public interface IAuthService
 
     Task RequestPasswordResetAsync(string email);
 
+    Task<string> VerifyOtpAndGenerateResetToken(VerifyOtpDto dto);
+
     Task ResetPasswordAsync(ResetPasswordDto dto);
 
     Task RequestEmailVerificationAsync(EmailVerificationRequestDto dto);

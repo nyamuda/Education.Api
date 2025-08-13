@@ -93,7 +93,7 @@ public class AuthController : ControllerBase
 
     // POST api/<AccountController>/logout
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
         try
         {

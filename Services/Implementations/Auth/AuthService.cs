@@ -172,6 +172,29 @@ public class AuthService(
         _logger.LogInformation("Successfully sent a password reset OTP to email {Email}", email);
     }
 
+    /// <summary>
+    /// Verifies the password reset OTP and generates a secure JWT token for password reset if the OTP is valid.
+    /// </summary>
+    /// <param name="dto">DTO containing the user's email and OTP.</param>
+    /// <returns>A JWT token that can be used to reset the user's password.</returns>
+    public async Task<string> VerifyOtpAndGenerateResetToken(VerifyOtpDto dto)
+    {
+        //verify OTP
+        await _otpService.VerifyAsync(dto);
+
+        //If the OTP is valid,
+        //generate the password reset token and send it to the client
+        var user =
+            await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.Email))
+            ?? throw new KeyNotFoundException(
+                $@"Password reset OTP verification failed. User with email ""{dto.Email}"" does not exist."
+            );
+
+        var resetToken = _jwtService.GenerateJwtToken(user: user, expiresInMinutes: 15);
+
+        return resetToken;
+    }
+
     //Resets password by validating the reset token
     public async Task ResetPasswordAsync(ResetPasswordDto dto)
     {
