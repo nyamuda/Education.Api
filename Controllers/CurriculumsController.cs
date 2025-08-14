@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Curriculums;
+using Education.Api.Enums.Curriculums;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Curriculums;
@@ -34,11 +35,19 @@ public class CurriculumsController(ICurriculumService curriculumService) : Contr
 
     //Gets a paginated list of curriculums
     [HttpGet]
-    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int page = 1,
+        int pageSize = 10,
+        CurriculumSortOption sortBy = CurriculumSortOption.DateCreated
+    )
     {
         try
         {
-            var curriculums = await _curriculumService.GetAsync(page: page, pageSize: pageSize);
+            var curriculums = await _curriculumService.GetAsync(
+                page: page,
+                pageSize: pageSize,
+                sortBy
+            );
             // var curriculums = await _curriculumService.DeserializeCurriculumsFromFileAsync();
             return Ok(curriculums);
         }

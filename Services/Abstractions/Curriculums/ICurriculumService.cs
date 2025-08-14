@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Curriculums;
+using Education.Api.Enums.Curriculums;
 using Education.Api.Models;
 
 namespace Education.Api.Services.Abstractions.Curriculums;
@@ -7,7 +8,7 @@ public interface ICurriculumService
 {
     Task<CurriculumDto> GetByIdAsync(int id);
 
-    Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize, CurriculumSortOption sortBy);
 
     Task<CurriculumDto> AddAsync(AddCurriculumDto dto);
 
