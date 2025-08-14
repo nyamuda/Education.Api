@@ -32,15 +32,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnConfiguring(optionsBuilder);
 
+        string email = "ptnrlab@gmail.com";
+
         //make a user an admin
         optionsBuilder
             .UseSeeding(
                 (context, _) =>
                 {
-                    var user = context
-                        .Set<User>()
-                        .FirstOrDefault(u => u.Email.Equals("ptnrlab@gmail.com"));
-                    if (user is not null)
+                    // Find user by email
+                    var user = context.Set<User>().FirstOrDefault(u => u.Email.Equals(email));
+                    // If found, assign Admin role if they haven't been assigned that role
+                    if (user is not null && user.Role != UserRole.Admin)
                     {
                         user.Role = UserRole.Admin;
                         context.SaveChanges();
@@ -50,13 +52,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .UseAsyncSeeding(
                 async (context, _, cancellationToken) =>
                 {
+                    // Find user by email
                     var user = await context
                         .Set<User>()
                         .FirstOrDefaultAsync(
-                            u => u.Email.Equals("ptnrlab@gmail.com"),
+                            u => u.Email.Equals(email),
                             cancellationToken: cancellationToken
                         );
-                    if (user is not null)
+                    // If found, assign Admin role if they haven't been assigned that role
+                    if (user is not null && user.Role != UserRole.Admin)
                     {
                         user.Role = UserRole.Admin;
                         await context.SaveChangesAsync(cancellationToken);

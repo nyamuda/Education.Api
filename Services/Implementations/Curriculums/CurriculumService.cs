@@ -3,6 +3,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
+using Education.Api.Enums.Curriculums;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Curriculums;
@@ -72,7 +73,7 @@ public class CurriculumService(
     /// A <see cref="PageInfo{CurriculumDto}"/> containing the list of curriculums for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize)
+    public async Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize,CurriculumSortOption sortBy)
     {
         var query = _context.Curriculums.OrderBy(c => c.Name).AsQueryable();
 
@@ -122,6 +123,7 @@ public class CurriculumService(
             Page = page,
             PageSize = pageSize,
             HasMore = hasMore,
+            TotalItems = totalItems,
             Items = items
         };
     }
