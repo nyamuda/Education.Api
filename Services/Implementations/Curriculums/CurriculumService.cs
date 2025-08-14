@@ -73,9 +73,20 @@ public class CurriculumService(
     /// A <see cref="PageInfo{CurriculumDto}"/> containing the list of curriculums for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<CurriculumDto>> GetAsync(int page, int pageSize,CurriculumSortOption sortBy)
+    public async Task<PageInfo<CurriculumDto>> GetAsync(
+        int page,
+        int pageSize,
+        CurriculumSortOption sortBy
+    )
     {
         var query = _context.Curriculums.OrderBy(c => c.Name).AsQueryable();
+
+        //apply the sort option
+        query = sortBy switch
+        {
+            CurriculumSortOption.Name => query.OrderByDescending(c => c.Name),
+            _ => query.OrderByDescending(c => c.CreatedAt),
+        };
 
         List<CurriculumDto> items = await query
             .Skip((page - 1) * pageSize)
