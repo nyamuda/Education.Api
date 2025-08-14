@@ -141,7 +141,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            string token = await _authService.VerifyOtpAndGenerateResetToken(dto);
+            string token = await _authService.VerifyOtpAndGenerateResetTokenAsync(dto);
             return Ok(new { resetToken = token });
         }
         catch (KeyNotFoundException ex)

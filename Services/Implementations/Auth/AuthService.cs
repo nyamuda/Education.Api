@@ -150,7 +150,8 @@ public class AuthService(
                 ExpirationTime = DateTime.UtcNow.AddMinutes(10), // expires in 10 minutes
             };
 
-        await _context.UserOtps.AddAsync(userOtp);
+        _context.UserOtps.Add(userOtp);
+        await _context.SaveChangesAsync();
 
         //generate the email template
         string emailTemplate = _emailTemplateBuilder.BuildPasswordResetRequestTemplate(
@@ -178,7 +179,7 @@ public class AuthService(
     /// <param name="dto">DTO containing the user's email and OTP.</param>
     /// <returns>A JWT token that can be used to reset the user's password.</returns>
     /// <exception cref="KeyNotFoundException">Thrown if no user with the given email is found.</exception>
-    public async Task<string> VerifyOtpAndGenerateResetToken(VerifyOtpDto dto)
+    public async Task<string> VerifyOtpAndGenerateResetTokenAsync(VerifyOtpDto dto)
     {
         //verify OTP
         await _otpService.VerifyAsync(dto);

@@ -1,9 +1,8 @@
-﻿using Education.Api.Controllers;
+﻿using Education.Api.Enums;
 using Education.Api.Models;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
-using Education.Api.Services.Abstractions.Curriculums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Data;
@@ -28,8 +27,43 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users { get; set; }
     public DbSet<UserOtp> UserOtps { get; set; }
 
-    //Seed the database
+    // Configure the DbContext and seed a specific user as an Admin during initialization
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
 
+        //make a user an admin
+        optionsBuilder
+            .UseSeeding(
+                (context, _) =>
+                {
+                    var user = context
+                        .Set<User>()
+                        .FirstOrDefault(u => u.Email.Equals("ptnrlab@gmail.com"));
+                    if (user is not null)
+                    {
+                        user.Role = UserRole.Admin;
+                        context.SaveChanges();
+                    }
+                }
+            )
+            .UseAsyncSeeding(
+                async (context, _, cancellationToken) =>
+                {
+                    var user = await context
+                        .Set<User>()
+                        .FirstOrDefaultAsync(
+                            u => u.Email.Equals("ptnrlab@gmail.com"),
+                            cancellationToken: cancellationToken
+                        );
+                    if (user is not null)
+                    {
+                        user.Role = UserRole.Admin;
+                        await context.SaveChangesAsync(cancellationToken);
+                    }
+                }
+            );
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
