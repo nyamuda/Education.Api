@@ -60,6 +60,7 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
     /// </summary>
     /// <param name="page">The current page number.</param>
     /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="sortBy">The field to sort the items by.</param>
     /// <returns>
     /// A <see cref="PageInfo{ExamBoardDto}"/> containing the list of exam boards for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
@@ -90,6 +91,14 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
                         Id = eb.Id,
                         Name = eb.Name,
                         CurriculumId = eb.CurriculumId,
+                        Curriculum =
+                            eb.Curriculum != null
+                                ? new CurriculumDto
+                                {
+                                    Id = eb.Curriculum.Id,
+                                    Name = eb.Curriculum.Name
+                                }
+                                : null,
                         Levels = eb.Levels
                             .Select(
                                 l =>

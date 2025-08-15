@@ -69,6 +69,7 @@ public class CurriculumService(
     /// </summary>
     /// <param name="page">The current page number.</param>
     /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="sortBy">The field to sort the items by</param>
     /// <returns>
     /// A <see cref="PageInfo{CurriculumDto}"/> containing the list of curriculums for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.

@@ -1,5 +1,6 @@
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
+using Education.Api.Enums.ExamBoards;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Education.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/exam-boards")]
 [ApiController]
 public class ExamBoardsController(IExamBoardService examBoardService, ILevelService levelService)
     : ControllerBase
@@ -38,11 +39,19 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
 
     //Gets a paginated list of exam boards
     [HttpGet]
-    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int page = 1,
+        int pageSize = 10,
+        ExamBoardSortOption sortBy = ExamBoardSortOption.DateCreated
+    )
     {
         try
         {
-            var examBoards = await _examBoardService.GetAsync(page: page, pageSize: pageSize);
+            var examBoards = await _examBoardService.GetAsync(
+                page: page,
+                pageSize: pageSize,
+                sortBy: sortBy
+            );
             return Ok(examBoards);
         }
         catch (Exception ex)
