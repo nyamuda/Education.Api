@@ -2,6 +2,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
+using Education.Api.Enums.ExamBoards;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
@@ -63,9 +64,20 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
     /// A <see cref="PageInfo{ExamBoardDto}"/> containing the list of exam boards for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<ExamBoardDto>> GetAsync(int page, int pageSize)
+    public async Task<PageInfo<ExamBoardDto>> GetAsync(
+        int page,
+        int pageSize,
+        ExamBoardSortOption sortBy
+    )
     {
-        var query = _context.ExamBoards.OrderByDescending(eb => eb.CreatedAt).AsQueryable();
+        var query = _context.ExamBoards.AsQueryable();
+
+        //apply the sort option
+        query = sortBy switch
+        {
+            ExamBoardSortOption.Name => query.OrderByDescending(c => c.Name),
+            _ => query.OrderByDescending(c => c.CreatedAt),
+        };
 
         List<ExamBoardDto> items = await query
             .Skip((page - 1) * pageSize)

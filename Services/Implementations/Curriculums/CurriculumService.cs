@@ -171,7 +171,9 @@ public class CurriculumService(
         //add the new curriculum to the database
         Curriculum curriculum = new() { Name = dto.Name };
 
-        await _context.Curriculums.AddAsync(curriculum);
+        _context.Curriculums.Add(curriculum);
+
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("New curriculum created with name {CurriculumName}", dto.Name);
 
