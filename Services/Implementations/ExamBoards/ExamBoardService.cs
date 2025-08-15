@@ -61,6 +61,7 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
     /// <param name="page">The current page number.</param>
     /// <param name="pageSize">The number of items to include per page.</param>
     /// <param name="sortBy">The field to sort the items by.</param>
+    /// <param name="curriculumId">The ID of the curriculum the exam boards belong to.</param>
     /// <returns>
     /// A <see cref="PageInfo{ExamBoardDto}"/> containing the list of exam boards for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
@@ -68,15 +69,20 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
     public async Task<PageInfo<ExamBoardDto>> GetAsync(
         int page,
         int pageSize,
-        ExamBoardSortOption sortBy
+        ExamBoardSortOption sortBy,
+        int? curriculumId
     )
     {
         var query = _context.ExamBoards.AsQueryable();
 
+        //apply filter
+        if (curriculumId is not null)
+            query = query.Where(x => x.CurriculumId == curriculumId);
+
         //apply the sort option
         query = sortBy switch
         {
-            ExamBoardSortOption.Name => query.OrderByDescending(c => c.Name),
+            ExamBoardSortOption.Name => query.OrderByDescending(x => x.Name),
             _ => query.OrderByDescending(c => c.CreatedAt),
         };
 
