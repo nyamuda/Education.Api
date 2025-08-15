@@ -124,6 +124,7 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
             Page = page,
             PageSize = pageSize,
             HasMore = hasMore,
+            TotalItems = totalItems,
             Items = items
         };
     }
