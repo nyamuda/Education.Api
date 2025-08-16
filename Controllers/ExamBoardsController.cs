@@ -40,6 +40,7 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
     //Gets a paginated list of exam boards
     [HttpGet]
     public async Task<IActionResult> Get(
+        int? curriculumId,
         int page = 1,
         int pageSize = 10,
         ExamBoardSortOption sortBy = ExamBoardSortOption.DateCreated
@@ -48,6 +49,7 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
         try
         {
             var examBoards = await _examBoardService.GetAsync(
+                curriculumId: curriculumId,
                 page: page,
                 pageSize: pageSize,
                 sortBy: sortBy

@@ -178,7 +178,8 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
 
         //add the new exam board to the database
         ExamBoard examBoard = new() { Name = dto.Name, CurriculumId = dto.CurriculumId };
-        await _context.ExamBoards.AddAsync(examBoard);
+        _context.ExamBoards.Add(examBoard);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Exam board successfully created: {ExamBoardName}", dto.Name);
 
@@ -220,7 +221,19 @@ public class ExamBoardService(ApplicationDbContext context, ILogger<ExamBoardSer
             );
         }
 
+        //check if the specified curriculum for the exam board exists
+        var curriculum =
+            await _context
+                .Curriculums
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == dto.CurriculumId)
+            ?? throw new KeyNotFoundException(
+                $"Exam board update failed: curriculum with ID {dto.CurriculumId} not found."
+            );
+
+        //update exam board
         examBoard.Name = dto.Name;
+        examBoard.CurriculumId = dto.CurriculumId;
 
         await _context.SaveChangesAsync();
 

@@ -8,7 +8,12 @@ public interface IExamBoardService
 {
     Task<ExamBoardDto> GetByIdAsync(int id);
 
-    Task<PageInfo<ExamBoardDto>> GetAsync(int page, int pageSize, ExamBoardSortOption sortBy);
+    Task<PageInfo<ExamBoardDto>> GetAsync(
+        int page,
+        int pageSize,
+        ExamBoardSortOption sortBy,
+        int? curriculumId
+    );
 
     Task<ExamBoardDto> AddAsync(AddExamBoardDto dto);
 
