@@ -7,7 +7,7 @@ public interface ILevelService
 {
     Task<LevelDto> GetByIdAsync(int id);
 
-    Task<PageInfo<LevelDto>> GetAsync(int examBoardId, int page, int pageSize);
+    Task<PageInfo<LevelDto>> GetAsync(int? examBoardId, int page, int pageSize);
 
     Task<LevelDto> AddAsync(int examBoardId, AddLevelDto dto);
 

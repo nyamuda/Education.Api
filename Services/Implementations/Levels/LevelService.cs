@@ -42,9 +42,13 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
     /// A <see cref="PageInfo{LevelDto}"/> containing the list of levels for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<LevelDto>> GetAsync(int examBoardId, int page, int pageSize)
+    public async Task<PageInfo<LevelDto>> GetAsync(int? examBoardId, int page, int pageSize)
     {
-        var query = _context.Levels.Where(l => l.ExamBoardId.Equals(examBoardId)).AsQueryable();
+        var query = _context.Levels.AsQueryable();
+
+        //apply filter
+        if (examBoardId != null)
+            query = query.Where(l => l.ExamBoardId.Equals(examBoardId));
 
         List<LevelDto> items = await query
             .Skip((page - 1) * pageSize)
