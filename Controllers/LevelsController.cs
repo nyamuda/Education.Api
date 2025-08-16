@@ -1,5 +1,6 @@
 using Azure;
 using Education.Api.Dtos.Levels;
+using Education.Api.Enums.Levels;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Levels;
 using Microsoft.AspNetCore.Authorization;
@@ -34,14 +35,20 @@ public class LevelsController(ILevelService levelService) : ControllerBase
 
     //Gets all levels
     [HttpGet]
-    public async Task<IActionResult> Get(int? examBoardId, int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int? examBoardId,
+        int page = 1,
+        int pageSize = 10,
+        LevelSortOption sortBy = LevelSortOption.DateCreated
+    )
     {
         try
         {
             var levels = await _levelService.GetAsync(
                 examBoardId: examBoardId,
                 page: page,
-                pageSize: pageSize
+                pageSize: pageSize,
+                sortBy: sortBy
             );
             return Ok(levels);
         }

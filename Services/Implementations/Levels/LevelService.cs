@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Levels;
+using Education.Api.Enums.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Levels;
@@ -38,17 +39,31 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
     /// </summary>
     /// <param name="page">The current page number.</param>
     /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="examBoardId">The ID the exam board to filter the items by.</param>
+    /// <param name="sortBy">The field to sort the items by.</param>
     /// <returns>
     /// A <see cref="PageInfo{LevelDto}"/> containing the list of levels for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<LevelDto>> GetAsync(int? examBoardId, int page, int pageSize)
+    public async Task<PageInfo<LevelDto>> GetAsync(
+        int? examBoardId,
+        int page,
+        int pageSize,
+        LevelSortOption sortBy
+    )
     {
         var query = _context.Levels.AsQueryable();
 
         //apply filter
         if (examBoardId != null)
             query = query.Where(l => l.ExamBoardId.Equals(examBoardId));
+
+        //sort the items
+        query = sortBy switch
+        {
+            LevelSortOption.Name => query.OrderByDescending(l => l.Name),
+            _ => query.OrderByDescending(l => l.CreatedAt)
+        };
 
         List<LevelDto> items = await query
             .Skip((page - 1) * pageSize)
