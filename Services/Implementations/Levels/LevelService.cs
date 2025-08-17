@@ -74,9 +74,15 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
     {
         var query = _context.Levels.AsQueryable();
 
-        //apply filter
-        if (examBoardId != null && examBoardId != 0)
-            query = query.Where(l => l.ExamBoardId.Equals(examBoardId));
+        //apply filters
+        if ((examBoardId != null && examBoardId != 0) || (curriculumId != null & curriculumId != 0))
+        {
+            query = query.Where(
+                l =>
+                    l.ExamBoardId.Equals(examBoardId)
+                    || (l.ExamBoard != null && l.ExamBoard.CurriculumId.Equals(curriculumId))
+            );
+        }
 
         //sort the items
         query = sortBy switch
