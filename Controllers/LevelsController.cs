@@ -36,6 +36,7 @@ public class LevelsController(ILevelService levelService) : ControllerBase
     //Gets all levels
     [HttpGet]
     public async Task<IActionResult> Get(
+        int? curriculumId,
         int? examBoardId,
         int page = 1,
         int pageSize = 10,
@@ -45,6 +46,7 @@ public class LevelsController(ILevelService levelService) : ControllerBase
         try
         {
             var levels = await _levelService.GetAsync(
+                curriculumId: curriculumId,
                 examBoardId: examBoardId,
                 page: page,
                 pageSize: pageSize,

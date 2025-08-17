@@ -65,6 +65,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
     public async Task<PageInfo<LevelDto>> GetAsync(
+        int? curriculumId,
         int? examBoardId,
         int page,
         int pageSize,

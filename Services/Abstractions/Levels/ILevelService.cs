@@ -9,6 +9,7 @@ public interface ILevelService
     Task<LevelDto> GetByIdAsync(int id);
 
     Task<PageInfo<LevelDto>> GetAsync(
+        int? curriculumId,
         int? examBoardId,
         int page,
         int pageSize,
