@@ -1,6 +1,7 @@
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
 using Education.Api.Enums.ExamBoards;
+using Education.Api.Enums.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.ExamBoards;
@@ -131,11 +132,21 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
 
     //Gets a paginated list of levels for a specific exam board
     [HttpGet("{examBoardId}/levels")]
-    public async Task<IActionResult> GetLevels(int examBoardId, int page = 1, int pageSize = 10)
+    public async Task<IActionResult> GetLevels(
+        int examBoardId,
+        int page = 1,
+        int pageSize = 10,
+        LevelSortOption sortBy = LevelSortOption.DateCreated
+    )
     {
         try
         {
-            PageInfo<LevelDto> levels = await _levelService.GetAsync(examBoardId, page, pageSize);
+            PageInfo<LevelDto> levels = await _levelService.GetAsync(
+                examBoardId,
+                page,
+                pageSize,
+                sortBy
+            );
             return Ok(levels);
         }
         catch (Exception ex)

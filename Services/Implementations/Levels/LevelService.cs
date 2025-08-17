@@ -1,4 +1,6 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
 using Education.Api.Enums.Levels;
 using Education.Api.Exceptions;
@@ -27,6 +29,23 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
                             Id = l.Id,
                             Name = l.Name,
                             ExamBoardId = l.ExamBoardId,
+                            ExamBoard =
+                                l.ExamBoard != null
+                                    ? new ExamBoardDto
+                                    {
+                                        Id = l.ExamBoard.Id,
+                                        Name = l.ExamBoard.Name,
+                                        CurriculumId = l.ExamBoard.CurriculumId,
+                                        Curriculum =
+                                            l.ExamBoard.Curriculum != null
+                                                ? new CurriculumDto
+                                                {
+                                                    Id = l.ExamBoard.Curriculum.Id,
+                                                    Name = l.ExamBoard.Curriculum.Name,
+                                                }
+                                                : null,
+                                    }
+                                    : null,
                             CreatedAt = l.CreatedAt
                         }
                 )
@@ -55,7 +74,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         var query = _context.Levels.AsQueryable();
 
         //apply filter
-        if (examBoardId != null)
+        if (examBoardId != null && examBoardId != 0)
             query = query.Where(l => l.ExamBoardId.Equals(examBoardId));
 
         //sort the items
@@ -76,6 +95,23 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
                         Id = l.Id,
                         Name = l.Name,
                         ExamBoardId = l.ExamBoardId,
+                        ExamBoard =
+                            l.ExamBoard != null
+                                ? new ExamBoardDto
+                                {
+                                    Id = l.ExamBoard.Id,
+                                    Name = l.ExamBoard.Name,
+                                    CurriculumId = l.ExamBoard.CurriculumId,
+                                    Curriculum =
+                                        l.ExamBoard.Curriculum != null
+                                            ? new CurriculumDto
+                                            {
+                                                Id = l.ExamBoard.Curriculum.Id,
+                                                Name = l.ExamBoard.Curriculum.Name,
+                                            }
+                                            : null,
+                                }
+                                : null,
                         CreatedAt = l.CreatedAt
                     }
             )
@@ -89,6 +125,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         {
             Items = items,
             HasMore = hasMore,
+            TotalItems = totalItems,
             Page = page,
             PageSize = pageSize
         };
