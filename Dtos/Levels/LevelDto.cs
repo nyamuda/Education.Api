@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Subjects;
 using Education.Api.Models;
 
 namespace Education.Api.Dtos.Levels;
@@ -10,6 +11,7 @@ public class LevelDto
     public required string Name { get; set; }
     public required int ExamBoardId { get; set; }
     public ExamBoardDto? ExamBoard { get; set; }
+    public List<SubjectDto> Subjects { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 
     public static LevelDto MapFrom(Level level)

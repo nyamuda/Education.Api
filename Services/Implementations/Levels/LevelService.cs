@@ -2,6 +2,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
+using Education.Api.Dtos.Subjects;
 using Education.Api.Enums.Levels;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -22,6 +23,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         return await _context
                 .Levels
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(
                     l =>
                         new LevelDto
@@ -46,6 +48,9 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
                                                 : null,
                                     }
                                     : null,
+                            Subjects = l.Subjects
+                                .Select(s => new SubjectDto { Id = s.Id, Name = s.Name, })
+                                .ToList(),
                             CreatedAt = l.CreatedAt
                         }
                 )
@@ -98,6 +103,7 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .AsNoTracking()
+            .AsSplitQuery()
             .Select(
                 l =>
                     new LevelDto
