@@ -9,5 +9,7 @@ public class Level
 
     public ExamBoard? ExamBoard { get; set; }
 
+    public List<Subject> Subjects { get; set; } = [];
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

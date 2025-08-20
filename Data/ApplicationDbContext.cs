@@ -118,10 +118,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(eb => eb.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
 
-        //An ExamBoard can have multiple Subjects and a Subject can exist in multiple ExamBoards.
-        //Hence, there is a many-to-many relationship between ExamBoard and Subject.
-        modelBuilder.Entity<ExamBoard>().HasMany(eb => eb.Subjects).WithMany(s => s.ExamBoards);
-
         //An ExamBoard can have multiple Questions and a Question can only belong to one ExamBoard.
         //Hence, there is a one-to-many relationship between ExamBoard and Question.
         modelBuilder
@@ -139,6 +135,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne(l => l.ExamBoard)
             .HasForeignKey(l => l.ExamBoardId)
             .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Levels for that exam board
+
+        //An\ Level can have multiple Subjects and a Subject can exist in multiple Levels.
+        //Hence, there is a many-to-many relationship between Level and Subject.
+        modelBuilder.Entity<Level>().HasMany(l => l.Subjects).WithMany(s => s.Levels);
 
         //A Subject can have multiple Topics and the a Topic can exist in multiple Subjects.
         //Hence, there is a many-to-many relationship between Subject and Topic.

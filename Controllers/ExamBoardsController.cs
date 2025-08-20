@@ -133,6 +133,7 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
     //Gets a paginated list of levels for a specific exam board
     [HttpGet("{examBoardId}/levels")]
     public async Task<IActionResult> GetLevels(
+        int? curriculumId,
         int examBoardId,
         int page = 1,
         int pageSize = 10,
@@ -142,10 +143,11 @@ public class ExamBoardsController(IExamBoardService examBoardService, ILevelServ
         try
         {
             PageInfo<LevelDto> levels = await _levelService.GetAsync(
-                examBoardId,
-                page,
-                pageSize,
-                sortBy
+                curriculumId: curriculumId,
+                examBoardId: examBoardId,
+                page: page,
+                pageSize: pageSize,
+                sortBy: sortBy
             );
             return Ok(levels);
         }

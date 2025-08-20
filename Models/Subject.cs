@@ -13,6 +13,6 @@ public class Subject
 
     public List<Topic> Topics { get; set; } = [];
 
-    public List<ExamBoard> ExamBoards { get; set; } = [];
+    public List<Level> Levels { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

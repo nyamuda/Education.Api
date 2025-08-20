@@ -75,13 +75,16 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         var query = _context.Levels.AsQueryable();
 
         //apply filters
-        if ((examBoardId != null && examBoardId != 0) || (curriculumId != null & curriculumId != 0))
+        if (curriculumId != null & curriculumId != 0)
         {
             query = query.Where(
-                l =>
-                    l.ExamBoardId.Equals(examBoardId)
-                    || (l.ExamBoard != null && l.ExamBoard.CurriculumId.Equals(curriculumId))
+                l => l.ExamBoard != null && l.ExamBoard.CurriculumId.Equals(curriculumId)
             );
+        }
+
+        if (examBoardId != null && examBoardId != 0)
+        {
+            query = query.Where(l => l.ExamBoardId.Equals(examBoardId));
         }
 
         //sort the items
@@ -193,7 +196,8 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         //create new level and save it to the database
         Level level = new() { Name = dto.Name, ExamBoardId = examBoardId };
 
-        await _context.Levels.AddAsync(level);
+        _context.Levels.Add(level);
+        await _context.SaveChangesAsync();
 
         return LevelDto.MapFrom(level);
     }
