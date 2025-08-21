@@ -7,6 +7,8 @@ public class UpdateQuestionDto
     [Required]
     public required string Content { get; set; }
 
+    public string? Answer { get; set; }
+
     [Required]
     public required int LevelId { get; set; }
 

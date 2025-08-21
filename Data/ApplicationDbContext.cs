@@ -128,7 +128,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Levels for that exam board
 
         // A Level can have multiple Subjects and a Subject can only belong to one Level.
-        // This is so because each subject in each level has its own properties (like code, exam weightings, descriptions).
+        // This is so because each subject in each level has its own properties (like topics, code, description).
         // This means the “Physics” in Grade 10 is fundamentally not the same entity as
         // “Physics” in Grade 11 — it just happens to share a name.
         // Hence, there is a one-to-many relationship between Level and Subject.
