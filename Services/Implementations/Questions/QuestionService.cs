@@ -230,72 +230,38 @@ public class QuestionService(
     }
 
     /// <summary>
-    /// Adds a new question to the database after validating the provided exam board, subject, topic, subtopics, and tags.
+    /// Adds a new question to the database after validating the provided topic, subtopics, and tags.
     /// </summary>
     /// <param name="userId">The ID of the user creating the question.</param>
     /// <param name="dto">The question DTO containing question content, metadata, and tags.</param>
     /// <returns>The newly created <see cref="QuestionDto"/>.</returns>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown when a referenced , subject, or topic does not exist.
+    /// Thrown when a referenced topic does not exist.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when one or more selected subtopics do not belong to the specified topic.
     /// </exception>
     public async Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto)
     {
-        //STEP 1: Check if an exam board with the given ID exists
-        var examBoard = await _context
-            .ExamBoards
-            .AsNoTracking()
-            .FirstOrDefaultAsync(eb => eb.Id.Equals(dto.ExamBoardId));
-
-        if (examBoard is null)
-        {
-            _logger.LogWarning("Exam board with ID {ExamBoardId} not found.", dto.ExamBoardId);
-
-            throw new KeyNotFoundException(
-                $"Exam board with ID '{dto.ExamBoardId}' does not exist."
-            );
-        }
-
-        //STEP 2: Check if a subject with the given ID exists and also belongs to the given Exam board
-        var subject = await _context
-            .Subjects
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                s => s.Id.Equals(dto.SubjectId) && s.ExamBoards.Contains(examBoard)
-            );
-        if (subject is null)
-        {
-            _logger.LogWarning(
-                "No subject with ID {SubjectId} found for exam board with ID {ExamBoardId}.",
-                dto.SubjectId,
-                dto.ExamBoardId
-            );
-
-            throw new KeyNotFoundException(
-                $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'."
-            );
-        }
-        //STEP 3: Check if a topic with the given ID exists and also belongs to the given subject
+        //STEP 1: Check if a topic with the given ID exists
         var topic = await _context
             .Topics
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId) && t.Subjects.Contains(subject));
+            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId));
 
         if (topic is null)
         {
             _logger.LogWarning(
-                "Topic with ID {TopicId} was not found for subject with ID {SubjectId}.",
-                dto.TopicId,
-                dto.SubjectId
+                "Failed to add question: topic with ID {TopicId} not found.",
+                dto.TopicId
             );
 
             throw new KeyNotFoundException(
-                $"No topic with ID {dto.TopicId} found for subject with ID {dto.SubjectId}."
+                $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist."
             );
         }
-        //STEP 4: Get the selected subtopics and make sure they belong to the topic
+
+        //STEP 2: Get the selected subtopics and make sure they belong to the specified topic
         var selectedSubtopics = await _context
             .Subtopics
             .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
@@ -303,29 +269,28 @@ public class QuestionService(
         if (selectedSubtopics.Count != dto.SubtopicIds.Count)
         {
             _logger.LogWarning(
-                "One or more selected subtopics do not exist under a topic with ID {TopicId}",
+                "Failed to add question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
                 dto.TopicId
             );
 
             throw new InvalidOperationException(
-                $"One or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
+                $"Unable to add question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
             );
         }
 
-        //STEP 5: Initialize the question entity with provided details
+        //STEP 3: Initialize the question entity with provided details
         Question question =
             new()
             {
                 Content = dto.Content,
-                ExamBoardId = dto.ExamBoardId,
-                SubjectId = dto.SubjectId,
+                SubjectId = topic.SubjectId,
                 TopicId = dto.TopicId,
                 UserId = userId,
                 Marks = dto.Marks,
             };
         question.Subtopics.AddRange(selectedSubtopics);
 
-        //STEP 6: Find each tag by name, or create it if it doesn't exist, then add it to the question.
+        //STEP 4: Find each tag by name, or create it if it doesn't exist, then add it to the question.
         // Go through each tag name provided in the request.
         // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -333,6 +298,9 @@ public class QuestionService(
             Tag tag = await _tagService.GetByNameAsync(tagName);
             question.Tags.Add(tag);
         }
+        
+        
+        //STEP 5: If an answer was was provided create
 
         //STEP 7: Finally save the question to the database
         await _context.Questions.AddAsync(question);

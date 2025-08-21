@@ -18,7 +18,10 @@ public class TagService(ApplicationDbContext context, ILogger<TagService> logger
     /// <returns>The existing or newly created <see cref="Tag"/>.</returns>
     public async Task<Tag> GetByNameAsync(string name)
     {
-        var tag = await _context.Tags.AsNoTracking().FirstOrDefaultAsync(t => t.Name.Equals(name));
+        var tag = await _context
+            .Tags
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         if (tag is null)
         {

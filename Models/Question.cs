@@ -12,7 +12,7 @@ public class Question
 
     public int? Marks { get; set; }
 
-    public required int LevelId { get; set; }
+    public int LevelId { get; set; }
     public Level? Level { get; set; }
 
     public required int SubjectId { get; set; }

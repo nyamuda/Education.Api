@@ -7,8 +7,6 @@ public class AddQuestionDto
     [Required]
     public required string Content { get; set; }
 
-    public string? Answer { get; set; }
-
     [Required]
     public required int TopicId { get; set; }
 
