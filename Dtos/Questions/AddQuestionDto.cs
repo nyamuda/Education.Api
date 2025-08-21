@@ -8,7 +8,7 @@ public class AddQuestionDto
     public required string Content { get; set; }
 
     [Required]
-    public required int ExamBoardId { get; set; }
+    public required int LevelId { get; set; }
 
     [Required]
     public required int SubjectId { get; set; }

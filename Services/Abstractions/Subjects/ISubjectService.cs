@@ -9,7 +9,7 @@ public interface ISubjectService
 
     Task<PageInfo<SubjectDto>> GetAsync(int page, int pageSize);
 
-    Task<SubjectDto> AddAsync(AddSubjectDto dto);
+    Task AddAsync(AddSubjectDto dto);
 
     Task UpdateAsync(int id, UpdateSubjectDto dto);
 

@@ -118,15 +118,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(eb => eb.CurriculumId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Curriculum -> delete ExamBoards for that Curriculum
 
-        //An ExamBoard can have multiple Questions and a Question can only belong to one ExamBoard.
-        //Hence, there is a one-to-many relationship between ExamBoard and Question.
-        modelBuilder
-            .Entity<ExamBoard>()
-            .HasMany(eb => eb.Questions)
-            .WithOne(q => q.ExamBoard)
-            .HasForeignKey(q => q.ExamBoardId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete ExamBoard -> delete Questions for that exam board
-
         //An ExamBoard can have multiple Levels and a Level can only belong to one ExamBoard.
         //Hence, there is a one-to-many relationship between ExamBoard and Level.
         modelBuilder
@@ -173,6 +164,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         //A Question can have multiple Tags and a Tag can exist in multiple Questions.
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
+
+        //A Level can have multiple Questions while a Question can only belong to one Level.
+        //Hence, there is a one-to-many relationship between Level and Question.
+        modelBuilder
+            .Entity<Question>()
+            .HasOne(q => q.Level)
+            .WithMany(l => l.Questions)
+            .HasForeignKey(q => q.LevelId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Level -> delete Questions for that level
 
         //A Subject can have multiple Questions while a Question can only belong to one Subject.
         //Hence, there is a one-to-many relationship between Subject and Question.

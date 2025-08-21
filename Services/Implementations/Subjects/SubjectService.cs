@@ -175,7 +175,9 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     {
         var subject =
             await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Delete failed: subject with ID '{id}' does not exist."
+            );
 
         _context.Subjects.Remove(subject);
 

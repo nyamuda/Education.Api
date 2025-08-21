@@ -1,5 +1,6 @@
 using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Tags;
 using Education.Api.Dtos.Topics;
@@ -17,8 +18,8 @@ public class QuestionDto
 
     public int? Marks { get; set; }
 
-    public required int ExamBoardId { get; set; }
-    public ExamBoardDto? ExamBoard { get; set; }
+    public required int LevelId { get; set; }
+    public LevelDto? Level { get; set; }
 
     public required int SubjectId { get; set; }
     public SubjectDto? Subject { get; set; }
