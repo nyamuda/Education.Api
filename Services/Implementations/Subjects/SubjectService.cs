@@ -79,15 +79,27 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// A <see cref="SubjectDto"/> representing the newly created subject.
     /// </returns>
     /// <exception cref="ConflictException">
-    /// Thrown if a subject with the same name already exists (case-insensitive).
+    /// Thrown if a subject with the same name already exists under the specified level (case-insensitive).
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided exam board IDs do not exist.
+    /// Thrown if one or more of the provided level IDs do not exist.
     /// </exception>
     public async Task<SubjectDto> AddAsync(AddSubjectDto dto)
     {
+        //get the the selected levels for the subject
+        var selectedLevels = await _context
+            .Levels
+            .Where(l => dto.LevelIds.Contains(l.Id))
+            .ToListAsync();
+
+        //Make sure all the selected levels exist
+        if (selectedLevels.Count != dto.LevelIds.Count)
+        {
+            throw new InvalidOperationException("One or more selected levels do not exist.");
+        }
+        
         //Subject name is unique.
-        //Check if there isn't already another subject with the given name (case-insensitive)
+        //Check if there isn't already another subject with the given name under the specified level (case-insensitive)
         bool alreadyExists = await _context
             .Subjects
             .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()));
@@ -95,18 +107,6 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         if (alreadyExists)
         {
             throw new ConflictException($"Subject with name '{dto.Name}' already exists.");
-        }
-
-        //get the the selected exam boards for the subject
-        var selectedExamBoards = await _context
-            .ExamBoards
-            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
-            .ToListAsync();
-
-        //Make sure all the selected exam boards exist
-        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
-        {
-            throw new InvalidOperationException("One or more selected exam boards do not exist.");
         }
 
         //add the new subject to the database

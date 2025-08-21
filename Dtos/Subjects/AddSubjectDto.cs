@@ -6,8 +6,11 @@ public class AddSubjectDto
 {
     [Required]
     public required string Name { get; set; }
+    
+    [Required]
+    public required int ExamBoardId { get; set; }
 
     [Required]
-    [MinLength(1, ErrorMessage = "Please select at least one exam board.")]
-    public List<int> ExamBoardIds { get; set; } = [];
+    [MinLength(1, ErrorMessage = "Please select at least one educational level.")]
+    public List<int> LevelIds { get; set; } = [];
 }
