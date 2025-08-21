@@ -124,45 +124,48 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <param name="id">The ID of the subject to update.</param>
     /// <param name="dto">The DTO containing the updated subject</param>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if no subject with the specified ID exists.
+    /// Thrown if no subject or level with the specified ID exists.
     /// </exception>
     /// <exception cref="ConflictException">
-    /// Thrown if another subject with the same name already exists (case-insensitive).
+    /// Thrown if another subject with the same name already exists under the selected level (case-insensitive).
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided exam board IDs do not exist.
-    /// </exception>
-
     public async Task UpdateAsync(int id, UpdateSubjectDto dto)
     {
+        //check if there specified subject exists
         var subject =
             await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Subject with ID '{id}' does not exist.");
+            ?? throw new KeyNotFoundException(
+                $"Update failed: subject with ID '{id}' does not exist."
+            );
 
-        //subject name is unique.
-        //check if there isn't already an existing subject with the new updated name
+        //check if there specified level exists
+        var _ =
+            await _context.Levels.AsNoTracking().FirstOrDefaultAsync(l => l.Id.Equals(dto.LevelId))
+            ?? throw new KeyNotFoundException(
+                $"Update failed: level with ID '{dto.LevelId}' does not exist."
+            );
+
+        //Subject name is unique under each educational level.
+        //Check if there isn't already another subject with the given updated name under the specified level (case-insensitive)
         bool alreadyExists = await _context
             .Subjects
-            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()) && s.Id != id);
+            .AnyAsync(
+                s =>
+                    s.LevelId == dto.LevelId
+                    && s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
+                    && s.Id != subject.Id
+            );
+
         if (alreadyExists)
         {
-            throw new ConflictException($"A subject with name '{dto.Name}' already exists.");
+            throw new ConflictException(
+                $"Unable to update: a subject with name '{dto.Name}' already exists under the selected level."
+            );
         }
 
-        //get the the selected exam boards for the subject
-        var selectedExamBoards = await _context
-            .ExamBoards
-            .Where(eb => dto.ExamBoardIds.Contains(eb.Id))
-            .ToListAsync();
-
-        //Make sure all the selected exam boards exist
-        if (selectedExamBoards.Count != dto.ExamBoardIds.Count)
-        {
-            throw new InvalidOperationException("One or more selected exam boards do not exist.");
-        }
-
+        //update subject
         subject.Name = dto.Name;
-        subject.ExamBoards.AddRange(selectedExamBoards);
+        subject.LevelId = dto.LevelId;
 
         await _context.SaveChangesAsync();
     }
