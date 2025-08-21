@@ -144,7 +144,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder
             .Entity<Subject>()
             .HasOne(s => s.Level)
-            .WithMany()
+            .WithMany(l => l.Subjects)
             .HasForeignKey(s => s.LevelId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Level -> delete Subjects for that Level
 

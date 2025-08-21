@@ -11,7 +11,7 @@ public class Subject
     public List<Question> Questions { get; set; } = [];
     public List<Topic> Topics { get; set; } = [];
 
-    public int LevelId { get; set; }
+    public required int LevelId { get; set; }
     public Level? Level { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

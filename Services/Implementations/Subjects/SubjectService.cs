@@ -72,24 +72,26 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     }
 
     /// <summary>
-    /// Adds a new subject to the database.
+    /// Adds a new subject to one or more educational levels.
     /// </summary>
-    /// <param name="dto">The DTO containing the subject's data.</param>
-    /// <returns>
-    /// A <see cref="SubjectDto"/> representing the newly created subject.
-    /// </returns>
-    /// <exception cref="ConflictException">
-    /// Thrown if a subject with the same name already exists under the specified level (case-insensitive).
-    /// </exception>
+    /// <param name="dto">
+    /// The DTO containing the subject name and the IDs of the levels the subject should be added to.
+    /// </param>
+    /// <remarks>
+    /// A subject name is unique within each level. If a subject with the same name already exists
+    /// in a level (case-insensitive comparison), it will be skipped and not added again.
+    /// </remarks>
     /// <exception cref="InvalidOperationException">
     /// Thrown if one or more of the provided level IDs do not exist.
     /// </exception>
-    public async Task<SubjectDto> AddAsync(AddSubjectDto dto)
+    public async Task AddAsync(AddSubjectDto dto)
     {
-        //get the the selected levels for the subject
+        //get the the selected educational levels for the subject
         var selectedLevels = await _context
             .Levels
             .Where(l => dto.LevelIds.Contains(l.Id))
+            .Include(l => l.Subjects)
+            .AsSplitQuery()
             .ToListAsync();
 
         //Make sure all the selected levels exist
@@ -97,25 +99,23 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         {
             throw new InvalidOperationException("One or more selected levels do not exist.");
         }
-        
-        //Subject name is unique.
-        //Check if there isn't already another subject with the given name under the specified level (case-insensitive)
-        bool alreadyExists = await _context
-            .Subjects
-            .AnyAsync(s => s.Name.ToLower().Equals(dto.Name.ToLower()));
 
-        if (alreadyExists)
+        //add the subject to each selected level
+        foreach (var level in selectedLevels)
         {
-            throw new ConflictException($"Subject with name '{dto.Name}' already exists.");
+            //Subject name is unique under each educational level.
+            //Check if there isn't already another subject with the given name under the specified level (case-insensitive)
+            bool alreadyExists = level
+                .Subjects
+                .Any(s => s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (alreadyExists)
+                continue;
+
+            level.Subjects.Add(new Subject { Name = dto.Name, LevelId = level.Id });
         }
 
-        //add the new subject to the database
-        Subject subject = new() { Name = dto.Name };
-        subject.ExamBoards.AddRange(selectedExamBoards);
-
-        await _context.Subjects.AddAsync(subject);
-
-        return SubjectDto.MapFrom(subject);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
