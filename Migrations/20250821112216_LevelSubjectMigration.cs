@@ -83,8 +83,7 @@ namespace Education.Api.Migrations
                 table: "Topics",
                 column: "SubjectId",
                 principalTable: "Subjects",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />

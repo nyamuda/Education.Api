@@ -5,7 +5,21 @@
       {
         "name": "Cambridge Assessment",
         "levels": [
-          { "name": "Lower Secondary" },
+          {
+            "name": "Lower Secondary",
+            "subjects": [
+              { "name": "Art & Design" },
+              { "name": "Cambridge Global Perspectives" },
+              { "name": "Cambridge ICT Starters" },
+              { "name": "Digital Literacy" },
+              { "name": "English" },
+              { "name": "English as a Second Language" },
+              { "name": "Mathematics" },
+              { "name": "Music" },
+              { "name": "Physical Education" },
+              { "name": "Science" }
+            ]
+          },
           { "name": "IGCSE" },
           { "name": "AS Level" },
           { "name": "A Level" }

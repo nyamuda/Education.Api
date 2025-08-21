@@ -795,7 +795,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Subject", "Subject")
                         .WithMany("Topics")
                         .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Subject");
