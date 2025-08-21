@@ -8,12 +8,6 @@ public class UpdateQuestionDto
     public required string Content { get; set; }
 
     [Required]
-    public required int LevelId { get; set; }
-
-    [Required]
-    public required int SubjectId { get; set; }
-
-    [Required]
     public required int TopicId { get; set; }
 
     public List<int> SubtopicIds { get; set; } = [];

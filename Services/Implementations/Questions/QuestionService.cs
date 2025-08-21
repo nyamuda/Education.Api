@@ -313,13 +313,13 @@ public class QuestionService(
     }
 
     /// <summary>
-    /// Updates an existing question with new content, topic, subtopics, tags, and related details.
+    /// Updates an existing question with new content, topic, subtopics, and tags.
     /// </summary>
     /// <param name="userId">The ID of the user attempting to update the question.</param>
     /// <param name="questionId">The ID of the question to update.</param>
     /// <param name="dto">The updated question data.</param>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown if the question, exam board, subject, or topic is not found.
+    /// Thrown if the question, or topic is not found.
     /// </exception>
     /// <exception cref="UnauthorizedAccessException">
     /// Thrown if the question does not belong to the specified user.
@@ -329,22 +329,27 @@ public class QuestionService(
     /// </exception>
     public async Task UpdateAsync(int userId, int questionId, UpdateQuestionDto dto)
     {
-        //STEP 1: Check if a question with a give ID exists
+        //STEP 1: Check if a question with a given ID exists
         var existingQuestion = await _context
             .Questions
             .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
         if (existingQuestion is null)
         {
-            _logger.LogWarning("Question not found: {QuestionId}", questionId);
+            _logger.LogWarning(
+                "Update failed: question with ID {QuestionId} not found.",
+                questionId
+            );
 
-            throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
+            throw new KeyNotFoundException(
+                $"Update failed: question with ID '{questionId}' does not exist."
+            );
         }
 
         //STEP 2: Verify that the question belongs to the given user. Prevent updates by other users.
         if (existingQuestion.UserId != userId)
         {
             _logger.LogWarning(
-                "Question with ID {QuestionId} doesn't belong to user with ID {UserId}",
+                "Update failed: question with ID {QuestionId} doesn't belong to user with ID {UserId}",
                 questionId,
                 userId
             );
@@ -354,59 +359,25 @@ public class QuestionService(
             );
         }
 
-        //STEP 3: Check if an exam board with the given ID exists
-        var examBoard = await _context
-            .ExamBoards
-            .AsNoTracking()
-            .FirstOrDefaultAsync(eb => eb.Id.Equals(dto.ExamBoardId));
-
-        if (examBoard is null)
-        {
-            _logger.LogWarning("Exam board with ID {ExamBoardId} not found.", dto.ExamBoardId);
-
-            throw new KeyNotFoundException(
-                $"Exam board with ID '{dto.ExamBoardId}' does not exist."
-            );
-        }
-
-        //STEP 4: Check if a subject with the given ID exists and also belongs to the given Exam board
-        var subject = await _context
-            .Subjects
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                s => s.Id.Equals(dto.SubjectId) && s.ExamBoards.Contains(examBoard)
-            );
-        if (subject is null)
-        {
-            _logger.LogWarning(
-                "No subject with ID {SubjectId} found for exam board with ID {ExamBoardId}.",
-                dto.SubjectId,
-                dto.ExamBoardId
-            );
-
-            throw new KeyNotFoundException(
-                $"No subject found with ID '{dto.SubjectId}' for exam board with ID '{dto.ExamBoardId}'."
-            );
-        }
-        //STEP 5: Check if a topic with the given ID exists and also belongs to the given subject
+        //STEP 3: Check if a topic with the given ID exists
         var topic = await _context
             .Topics
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId) && t.Subjects.Contains(subject));
+            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId));
 
         if (topic is null)
         {
             _logger.LogWarning(
-                "Topic with ID {TopicId} was not found for subject with ID {SubjectId}.",
-                dto.TopicId,
-                dto.SubjectId
+                "Failed to update question: topic with ID {TopicId} not found.",
+                dto.TopicId
             );
 
             throw new KeyNotFoundException(
-                $"No topic with ID {dto.TopicId} found for subject with ID {dto.SubjectId}."
+                $"Unable to update question. Topic with ID '{dto.TopicId}' does not exist."
             );
         }
-        //STEP 6: Get the selected subtopics and make sure they belong to the topic
+
+        //STEP 4: Get the selected subtopics and make sure they belong to the specified topic
         var selectedSubtopics = await _context
             .Subtopics
             .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
@@ -414,33 +385,39 @@ public class QuestionService(
         if (selectedSubtopics.Count != dto.SubtopicIds.Count)
         {
             _logger.LogWarning(
-                "One or more selected subtopics do not exist under a topic with ID {TopicId}",
+                "Failed to update question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
                 dto.TopicId
             );
 
             throw new InvalidOperationException(
-                $"One or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
+                $"Unable to update question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
             );
         }
-
-        //STEP 7: Update the existing question entity with provided details
+        //STEP 5: Update the existing question entity with provided details
         existingQuestion.Content = dto.Content;
-        existingQuestion.ExamBoardId = dto.ExamBoardId;
-        existingQuestion.SubjectId = dto.SubjectId;
         existingQuestion.TopicId = dto.TopicId;
-        existingQuestion.Subtopics.AddRange(selectedSubtopics);
+        existingQuestion.SubjectId = topic.SubjectId;
         existingQuestion.Marks = dto.Marks;
 
-        //STEP 8: Find each tag by name, or create it if it doesn't exist, then add it to the question.
+        //clear subtopics before adding
+        existingQuestion.Subtopics.Clear();
+        //add new subtopics
+        existingQuestion.Subtopics.AddRange(selectedSubtopics);
+
+        //clear tags before adding new ones
+        existingQuestion.Tags.Clear();
+
+        //STEP 6: Find each tag by name, or create it if it doesn't exist, then add it to the question.
         // Go through each tag name provided in the request.
         // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             Tag tag = await _tagService.GetByNameAsync(tagName);
+
             existingQuestion.Tags.Add(tag);
         }
 
-        //STEP 9: Finally persist the changes to the database
+        //STEP 7: Finally persist the changes to the database
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully updated question with ID {QuestionId}.", questionId);
