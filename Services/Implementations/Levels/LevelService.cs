@@ -291,11 +291,10 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
         }
 
         _context.Levels.Remove(level);
-
         await _context.SaveChangesAsync();
 
-        //DeleteBehavior between Level and Subject is set to NoAction
-        //Manually delete all subjects related to this level
+        //DeleteBehavior between Level and Subject is set to NoAction.
+        //Manually delete all subjects related to this level.
         await _context.Subjects.Where(s => s.LevelId.Equals(id)).ExecuteDeleteAsync();
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250821110649_LevelSubjectMigration")]
+    [Migration("20250821111531_LevelSubjectMigration")]
     partial class LevelSubjectMigration
     {
         /// <inheritdoc />
@@ -761,7 +761,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Level", "Level")
                         .WithMany("Subjects")
                         .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Level");

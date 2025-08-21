@@ -146,7 +146,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasMany(s => s.Topics)
             .WithOne(t => t.Subject)
             .HasForeignKey(t => t.SubjectId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Subject -> delete Topics for that Subject
+            .OnDelete(DeleteBehavior.NoAction); //Delete Subject -> set foreign key to null
 
         //A Topic can have multiple Subtopics while a Subtopic can only belong to one Topic.
         //Hence, there is a one-to-many relationship between Topic and Subtopic.

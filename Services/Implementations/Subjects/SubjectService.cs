@@ -180,7 +180,10 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
             );
 
         _context.Subjects.Remove(subject);
-
         await _context.SaveChangesAsync();
+
+        //DeleteBehavior between Subject and Topic is set to NoAction.
+        //Manually delete all topics related to this subject.
+        await _context.Topics.Where(t => t.SubjectId.Equals(id)).ExecuteDeleteAsync();
     }
 }

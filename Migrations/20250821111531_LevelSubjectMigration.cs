@@ -76,8 +76,7 @@ namespace Education.Api.Migrations
                 table: "Subjects",
                 column: "LevelId",
                 principalTable: "Levels",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Topics_Subjects_SubjectId",

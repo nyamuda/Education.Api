@@ -758,7 +758,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Level", "Level")
                         .WithMany("Subjects")
                         .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Level");
