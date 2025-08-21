@@ -298,12 +298,11 @@ public class QuestionService(
             Tag tag = await _tagService.GetByNameAsync(tagName);
             question.Tags.Add(tag);
         }
-        
-        
-        //STEP 5: If an answer was was provided create
 
-        //STEP 7: Finally save the question to the database
-        await _context.Questions.AddAsync(question);
+        //STEP 5: Finally save the question to the database
+        _context.Questions.Add(question);
+
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation(
             "Successfully created new question by user with ID {UserId}.",
