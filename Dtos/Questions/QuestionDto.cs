@@ -47,7 +47,7 @@ public class QuestionDto
         {
             Id = question.Id,
             Content = question.Content,
-            ExamBoardId = question.ExamBoardId,
+            LevelId = question.LevelId,
             SubjectId = question.SubjectId,
             TopicId = question.TopicId,
             UserId = question.UserId,

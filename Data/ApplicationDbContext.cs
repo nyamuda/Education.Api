@@ -139,9 +139,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(s => s.LevelId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Level -> delete Subjects for that Level
 
-        //A Subject can have multiple Topics and the a Topic can exist in multiple Subjects.
-        //Hence, there is a many-to-many relationship between Subject and Topic.
-        modelBuilder.Entity<Subject>().HasMany(s => s.Topics).WithMany(t => t.Subjects);
+        //A Subject can have multiple Topics and a Topic can only belong to one Subject.
+        //Hence, there is a one-to-many relationship between Subject and Topic.
+        modelBuilder
+            .Entity<Subject>()
+            .HasMany(s => s.Topics)
+            .WithOne(t => t.Subject)
+            .HasForeignKey(t => t.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Subject -> delete Topics for that Subject
 
         //A Topic can have multiple Subtopics while a Subtopic can only belong to one Topic.
         //Hence, there is a one-to-many relationship between Topic and Subtopic.

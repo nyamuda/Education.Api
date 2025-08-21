@@ -8,7 +8,8 @@ public class Topic
     public int Id { get; set; }
     public required string Name { get; set; }
 
-    public List<Subject> Subjects { get; set; } = [];
+    public required int SubjectId { get; set; }
+    public Subject? Subject { get; set; }
 
     public List<Subtopic> Subtopics { get; set; } = [];
 

@@ -1,6 +1,7 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Questions;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Tags;
@@ -38,20 +39,35 @@ public class QuestionService(
                             Id = q.Id,
                             Content = q.Content,
                             Marks = q.Marks,
-                            ExamBoardId = q.ExamBoardId,
-                            ExamBoard =
-                                q.ExamBoard != null
-                                    ? new ExamBoardDto
+                            LevelId = q.LevelId,
+                            Level =
+                                q.Level != null
+                                    ? new LevelDto
                                     {
-                                        Id = q.ExamBoard.Id,
-                                        Name = q.ExamBoard.Name,
-                                        CurriculumId = q.ExamBoard.CurriculumId,
-                                        Curriculum =
-                                            q.ExamBoard.Curriculum != null
-                                                ? new CurriculumDto
+                                        Id = q.Level.Id,
+                                        Name = q.Level.Name,
+                                        ExamBoardId = q.Level.ExamBoardId,
+                                        ExamBoard =
+                                            q.Level.ExamBoard != null
+                                                ? new ExamBoardDto
                                                 {
-                                                    Id = q.ExamBoard.Curriculum.Id,
-                                                    Name = q.ExamBoard.Curriculum.Name
+                                                    Id = q.Level.ExamBoard.Id,
+                                                    Name = q.Level.ExamBoard.Name,
+                                                    CurriculumId = q.Level.ExamBoard.CurriculumId,
+                                                    Curriculum =
+                                                        q.Level.ExamBoard.Curriculum != null
+                                                            ? new CurriculumDto
+                                                            {
+                                                                Id = q.Level
+                                                                    .ExamBoard
+                                                                    .Curriculum
+                                                                    .Id,
+                                                                Name = q.Level
+                                                                    .ExamBoard
+                                                                    .Curriculum
+                                                                    .Name
+                                                            }
+                                                            : null,
                                                 }
                                                 : null
                                     }
@@ -127,20 +143,29 @@ public class QuestionService(
                         Id = q.Id,
                         Content = q.Content,
                         Marks = q.Marks,
-                        ExamBoardId = q.ExamBoardId,
-                        ExamBoard =
-                            q.ExamBoard != null
-                                ? new ExamBoardDto
+                        LevelId = q.LevelId,
+                        Level =
+                            q.Level != null
+                                ? new LevelDto
                                 {
-                                    Id = q.ExamBoard.Id,
-                                    Name = q.ExamBoard.Name,
-                                    CurriculumId = q.ExamBoard.CurriculumId,
-                                    Curriculum =
-                                        q.ExamBoard.Curriculum != null
-                                            ? new CurriculumDto
+                                    Id = q.Level.Id,
+                                    Name = q.Level.Name,
+                                    ExamBoardId = q.Level.ExamBoardId,
+                                    ExamBoard =
+                                        q.Level.ExamBoard != null
+                                            ? new ExamBoardDto
                                             {
-                                                Id = q.ExamBoard.Curriculum.Id,
-                                                Name = q.ExamBoard.Curriculum.Name
+                                                Id = q.Level.ExamBoard.Id,
+                                                Name = q.Level.ExamBoard.Name,
+                                                CurriculumId = q.Level.ExamBoard.CurriculumId,
+                                                Curriculum =
+                                                    q.Level.ExamBoard.Curriculum != null
+                                                        ? new CurriculumDto
+                                                        {
+                                                            Id = q.Level.ExamBoard.Curriculum.Id,
+                                                            Name = q.Level.ExamBoard.Curriculum.Name
+                                                        }
+                                                        : null,
                                             }
                                             : null
                                 }
@@ -211,7 +236,7 @@ public class QuestionService(
     /// <param name="dto">The question DTO containing question content, metadata, and tags.</param>
     /// <returns>The newly created <see cref="QuestionDto"/>.</returns>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown when a referenced exam board, subject, or topic does not exist.
+    /// Thrown when a referenced , subject, or topic does not exist.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// Thrown when one or more selected subtopics do not belong to the specified topic.
