@@ -136,10 +136,10 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// Thrown if no topic with the specified ID exists.
     /// </exception>
     /// <exception cref="ConflictException">
-    /// Thrown if another topic with the same name already exists (case-insensitive).
+    /// Thrown if another topic with the same name already exists under the specified subject (case-insensitive).
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided subject IDs do not exist.
+    /// <exception cref="KeyNotFoundException">
+    ///  Thrown if the specified topic or subject is not found.
     /// </exception>
 
     public async Task UpdateAsync(int id, UpdateTopicDto dto)
@@ -147,46 +147,40 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
         var topic =
             await _context.Topics.FirstOrDefaultAsync(t => t.Id.Equals(id))
             ?? throw new KeyNotFoundException(
-                $"Cannot update topic. Topic with ID '{id}' does not exist."
+                $"Unable to update topic. Topic with ID '{id}' does not exist."
             );
 
-        //topic name is unique.
-        //check if there isn't already an existing topic with the new updated name
+        //check if the specified subject exists
+        var subject =
+            await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(dto.SubjectId))
+            ?? throw new KeyNotFoundException(
+                $"Unable to update topic: subject with ID ${dto.SubjectId} does not exist."
+            );
+
+        //Topic name is unique for each subject.
+        //Check if there isn't already another topic with the given name under the specified subject (case-insensitive)
         bool alreadyExists = await _context
             .Topics
-            .AnyAsync(t => t.Name.ToLower().Equals(dto.Name.ToLower()) && t.Id != id);
+            .AnyAsync(
+                t =>
+                    t.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
+                    && t.SubjectId == dto.SubjectId
+                    && t.Id != id
+            );
         if (alreadyExists)
         {
             _logger.LogWarning(
-                "Update failed: topic with name {TopicName} already exists.",
+                "Update failed: topic with name {TopicName} already exists under the selected subject.",
                 dto.Name
             );
 
             throw new ConflictException(
-                $"Update failed: a topic with name '{dto.Name}' already exists."
-            );
-        }
-
-        //get the the selected subjects for the topic
-        var selectedSubjects = await _context
-            .Subjects
-            .Where(s => dto.SubjectIds.Contains(s.Id))
-            .ToListAsync();
-
-        //Make sure all the selected subjects exist
-        if (selectedSubjects.Count != dto.SubjectIds.Count)
-        {
-            _logger.LogWarning(
-                "Update failed: one or more selected subjects do not exist for topic {TopicId}",
-                id
-            );
-            throw new InvalidOperationException(
-                "Topic update failed: one or more selected subjects do not exist."
+                $"Update failed: a topic with name '{dto.Name}' already exists under the selected subject."
             );
         }
 
         topic.Name = dto.Name;
-        topic.Subjects.AddRange(selectedSubjects);
+        topic.SubjectId = dto.SubjectId;
 
         await _context.SaveChangesAsync();
 
