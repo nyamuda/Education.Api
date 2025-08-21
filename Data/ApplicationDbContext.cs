@@ -137,7 +137,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(s => s.Level)
             .WithMany(l => l.Subjects)
             .HasForeignKey(s => s.LevelId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Level -> delete Subjects for that Level
+            .OnDelete(DeleteBehavior.NoAction); //Delete Level -> set foreign key to null
 
         //A Subject can have multiple Topics and a Topic can only belong to one Subject.
         //Hence, there is a one-to-many relationship between Subject and Topic.

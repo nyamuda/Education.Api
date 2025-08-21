@@ -132,9 +132,6 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// </summary>
     /// <param name="id">The ID of the topic to update.</param>
     /// <param name="dto">The DTO containing the updated topic</param>
-    /// <exception cref="KeyNotFoundException">
-    /// Thrown if no topic with the specified ID exists.
-    /// </exception>
     /// <exception cref="ConflictException">
     /// Thrown if another topic with the same name already exists under the specified subject (case-insensitive).
     /// </exception>
