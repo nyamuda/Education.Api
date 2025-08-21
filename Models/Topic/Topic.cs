@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Models.Topics;
 
-[Index(nameof(Name), IsUnique = true)]
+[Index(nameof(Name), IsUnique = false)]
 public class Topic
 {
     public int Id { get; set; }

@@ -8,6 +8,5 @@ public class AddTopicDto
     public required string Name { get; set; }
 
     [Required]
-    [MinLength(1, ErrorMessage = "Please select at least one subject.")]
-    public required List<int> SubjectIds { get; set; }
+    public required int SubjectId { get; set; }
 }

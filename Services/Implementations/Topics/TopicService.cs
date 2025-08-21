@@ -82,47 +82,45 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// A <see cref="TopicDto"/> representing the newly created topic.
     /// </returns>
     /// <exception cref="ConflictException">
-    /// Thrown if a topic with the same name already exists (case-insensitive).
+    /// Thrown if a topic with the same name already exists under the specified subject (case-insensitive).
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided subject IDs do not exist.
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified subject is not found.
     /// </exception>
     public async Task<TopicDto> AddAsync(AddTopicDto dto)
     {
-        //Topic name is unique.
-        //Check if there isn't already another topic with the given name (case-insensitive)
+        //check if the specified subject exists
+        var subject =
+            await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(dto.SubjectId))
+            ?? throw new KeyNotFoundException(
+                $"Unable to add topic: subject with ID ${dto.SubjectId} does not exist."
+            );
+        //Topic name is unique for each subject.
+        //Check if there isn't already another topic with the given name under the specified subject (case-insensitive)
         bool alreadyExists = await _context
             .Topics
-            .AnyAsync(t => t.Name.ToLower().Equals(dto.Name.ToLower()));
+            .AnyAsync(
+                t =>
+                    t.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
+                    && t.SubjectId == dto.SubjectId
+            );
 
         if (alreadyExists)
         {
             _logger.LogWarning(
-                "Failed to add topic. Topic with name {TopicName} already exists.",
+                "Failed to add topic. Topic with name {TopicName} already exists under the selected subject.",
                 dto.Name
             );
-            throw new ConflictException($"A topic with name '{dto.Name}' already exists.");
-        }
-
-        //get the the selected subjects for the topic
-        var selectedSubjects = await _context
-            .Subjects
-            .Where(s => dto.SubjectIds.Contains(s.Id))
-            .ToListAsync();
-
-        //Make sure all the selected subjects exist
-        if (selectedSubjects.Count != dto.SubjectIds.Count)
-        {
-            throw new InvalidOperationException(
-                "Failed to add topic: one or more selected subjects do not exist."
+            throw new ConflictException(
+                $"Unable to add topic. A topic with name '{dto.Name}' already exists under the selected subject."
             );
         }
 
         //add the new topic to the database
-        Topic topic = new() { Name = dto.Name };
-        topic.Subjects.AddRange(selectedSubjects);
+        Topic topic = new() { Name = dto.Name, SubjectId = dto.SubjectId };
 
-        await _context.Topics.AddAsync(topic);
+        _context.Topics.Add(topic);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("New topic created with name {TopicName}", dto.Name);
 

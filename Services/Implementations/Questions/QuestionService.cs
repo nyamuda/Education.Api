@@ -399,7 +399,7 @@ public class QuestionService(
         existingQuestion.SubjectId = topic.SubjectId;
         existingQuestion.Marks = dto.Marks;
 
-        //clear subtopics before adding
+        //clear subtopics before adding new one
         existingQuestion.Subtopics.Clear();
         //add new subtopics
         existingQuestion.Subtopics.AddRange(selectedSubtopics);
