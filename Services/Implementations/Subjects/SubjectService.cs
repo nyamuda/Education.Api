@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Subjects;
+using Education.Api.Enums.Subjects;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Subjects;
@@ -66,6 +67,13 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
             queryParams.LevelId != null
                 ? query.Where(s => s.LevelId == queryParams.LevelId)
                 : query;
+
+        //sort the items
+        query = queryParams.SortBy switch
+        {
+            SubjectSortOption.Name => query.OrderByDescending(s => s.Name),
+            _ => query.OrderByDescending(s => s.CreatedAt),
+        };
 
         List<SubjectDto> items = await query
             .Skip((page - 1) * pageSize)
