@@ -866,10 +866,93 @@
       {
         "name": "Common Core State Standards",
         "levels": [
-          { "name": "Grade 9 – Freshman" },
-          { "name": "Grade 10 – Sophomore" },
-          { "name": "Grade 11 – Junior" },
-          { "name": "Grade 12 – Senior" }
+          {
+            "name": "Grade 9 – Freshman",
+            "subjects": [
+              { "name": "English Language Arts" },
+              { "name": "Algebra I" },
+              { "name": "Geometry" },
+              { "name": "Biology" },
+              { "name": "Physical Science" },
+              { "name": "World History / Geography" },
+              { "name": "Health Education" },
+              { "name": "Physical Education" },
+              { "name": "Art" },
+              { "name": "Music" },
+              { "name": "Spanish" },
+              { "name": "French" },
+              { "name": "German" },
+              { "name": "Chinese (Mandarin)" },
+              { "name": "Latin" },
+              { "name": "Computer Science / Technology" }
+            ]
+          },
+          {
+            "name": "Grade 10 – Sophomore",
+            "subjects": [
+              { "name": "English Language Arts" },
+              { "name": "Geometry" },
+              { "name": "Algebra II" },
+              { "name": "Chemistry" },
+              { "name": "Biology" },
+              { "name": "World History / US History" },
+              { "name": "Physical Education" },
+              { "name": "Health Education" },
+              { "name": "Art" },
+              { "name": "Music" },
+              { "name": "Spanish" },
+              { "name": "French" },
+              { "name": "German" },
+              { "name": "Chinese (Mandarin)" },
+              { "name": "Latin" },
+              { "name": "Computer Science / Technology" }
+            ]
+          },
+          {
+            "name": "Grade 11 – Junior",
+            "subjects": [
+              { "name": "English Language Arts" },
+              { "name": "Algebra II" },
+              { "name": "Pre-Calculus" },
+              { "name": "Physics" },
+              { "name": "Chemistry" },
+              { "name": "United States History" },
+              { "name": "Physical Education" },
+              { "name": "Health Education" },
+              { "name": "Art" },
+              { "name": "Music" },
+              { "name": "Spanish" },
+              { "name": "French" },
+              { "name": "German" },
+              { "name": "Chinese (Mandarin)" },
+              { "name": "Latin" },
+              { "name": "Computer Science / Technology" }
+            ]
+          },
+          {
+            "name": "Grade 12 – Senior",
+            "subjects": [
+              { "name": "English Language Arts" },
+              { "name": "Pre-Calculus" },
+              { "name": "Calculus" },
+              { "name": "Statistics" },
+              { "name": "Physics" },
+              { "name": "Chemistry" },
+              { "name": "Biology" },
+              { "name": "United States Government" },
+              { "name": "Economics" },
+              { "name": "Physical Education" },
+              { "name": "Health Education" },
+              { "name": "Art" },
+              { "name": "Music" },
+              { "name": "Spanish" },
+              { "name": "French" },
+              { "name": "German" },
+              { "name": "Chinese (Mandarin)" },
+              { "name": "Latin" },
+              { "name": "Computer Science / Technology" }
+            ]
+          }
         ]
       }
     ]
@@ -880,9 +963,68 @@
       {
         "name": "College Board",
         "levels": [
-          { "name": "Grade 10 – AP" },
-          { "name": "Grade 11 – AP" },
-          { "name": "Grade 12 – AP" }
+          {
+            "name": "Grade 10 – AP",
+            "subjects": [
+              { "name": "AP English Language and Composition" },
+              { "name": "AP World History" },
+              { "name": "AP Biology" },
+              { "name": "AP Chemistry" },
+              { "name": "AP Physics 1" },
+              { "name": "AP Calculus AB" },
+              { "name": "AP Statistics" },
+              { "name": "AP Spanish Language and Culture" },
+              { "name": "AP French Language and Culture" },
+              { "name": "AP Computer Science A" },
+              { "name": "AP Art and Design (2D or 3D)" },
+              { "name": "AP Music Theory" }
+            ]
+          },
+          {
+            "name": "Grade 11 – AP",
+            "subjects": [
+              { "name": "AP English Literature and Composition" },
+              { "name": "AP United States History" },
+              { "name": "AP Biology" },
+              { "name": "AP Chemistry" },
+              { "name": "AP Physics 1" },
+              { "name": "AP Physics 2" },
+              { "name": "AP Calculus AB" },
+              { "name": "AP Calculus BC" },
+              { "name": "AP Statistics" },
+              { "name": "AP Spanish Language and Culture" },
+              { "name": "AP French Language and Culture" },
+              { "name": "AP Computer Science A" },
+              { "name": "AP Art and Design (2D or 3D)" },
+              { "name": "AP Music Theory" },
+              { "name": "AP Psychology" },
+              { "name": "AP Environmental Science" }
+            ]
+          },
+          {
+            "name": "Grade 12 – AP",
+            "subjects": [
+              { "name": "AP English Literature and Composition" },
+              { "name": "AP United States History" },
+              { "name": "AP European History" },
+              { "name": "AP Biology" },
+              { "name": "AP Chemistry" },
+              { "name": "AP Physics 1" },
+              { "name": "AP Physics 2" },
+              { "name": "AP Calculus AB" },
+              { "name": "AP Calculus BC" },
+              { "name": "AP Statistics" },
+              { "name": "AP Spanish Language and Culture" },
+              { "name": "AP French Language and Culture" },
+              { "name": "AP Computer Science A" },
+              { "name": "AP Art and Design (2D or 3D)" },
+              { "name": "AP Music Theory" },
+              { "name": "AP Psychology" },
+              { "name": "AP Environmental Science" },
+              { "name": "AP Economics (Macro / Micro)" },
+              { "name": "AP Government and Politics (US / Comparative)" }
+            ]
+          }
         ]
       }
     ]
@@ -892,7 +1034,70 @@
     "examBoards": [
       {
         "name": "IBO",
-        "levels": [{ "name": "IB DP Year 1" }, { "name": "IB DP Year 2" }]
+        "levels": [
+          {
+            "name": "IB DP Year 1",
+            "subjects": [
+              { "name": "English A: Literature" },
+              { "name": "English A: Language and Literature" },
+              { "name": "Other Language A" },
+              { "name": "Spanish B" },
+              { "name": "French B" },
+              { "name": "German B" },
+              { "name": "Other Language B" },
+              { "name": "History" },
+              { "name": "Economics" },
+              { "name": "Geography" },
+              { "name": "Psychology" },
+              { "name": "Global Politics" },
+              { "name": "Biology" },
+              { "name": "Chemistry" },
+              { "name": "Physics" },
+              { "name": "Environmental Systems and Societies" },
+              { "name": "Mathematics: Analysis and Approaches (HL/SL)" },
+              {
+                "name": "Mathematics: Applications and Interpretation (HL/SL)"
+              },
+              { "name": "Visual Arts" },
+              { "name": "Music" },
+              { "name": "Theatre" },
+              { "name": "Theory of Knowledge (TOK)" },
+              { "name": "Extended Essay (EE) – guidance begins" },
+              { "name": "Creativity, Activity, Service (CAS) – program begins" }
+            ]
+          },
+          {
+            "name": "IB DP Year 2",
+            "subjects": [
+              { "name": "English A: Literature" },
+              { "name": "English A: Language and Literature" },
+              { "name": "Other Language A" },
+              { "name": "Spanish B" },
+              { "name": "French B" },
+              { "name": "German B" },
+              { "name": "Other Language B" },
+              { "name": "History" },
+              { "name": "Economics" },
+              { "name": "Geography" },
+              { "name": "Psychology" },
+              { "name": "Global Politics" },
+              { "name": "Biology" },
+              { "name": "Chemistry" },
+              { "name": "Physics" },
+              { "name": "Environmental Systems and Societies" },
+              { "name": "Mathematics: Analysis and Approaches (HL/SL)" },
+              {
+                "name": "Mathematics: Applications and Interpretation (HL/SL)"
+              },
+              { "name": "Visual Arts" },
+              { "name": "Music" },
+              { "name": "Theatre" },
+              { "name": "Theory of Knowledge (TOK) – essay & presentation" },
+              { "name": "Extended Essay (EE) – final submission" },
+              { "name": "Creativity, Activity, Service (CAS) – completion" }
+            ]
+          }
+        ]
       }
     ]
   }
