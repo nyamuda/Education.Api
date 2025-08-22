@@ -163,6 +163,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         {
             Page = queryParams.Page,
             PageSize = queryParams.PageSize,
+            TotalItems = totalItems,
             HasMore = hasMore,
             Items = items
         };
