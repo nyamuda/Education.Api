@@ -61,8 +61,11 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                     s => s.Level != null && s.Level.ExamBoardId == queryParams.ExamBoardId
                 )
                 : query;
-
-        //apply the exam board filter
+        //apply the level filter
+        query =
+            queryParams.LevelId != null
+                ? query.Where(s => s.LevelId == queryParams.LevelId)
+                : query;
 
         List<SubjectDto> items = await query
             .Skip((page - 1) * pageSize)
