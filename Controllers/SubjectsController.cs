@@ -1,6 +1,7 @@
 using Azure;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Enums.Subjects;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Subjects;
 using Microsoft.AspNetCore.Authorization;
@@ -58,6 +59,33 @@ public class SubjectsController(ISubjectService subjectService) : ControllerBase
                 };
             var subjects = await _subjectService.GetAsync(queryParams);
             return Ok(subjects);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Adds a new subject
+    [HttpPost]
+    public async Task<IActionResult> Post(AddSubjectDto dto)
+    {
+        try
+        {
+            SubjectDto subject = await _subjectService.AddAsync(dto);
+            return CreatedAtRoute(
+                routeName: "GetSubjectById",
+                routeValues: new { id = subject.Id },
+                value: subject
+            );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {

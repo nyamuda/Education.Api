@@ -184,9 +184,9 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <exception cref="ConflictException">
     /// Thrown if another subject with the same name already exists under the selected level (case-insensitive).
     /// </exception>
-    public async Task AddAsync(AddSubjectDto dto)
+    public async Task<SubjectDto> AddAsync(AddSubjectDto dto)
     {
-        //check if there specified level exists
+        //check if the specified level exists
         var level =
             await _context
                 .Levels
@@ -214,6 +214,8 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         Subject subject = new() { Name = dto.Name, LevelId = dto.LevelId };
         _context.Subjects.Add(subject);
         await _context.SaveChangesAsync();
+
+        return SubjectDto.MapFrom(subject);
     }
 
     /// <summary>
