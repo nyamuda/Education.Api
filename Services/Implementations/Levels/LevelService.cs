@@ -49,7 +49,15 @@ public class LevelService(ApplicationDbContext context, ILogger<LevelService> lo
                                     }
                                     : null,
                             Subjects = l.Subjects
-                                .Select(s => new SubjectDto { Id = s.Id, Name = s.Name, })
+                                .Select(
+                                    s =>
+                                        new SubjectDto
+                                        {
+                                            Id = s.Id,
+                                            Name = s.Name,
+                                            LevelId = s.LevelId
+                                        }
+                                )
                                 .ToList(),
                             CreatedAt = l.CreatedAt
                         }

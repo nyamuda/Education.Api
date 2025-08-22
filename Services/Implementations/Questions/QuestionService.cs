@@ -75,7 +75,12 @@ public class QuestionService(
                             SubjectId = q.SubjectId,
                             Subject =
                                 q.Subject != null
-                                    ? new SubjectDto { Id = q.Subject.Id, Name = q.Subject.Name, }
+                                    ? new SubjectDto
+                                    {
+                                        Id = q.Subject.Id,
+                                        Name = q.Subject.Name,
+                                        LevelId = q.Subject.LevelId
+                                    }
                                     : null,
                             TopicId = q.TopicId,
                             Topic =
@@ -173,7 +178,12 @@ public class QuestionService(
                         SubjectId = q.SubjectId,
                         Subject =
                             q.Subject != null
-                                ? new SubjectDto { Id = q.Subject.Id, Name = q.Subject.Name, }
+                                ? new SubjectDto
+                                {
+                                    Id = q.Subject.Id,
+                                    Name = q.Subject.Name,
+                                    LevelId = q.Subject.LevelId
+                                }
                                 : null,
                         TopicId = q.TopicId,
                         Topic =

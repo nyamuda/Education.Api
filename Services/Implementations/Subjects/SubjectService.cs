@@ -23,6 +23,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                         {
                             Id = s.Id,
                             Name = s.Name,
+                            LevelId = s.LevelId,
                             CreatedAt = s.CreatedAt
                         }
                 )
@@ -53,6 +54,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                     {
                         Id = s.Id,
                         Name = s.Name,
+                        LevelId = s.LevelId,
                         CreatedAt = s.CreatedAt
                     }
             )

@@ -20,7 +20,7 @@ public class CurriculumService(
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<CurriculumService> _logger = logger;
     private readonly IWebHostEnvironment _env = env;
-    private static readonly JsonSerializerOptions _jsonOptions =
+    public static readonly JsonSerializerOptions _jsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
     //Gets a curriculum with a given ID

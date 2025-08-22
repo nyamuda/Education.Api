@@ -48,6 +48,7 @@ public class CurriculumsController(ICurriculumService curriculumService) : Contr
                 pageSize: pageSize,
                 sortBy
             );
+            //test deserialization of curriculums
             // var curriculums = await _curriculumService.DeserializeCurriculumsFromFileAsync();
             return Ok(curriculums);
         }
