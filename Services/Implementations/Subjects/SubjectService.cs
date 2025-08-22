@@ -170,49 +170,49 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     }
 
     /// <summary>
-    /// Adds a new subject to one or more educational levels.
+    /// Creates a new subject under a specific level.
     /// </summary>
     /// <param name="dto">
-    /// The DTO containing the subject name and the IDs of the levels the subject should be added to.
+    /// The DTO containing the subject name and the ID of the level the subject should be added to.
     /// </param>
     /// <remarks>
-    /// A subject name is unique within each level. If a subject with the same name already exists
-    /// in a level (case-insensitive comparison), it will be skipped and not added again.
+    /// A subject name is unique within each level (case-insensitive comparison).
     /// </remarks>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if one or more of the provided level IDs do not exist.
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the specified level is not found.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown if another subject with the same name already exists under the selected level (case-insensitive).
     /// </exception>
     public async Task AddAsync(AddSubjectDto dto)
     {
-        //get the the selected educational levels for the subject
-        var selectedLevels = await _context
-            .Levels
-            .Where(l => dto.LevelIds.Contains(l.Id))
-            .Include(l => l.Subjects)
-            .AsSplitQuery()
-            .ToListAsync();
+        //check if there specified level exists
+        var level =
+            await _context
+                .Levels
+                .Include(l => l.Subjects)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(l => l.Id.Equals(dto.LevelId))
+            ?? throw new KeyNotFoundException(
+                $"Subject creation failed: level with ID '{dto.LevelId}' does not exist."
+            );
 
-        //Make sure all the selected levels exist
-        if (selectedLevels.Count != dto.LevelIds.Count)
+        //Subject name is unique under each educational level.
+        //Check if there isn't already another subject with the given updated name under the specified level (case-insensitive)
+        bool alreadyExists = level
+            .Subjects
+            .Any(s => s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (alreadyExists)
         {
-            throw new InvalidOperationException("One or more selected levels do not exist.");
+            throw new ConflictException(
+                $"Unable to add subject: a subject with name '{dto.Name}' already exists under the selected level."
+            );
         }
 
-        //add the subject to each selected level
-        foreach (var level in selectedLevels)
-        {
-            //Subject name is unique under each educational level.
-            //Check if there isn't already another subject with the given name under the specified level (case-insensitive)
-            bool alreadyExists = level
-                .Subjects
-                .Any(s => s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase));
-
-            if (alreadyExists)
-                continue;
-
-            level.Subjects.Add(new Subject { Name = dto.Name, LevelId = level.Id });
-        }
-
+        //save the subject to the database
+        Subject subject = new() { Name = dto.Name, LevelId = dto.LevelId };
+        _context.Subjects.Add(subject);
         await _context.SaveChangesAsync();
     }
 
@@ -220,7 +220,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// Updates an existing subject with a given ID.
     /// </summary>
     /// <param name="id">The ID of the subject to update.</param>
-    /// <param name="dto">The DTO containing the updated subject</param>
+    /// <param name="dto">The DTO containing the updated subject details.</param>
     /// <exception cref="KeyNotFoundException">
     /// Thrown if no subject or level with the specified ID exists.
     /// </exception>
@@ -233,31 +233,30 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         var subject =
             await _context.Subjects.FirstOrDefaultAsync(s => s.Id.Equals(id))
             ?? throw new KeyNotFoundException(
-                $"Update failed: subject with ID '{id}' does not exist."
+                $"Subject update failed: subject with ID '{id}' does not exist."
             );
 
         //check if there specified level exists
-        var _ =
-            await _context.Levels.AsNoTracking().FirstOrDefaultAsync(l => l.Id.Equals(dto.LevelId))
+        var level =
+            await _context
+                .Levels
+                .Include(l => l.Subjects)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(l => l.Id.Equals(dto.LevelId))
             ?? throw new KeyNotFoundException(
-                $"Update failed: level with ID '{dto.LevelId}' does not exist."
+                $"Subject update failed: level with ID '{dto.LevelId}' does not exist."
             );
 
         //Subject name is unique under each educational level.
         //Check if there isn't already another subject with the given updated name under the specified level (case-insensitive)
-        bool alreadyExists = await _context
+        bool alreadyExists = level
             .Subjects
-            .AnyAsync(
-                s =>
-                    s.LevelId == dto.LevelId
-                    && s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
-                    && s.Id != subject.Id
-            );
+            .Any(s => s.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase) && s.Id != id);
 
         if (alreadyExists)
         {
             throw new ConflictException(
-                $"Unable to update: a subject with name '{dto.Name}' already exists under the selected level."
+                $"Update failed: a subject with name '{dto.Name}' already exists under the selected level."
             );
         }
 
