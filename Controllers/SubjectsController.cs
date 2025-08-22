@@ -68,6 +68,7 @@ public class SubjectsController(ISubjectService subjectService) : ControllerBase
 
     //Adds a new subject
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Post(AddSubjectDto dto)
     {
         try
@@ -78,6 +79,30 @@ public class SubjectsController(ISubjectService subjectService) : ControllerBase
                 routeValues: new { id = subject.Id },
                 value: subject
             );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Updates a subject with a given ID
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Put(int id, UpdateSubjectDto dto)
+    {
+        try
+        {
+            await _subjectService.UpdateAsync(id, dto);
+            return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
