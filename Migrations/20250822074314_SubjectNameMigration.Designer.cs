@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250808101552_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250822074314_SubjectNameMigration")]
+    partial class SubjectNameMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -292,7 +292,7 @@ namespace Education.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExamBoardId")
+                    b.Property<int>("LevelId")
                         .HasColumnType("int");
 
                     b.Property<int?>("Marks")
@@ -312,7 +312,7 @@ namespace Education.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExamBoardId");
+                    b.HasIndex("LevelId");
 
                     b.HasIndex("SubjectId");
 
@@ -337,6 +337,9 @@ namespace Education.Api.Migrations
                     b.Property<int?>("CurriculumId")
                         .HasColumnType("int");
 
+                    b.Property<int>("LevelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -345,8 +348,9 @@ namespace Education.Api.Migrations
 
                     b.HasIndex("CurriculumId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("Name");
 
                     b.ToTable("Subjects");
                 });
@@ -426,10 +430,14 @@ namespace Education.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
+
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Topics");
                 });
@@ -481,9 +489,15 @@ namespace Education.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CurriculumId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("ExamBoardId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
@@ -497,9 +511,19 @@ namespace Education.Api.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CurriculumId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("ExamBoardId");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -539,19 +563,19 @@ namespace Education.Api.Migrations
                     b.ToTable("UserOtps");
                 });
 
-            modelBuilder.Entity("ExamBoardSubject", b =>
+            modelBuilder.Entity("LevelUser", b =>
                 {
-                    b.Property<int>("ExamBoardsId")
+                    b.Property<int>("LevelsId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SubjectsId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("ExamBoardsId", "SubjectsId");
+                    b.HasKey("LevelsId", "UserId");
 
-                    b.HasIndex("SubjectsId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("ExamBoardSubject");
+                    b.ToTable("LevelUser");
                 });
 
             modelBuilder.Entity("QuestionTag", b =>
@@ -567,21 +591,6 @@ namespace Education.Api.Migrations
                     b.HasIndex("TagsId");
 
                     b.ToTable("QuestionTag");
-                });
-
-            modelBuilder.Entity("SubjectTopic", b =>
-                {
-                    b.Property<int>("SubjectsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TopicsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SubjectsId", "TopicsId");
-
-                    b.HasIndex("TopicsId");
-
-                    b.ToTable("SubjectTopic");
                 });
 
             modelBuilder.Entity("Education.Api.Models.Answer", b =>
@@ -631,7 +640,7 @@ namespace Education.Api.Migrations
             modelBuilder.Entity("Education.Api.Models.ExamBoard", b =>
                 {
                     b.HasOne("Education.Api.Models.Curriculum", "Curriculum")
-                        .WithMany()
+                        .WithMany("ExamBoards")
                         .HasForeignKey("CurriculumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -709,9 +718,9 @@ namespace Education.Api.Migrations
 
             modelBuilder.Entity("Education.Api.Models.Question", b =>
                 {
-                    b.HasOne("Education.Api.Models.ExamBoard", "ExamBoard")
+                    b.HasOne("Education.Api.Models.Level", "Level")
                         .WithMany("Questions")
-                        .HasForeignKey("ExamBoardId")
+                        .HasForeignKey("LevelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -733,7 +742,7 @@ namespace Education.Api.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("ExamBoard");
+                    b.Navigation("Level");
 
                     b.Navigation("Subject");
 
@@ -747,6 +756,14 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Curriculum", null)
                         .WithMany("Subjects")
                         .HasForeignKey("CurriculumId");
+
+                    b.HasOne("Education.Api.Models.Level", "Level")
+                        .WithMany("Subjects")
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Level");
                 });
 
             modelBuilder.Entity("Education.Api.Models.Topics.QuestionSubtopic", b =>
@@ -773,6 +790,17 @@ namespace Education.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("Education.Api.Models.Topics.Topic", b =>
+                {
+                    b.HasOne("Education.Api.Models.Subject", "Subject")
+                        .WithMany("Topics")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("Education.Api.Models.Upvote", b =>
@@ -807,6 +835,23 @@ namespace Education.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Education.Api.Models.Users.User", b =>
+                {
+                    b.HasOne("Education.Api.Models.Curriculum", "Curriculum")
+                        .WithMany()
+                        .HasForeignKey("CurriculumId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Education.Api.Models.ExamBoard", "ExamBoard")
+                        .WithMany()
+                        .HasForeignKey("ExamBoardId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Curriculum");
+
+                    b.Navigation("ExamBoard");
+                });
+
             modelBuilder.Entity("Education.Api.Models.Users.UserOtp", b =>
                 {
                     b.HasOne("Education.Api.Models.Users.User", "User")
@@ -818,17 +863,17 @@ namespace Education.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ExamBoardSubject", b =>
+            modelBuilder.Entity("LevelUser", b =>
                 {
-                    b.HasOne("Education.Api.Models.ExamBoard", null)
+                    b.HasOne("Education.Api.Models.Level", null)
                         .WithMany()
-                        .HasForeignKey("ExamBoardsId")
+                        .HasForeignKey("LevelsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Education.Api.Models.Subject", null)
+                    b.HasOne("Education.Api.Models.Users.User", null)
                         .WithMany()
-                        .HasForeignKey("SubjectsId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -844,21 +889,6 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Tag", null)
                         .WithMany()
                         .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SubjectTopic", b =>
-                {
-                    b.HasOne("Education.Api.Models.Subject", null)
-                        .WithMany()
-                        .HasForeignKey("SubjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Education.Api.Models.Topics.Topic", null)
-                        .WithMany()
-                        .HasForeignKey("TopicsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -881,14 +911,21 @@ namespace Education.Api.Migrations
 
             modelBuilder.Entity("Education.Api.Models.Curriculum", b =>
                 {
+                    b.Navigation("ExamBoards");
+
                     b.Navigation("Subjects");
                 });
 
             modelBuilder.Entity("Education.Api.Models.ExamBoard", b =>
                 {
                     b.Navigation("Levels");
+                });
 
+            modelBuilder.Entity("Education.Api.Models.Level", b =>
+                {
                     b.Navigation("Questions");
+
+                    b.Navigation("Subjects");
                 });
 
             modelBuilder.Entity("Education.Api.Models.Question", b =>
@@ -905,6 +942,8 @@ namespace Education.Api.Migrations
             modelBuilder.Entity("Education.Api.Models.Subject", b =>
                 {
                     b.Navigation("Questions");
+
+                    b.Navigation("Topics");
                 });
 
             modelBuilder.Entity("Education.Api.Models.Topics.Topic", b =>

@@ -46,13 +46,17 @@ public class SubjectsController(ISubjectService subjectService) : ControllerBase
     {
         try
         {
-            var subjects = await _subjectService.GetAsync(
-                curriculumId: curriculumId,
-                examBoardId: examBoardId,
-                page: page,
-                pageSize: pageSize,
-                sortBy: sortBy
-            );
+            SubjectQueryParams queryParams =
+                new()
+                {
+                    CurriculumId = curriculumId,
+                    ExamBoardId = examBoardId,
+                    LevelId = levelId,
+                    Page = page,
+                    PageSize = pageSize,
+                    SortBy = sortBy
+                };
+            var subjects = await _subjectService.GetAsync(queryParams);
             return Ok(subjects);
         }
         catch (Exception ex)

@@ -1,4 +1,7 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Enums.Subjects;
 using Education.Api.Exceptions;
@@ -18,6 +21,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         return await _context
                 .Subjects
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(
                     s =>
                         new SubjectDto
@@ -25,6 +29,38 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                             Id = s.Id,
                             Name = s.Name,
                             LevelId = s.LevelId,
+                            Level =
+                                s.Level != null
+                                    ? new LevelDto
+                                    {
+                                        Id = s.Level.Id,
+                                        Name = s.Level.Name,
+                                        ExamBoardId = s.Level.ExamBoardId,
+                                        ExamBoard =
+                                            s.Level.ExamBoard != null
+                                                ? new ExamBoardDto
+                                                {
+                                                    Id = s.Level.ExamBoard.Id,
+                                                    Name = s.Level.ExamBoard.Name,
+                                                    CurriculumId = s.Level.ExamBoard.CurriculumId,
+                                                    Curriculum =
+                                                        s.Level.ExamBoard.Curriculum != null
+                                                            ? new CurriculumDto
+                                                            {
+                                                                Id = s.Level
+                                                                    .ExamBoard
+                                                                    .Curriculum
+                                                                    .Id,
+                                                                Name = s.Level
+                                                                    .ExamBoard
+                                                                    .Curriculum
+                                                                    .Name
+                                                            }
+                                                            : null
+                                                }
+                                                : null,
+                                    }
+                                    : null,
                             CreatedAt = s.CreatedAt
                         }
                 )
@@ -35,8 +71,9 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// <summary>
     /// Retrieves a paginated list of subjects.
     /// </summary>
-    /// <param name="page">The current page number.</param>
-    /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="queryParams">
+    /// An object containing query parameters to filter, sort, and paginate the subjects.
+    /// </param>
     /// <returns>
     /// A <see cref="PageInfo{SubjectDto}"/> containing the list of subjects for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
@@ -76,9 +113,10 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         };
 
         List<SubjectDto> items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
             .AsNoTracking()
+            .AsSplitQuery()
             .Select(
                 s =>
                     new SubjectDto
@@ -86,6 +124,32 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                         Id = s.Id,
                         Name = s.Name,
                         LevelId = s.LevelId,
+                        Level =
+                            s.Level != null
+                                ? new LevelDto
+                                {
+                                    Id = s.Level.Id,
+                                    Name = s.Level.Name,
+                                    ExamBoardId = s.Level.ExamBoardId,
+                                    ExamBoard =
+                                        s.Level.ExamBoard != null
+                                            ? new ExamBoardDto
+                                            {
+                                                Id = s.Level.ExamBoard.Id,
+                                                Name = s.Level.ExamBoard.Name,
+                                                CurriculumId = s.Level.ExamBoard.CurriculumId,
+                                                Curriculum =
+                                                    s.Level.ExamBoard.Curriculum != null
+                                                        ? new CurriculumDto
+                                                        {
+                                                            Id = s.Level.ExamBoard.Curriculum.Id,
+                                                            Name = s.Level.ExamBoard.Curriculum.Name
+                                                        }
+                                                        : null
+                                            }
+                                            : null,
+                                }
+                                : null,
                         CreatedAt = s.CreatedAt
                     }
             )
@@ -93,12 +157,12 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
 
         //pagination info
         int totalItems = await query.CountAsync();
-        bool hasMore = totalItems > page * pageSize;
+        bool hasMore = totalItems > queryParams.Page * queryParams.PageSize;
 
         return new PageInfo<SubjectDto>
         {
-            Page = page,
-            PageSize = pageSize,
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize,
             HasMore = hasMore,
             Items = items
         };

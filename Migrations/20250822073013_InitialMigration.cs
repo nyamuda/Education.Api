@@ -39,38 +39,6 @@ namespace Education.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Topics",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Topics", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ExamBoards",
                 columns: table => new
                 {
@@ -92,12 +60,64 @@ namespace Education.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Levels",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExamBoardId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Levels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Levels_ExamBoards_ExamBoardId",
+                        column: x => x.ExamBoardId,
+                        principalTable: "ExamBoards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    CurriculumId = table.Column<int>(type: "int", nullable: true),
+                    ExamBoardId = table.Column<int>(type: "int", nullable: true),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Curriculums_CurriculumId",
+                        column: x => x.CurriculumId,
+                        principalTable: "Curriculums",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Users_ExamBoards_ExamBoardId",
+                        column: x => x.ExamBoardId,
+                        principalTable: "ExamBoards",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Subjects",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LevelId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CurriculumId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -109,25 +129,33 @@ namespace Education.Api.Migrations
                         column: x => x.CurriculumId,
                         principalTable: "Curriculums",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Subjects_Levels_LevelId",
+                        column: x => x.LevelId,
+                        principalTable: "Levels",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subtopics",
+                name: "LevelUser",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TopicId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LevelsId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Subtopics", x => x.Id);
+                    table.PrimaryKey("PK_LevelUser", x => new { x.LevelsId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_Subtopics_Topics_TopicId",
-                        column: x => x.TopicId,
-                        principalTable: "Topics",
+                        name: "FK_LevelUser_Levels_LevelsId",
+                        column: x => x.LevelsId,
+                        principalTable: "Levels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LevelUser_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -157,48 +185,23 @@ namespace Education.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Levels",
+                name: "Topics",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExamBoardId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Levels", x => x.Id);
+                    table.PrimaryKey("PK_Topics", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Levels_ExamBoards_ExamBoardId",
-                        column: x => x.ExamBoardId,
-                        principalTable: "ExamBoards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ExamBoardSubject",
-                columns: table => new
-                {
-                    ExamBoardsId = table.Column<int>(type: "int", nullable: false),
-                    SubjectsId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ExamBoardSubject", x => new { x.ExamBoardsId, x.SubjectsId });
-                    table.ForeignKey(
-                        name: "FK_ExamBoardSubject_ExamBoards_ExamBoardsId",
-                        column: x => x.ExamBoardsId,
-                        principalTable: "ExamBoards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ExamBoardSubject_Subjects_SubjectsId",
-                        column: x => x.SubjectsId,
+                        name: "FK_Topics_Subjects_SubjectId",
+                        column: x => x.SubjectId,
                         principalTable: "Subjects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -209,7 +212,7 @@ namespace Education.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Marks = table.Column<int>(type: "int", nullable: true),
-                    ExamBoardId = table.Column<int>(type: "int", nullable: false),
+                    LevelId = table.Column<int>(type: "int", nullable: false),
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     TopicId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -220,9 +223,9 @@ namespace Education.Api.Migrations
                 {
                     table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_ExamBoards_ExamBoardId",
-                        column: x => x.ExamBoardId,
-                        principalTable: "ExamBoards",
+                        name: "FK_Questions_Levels_LevelId",
+                        column: x => x.LevelId,
+                        principalTable: "Levels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -245,24 +248,21 @@ namespace Education.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubjectTopic",
+                name: "Subtopics",
                 columns: table => new
                 {
-                    SubjectsId = table.Column<int>(type: "int", nullable: false),
-                    TopicsId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TopicId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubjectTopic", x => new { x.SubjectsId, x.TopicsId });
+                    table.PrimaryKey("PK_Subtopics", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SubjectTopic_Subjects_SubjectsId",
-                        column: x => x.SubjectsId,
-                        principalTable: "Subjects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SubjectTopic_Topics_TopicsId",
-                        column: x => x.TopicsId,
+                        name: "FK_Subtopics_Topics_TopicId",
+                        column: x => x.TopicId,
                         principalTable: "Topics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -326,28 +326,6 @@ namespace Education.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionSubtopic",
-                columns: table => new
-                {
-                    QuestionId = table.Column<int>(type: "int", nullable: false),
-                    SubtopicId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionSubtopic", x => new { x.QuestionId, x.SubtopicId });
-                    table.ForeignKey(
-                        name: "FK_QuestionSubtopic_Questions_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "Questions",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_QuestionSubtopic_Subtopics_SubtopicId",
-                        column: x => x.SubtopicId,
-                        principalTable: "Subtopics",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "QuestionTag",
                 columns: table => new
                 {
@@ -369,6 +347,28 @@ namespace Education.Api.Migrations
                         principalTable: "Tags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionSubtopic",
+                columns: table => new
+                {
+                    QuestionId = table.Column<int>(type: "int", nullable: false),
+                    SubtopicId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionSubtopic", x => new { x.QuestionId, x.SubtopicId });
+                    table.ForeignKey(
+                        name: "FK_QuestionSubtopic_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_QuestionSubtopic_Subtopics_SubtopicId",
+                        column: x => x.SubtopicId,
+                        principalTable: "Subtopics",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -564,14 +564,14 @@ namespace Education.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExamBoardSubject_SubjectsId",
-                table: "ExamBoardSubject",
-                column: "SubjectsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Levels_ExamBoardId",
                 table: "Levels",
                 column: "ExamBoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LevelUser_UserId",
+                table: "LevelUser",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuestionFlags_QuestionId",
@@ -584,9 +584,9 @@ namespace Education.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_ExamBoardId",
+                name: "IX_Questions_LevelId",
                 table: "Questions",
-                column: "ExamBoardId");
+                column: "LevelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_SubjectId",
@@ -619,15 +619,15 @@ namespace Education.Api.Migrations
                 column: "CurriculumId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Subjects_LevelId",
+                table: "Subjects",
+                column: "LevelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Subjects_Name",
                 table: "Subjects",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SubjectTopic_TopicsId",
-                table: "SubjectTopic",
-                column: "TopicsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subtopics_TopicId",
@@ -643,8 +643,12 @@ namespace Education.Api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Topics_Name",
                 table: "Topics",
-                column: "Name",
-                unique: true);
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Topics_SubjectId",
+                table: "Topics",
+                column: "SubjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Upvotes_AnswerId",
@@ -670,6 +674,28 @@ namespace Education.Api.Migrations
                 name: "IX_UserOtps_UserId",
                 table: "UserOtps",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_CurriculumId",
+                table: "Users",
+                column: "CurriculumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ExamBoardId",
+                table: "Users",
+                column: "ExamBoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -682,10 +708,7 @@ namespace Education.Api.Migrations
                 name: "CommentFlags");
 
             migrationBuilder.DropTable(
-                name: "ExamBoardSubject");
-
-            migrationBuilder.DropTable(
-                name: "Levels");
+                name: "LevelUser");
 
             migrationBuilder.DropTable(
                 name: "QuestionFlags");
@@ -695,9 +718,6 @@ namespace Education.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuestionTag");
-
-            migrationBuilder.DropTable(
-                name: "SubjectTopic");
 
             migrationBuilder.DropTable(
                 name: "Upvotes");
@@ -721,16 +741,19 @@ namespace Education.Api.Migrations
                 name: "Questions");
 
             migrationBuilder.DropTable(
-                name: "ExamBoards");
+                name: "Topics");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Subjects");
 
             migrationBuilder.DropTable(
-                name: "Topics");
+                name: "Levels");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "ExamBoards");
 
             migrationBuilder.DropTable(
                 name: "Curriculums");

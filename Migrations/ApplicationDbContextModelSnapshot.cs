@@ -347,8 +347,7 @@ namespace Education.Api.Migrations
 
                     b.HasIndex("LevelId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.ToTable("Subjects");
                 });

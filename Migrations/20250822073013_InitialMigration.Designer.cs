@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250821112216_LevelSubjectMigration")]
-    partial class LevelSubjectMigration
+    [Migration("20250822073013_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
