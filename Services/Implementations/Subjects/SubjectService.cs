@@ -44,7 +44,7 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     {
         var query = _context.Subjects.AsQueryable();
 
-        //apply the  curriculum filter
+        //apply the curriculum filter
         query =
             queryParams.CurriculumId != null
                 ? query.Where(
@@ -54,8 +54,15 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                         && s.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
                 )
                 : query;
-                
-         //apply the exam board filter
+        //apply the exam board filter
+        query =
+            queryParams.ExamBoardId != null
+                ? query.Where(
+                    s => s.Level != null && s.Level.ExamBoardId == queryParams.ExamBoardId
+                )
+                : query;
+
+        //apply the exam board filter
 
         List<SubjectDto> items = await query
             .Skip((page - 1) * pageSize)
