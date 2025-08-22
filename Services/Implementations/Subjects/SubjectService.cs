@@ -40,9 +40,22 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// A <see cref="PageInfo{SubjectDto}"/> containing the list of subjects for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<SubjectDto>> GetAsync(int page, int pageSize)
+    public async Task<PageInfo<SubjectDto>> GetAsync(SubjectQueryParams queryParams)
     {
-        var query = _context.Subjects.OrderByDescending(s => s.CreatedAt).AsQueryable();
+        var query = _context.Subjects.AsQueryable();
+
+        //apply the  curriculum filter
+        query =
+            queryParams.CurriculumId != null
+                ? query.Where(
+                    s =>
+                        s.Level != null
+                        && s.Level.ExamBoard != null
+                        && s.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
+                )
+                : query;
+                
+         //apply the exam board filter
 
         List<SubjectDto> items = await query
             .Skip((page - 1) * pageSize)

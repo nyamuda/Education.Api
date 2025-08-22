@@ -7,7 +7,7 @@ public interface ISubjectService
 {
     Task<SubjectDto> GetByIdAsync(int id);
 
-    Task<PageInfo<SubjectDto>> GetAsync(int page, int pageSize,int curriculumId);
+    Task<PageInfo<SubjectDto>> GetAsync(SubjectQueryParams queryParams);
 
     Task AddAsync(AddSubjectDto dto);
 
