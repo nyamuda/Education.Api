@@ -31,6 +31,59 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
                         {
                             Id = t.Id,
                             Name = t.Name,
+                            SubjectId = t.SubjectId,
+                            Subject =
+                                t.Subject != null
+                                    ? new SubjectDto
+                                    {
+                                        Id = t.Subject.Id,
+                                        Name = t.Subject.Name,
+                                        LevelId = t.Subject.LevelId,
+                                        Level =
+                                            t.Subject.Level != null
+                                                ? new LevelDto
+                                                {
+                                                    Id = t.Subject.Level.Id,
+                                                    Name = t.Subject.Level.Name,
+                                                    ExamBoardId = t.Subject.Level.ExamBoardId,
+                                                    ExamBoard =
+                                                        t.Subject.Level.ExamBoard != null
+                                                            ? new ExamBoardDto
+                                                            {
+                                                                Id = t.Subject.Level.ExamBoard.Id,
+                                                                Name = t.Subject
+                                                                    .Level
+                                                                    .ExamBoard
+                                                                    .Name,
+                                                                CurriculumId = t.Subject
+                                                                    .Level
+                                                                    .ExamBoard
+                                                                    .CurriculumId,
+                                                                Curriculum =
+                                                                    t.Subject
+                                                                        .Level
+                                                                        .ExamBoard
+                                                                        .Curriculum != null
+                                                                        ? new CurriculumDto
+                                                                        {
+                                                                            Id = t.Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Curriculum
+                                                                                .Id,
+                                                                            Name = t.Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Curriculum
+                                                                                .Name
+                                                                        }
+                                                                        : null
+                                                            }
+                                                            : null
+                                                }
+                                                : null
+                                    }
+                                    : null,
                             CreatedAt = t.CreatedAt
                         }
                 )
@@ -103,30 +156,54 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
                     {
                         Id = t.Id,
                         Name = t.Name,
-                        SubjectId=t.SubjectId,
-                        Subject=t.Subject!=null? new SubjectDto 
-                        {
-                            Id=t.Subject.Id,
-                            Name=t.Subject.Name,
-                            LevelId=t.Subject.LevelId,
-                            Level=t.Subject.Level!=null? new LevelDto 
-                            {
-                                Id=t.Subject.Level.Id,
-                                Name=t.Subject.Level.Name,
-                                ExamBoardId=t.Subject.Level.ExamBoardId,
-                                ExamBoard=t.Subject.Level.ExamBoard!=null? new ExamBoardDto 
+                        SubjectId = t.SubjectId,
+                        Subject =
+                            t.Subject != null
+                                ? new SubjectDto
                                 {
-                                    Id=t.Subject.Level.ExamBoard.Id,
-                                    Name=t.Subject.Level.ExamBoard.Name,
-                                    CurriculumId=t.Subject.Level.ExamBoard.CurriculumId,
-                                    Curriculum=t.Subject.Level.ExamBoard.Curriculum!=null? new CurriculumDto 
-                                    {
-                                        Id=t.Subject.Level.ExamBoard.Curriculum.Id,
-                                        Name=t.Subject.Level.ExamBoard.Curriculum.Name
-                                    }:null
-                                }:null
-                            }:null
-                        },
+                                    Id = t.Subject.Id,
+                                    Name = t.Subject.Name,
+                                    LevelId = t.Subject.LevelId,
+                                    Level =
+                                        t.Subject.Level != null
+                                            ? new LevelDto
+                                            {
+                                                Id = t.Subject.Level.Id,
+                                                Name = t.Subject.Level.Name,
+                                                ExamBoardId = t.Subject.Level.ExamBoardId,
+                                                ExamBoard =
+                                                    t.Subject.Level.ExamBoard != null
+                                                        ? new ExamBoardDto
+                                                        {
+                                                            Id = t.Subject.Level.ExamBoard.Id,
+                                                            Name = t.Subject.Level.ExamBoard.Name,
+                                                            CurriculumId = t.Subject
+                                                                .Level
+                                                                .ExamBoard
+                                                                .CurriculumId,
+                                                            Curriculum =
+                                                                t.Subject.Level.ExamBoard.Curriculum
+                                                                != null
+                                                                    ? new CurriculumDto
+                                                                    {
+                                                                        Id = t.Subject
+                                                                            .Level
+                                                                            .ExamBoard
+                                                                            .Curriculum
+                                                                            .Id,
+                                                                        Name = t.Subject
+                                                                            .Level
+                                                                            .ExamBoard
+                                                                            .Curriculum
+                                                                            .Name
+                                                                    }
+                                                                    : null
+                                                        }
+                                                        : null
+                                            }
+                                            : null
+                                }
+                                : null,
                         CreatedAt = t.CreatedAt
                     }
             )
@@ -140,7 +217,7 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
         {
             Page = queryParams.Page,
             PageSize = queryParams.PageSize,
-            TotalItems=totalItems,
+            TotalItems = totalItems,
             HasMore = hasMore,
             Items = items
         };

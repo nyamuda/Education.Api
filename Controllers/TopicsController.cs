@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Topics;
+using Education.Api.Enums.Topics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Topics;
@@ -34,11 +35,31 @@ public class TopicsController(ITopicService topicService) : ControllerBase
 
     //Gets a paginated list of topics
     [HttpGet]
-    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int? curriculumId,
+        int? examBoardId,
+        int? levelId,
+        int? subjectId,
+        int page = 1,
+        int pageSize = 10,
+        TopicSortOption sortBy = TopicSortOption.DateCreated
+    )
     {
         try
         {
-            var topics = await _topicService.GetAsync(page: page, pageSize: pageSize);
+            TopicQueryParams queryParams =
+                new()
+                {
+                    CurriculumId = curriculumId,
+                    ExamBoardId = examBoardId,
+                    LevelId = levelId,
+                    SubjectId = subjectId,
+                    Page = page,
+                    PageSize = pageSize,
+                    SortBy = sortBy
+                };
+            var topics = await _topicService.GetAsync(queryParams);
+
             return Ok(topics);
         }
         catch (Exception ex)

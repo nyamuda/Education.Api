@@ -85,7 +85,12 @@ public class QuestionService(
                             TopicId = q.TopicId,
                             Topic =
                                 q.Topic != null
-                                    ? new TopicDto { Id = q.Topic.Id, Name = q.Topic.Name }
+                                    ? new TopicDto
+                                    {
+                                        Id = q.Topic.Id,
+                                        Name = q.Topic.Name,
+                                        SubjectId = q.Topic.SubjectId
+                                    }
                                     : null,
                             Subtopics = q.Subtopics
                                 .Select(
@@ -188,7 +193,12 @@ public class QuestionService(
                         TopicId = q.TopicId,
                         Topic =
                             q.Topic != null
-                                ? new TopicDto { Id = q.Topic.Id, Name = q.Topic.Name }
+                                ? new TopicDto
+                                {
+                                    Id = q.Topic.Id,
+                                    Name = q.Topic.Name,
+                                    SubjectId = q.Topic.SubjectId
+                                }
                                 : null,
                         Subtopics = q.Subtopics
                             .Select(

@@ -3,6 +3,7 @@ using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
+using Education.Api.Dtos.Subjects;
 using Education.Api.Enums.Curriculums;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -93,6 +94,7 @@ public class CurriculumService(
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .AsNoTracking()
+            .AsSplitQuery()
             .Select(
                 c =>
                     new CurriculumDto
@@ -114,7 +116,18 @@ public class CurriculumService(
                                                     {
                                                         Id = l.Id,
                                                         Name = l.Name,
-                                                        ExamBoardId = l.ExamBoardId
+                                                        ExamBoardId = l.ExamBoardId,
+                                                        Subjects = l.Subjects
+                                                            .Select(
+                                                                s =>
+                                                                    new SubjectDto
+                                                                    {
+                                                                        Id = s.Id,
+                                                                        Name = s.Name,
+                                                                        LevelId = s.LevelId
+                                                                    }
+                                                            )
+                                                            .ToList()
                                                     }
                                             )
                                             .ToList()
