@@ -1,5 +1,6 @@
 using Education.Api.Data;
 using Education.Api.Dtos.Topics;
+using Education.Api.Enums.Topics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Models.Topics;
@@ -36,15 +37,56 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// <summary>
     /// Retrieves a paginated list of topics.
     /// </summary>
-    /// <param name="page">The current page number.</param>
-    /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="queryParams">
+    /// An object containing query parameters to filter, sort, and paginate the topics.
+    /// </param>
     /// <returns>
     /// A <see cref="PageInfo{TopicDto}"/> containing the list of topics for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<TopicDto>> GetAsync(int page, int pageSize)
+    public async Task<PageInfo<TopicDto>> GetAsync(TopicQueryParams queryParams)
     {
-        var query = _context.Topics.OrderByDescending(t => t.CreatedAt).AsQueryable();
+        var query = _context.Topics.AsQueryable();
+
+        //apply the curriculum filter
+        query =
+            queryParams.CurriculumId != null
+                ? query.Where(
+                    t =>
+                        t.Subject != null
+                        && t.Subject.Level != null
+                        && t.Subject.Level.ExamBoard != null
+                        && t.Subject.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
+                )
+                : query;
+        //apply the exam board filter
+        query =
+            queryParams.ExamBoardId != null
+                ? query.Where(
+                    t =>
+                        t.Subject != null
+                        && t.Subject.Level != null
+                        && t.Subject.Level.ExamBoardId == queryParams.ExamBoardId
+                )
+                : query;
+        //apply the level filter
+        query =
+            queryParams.LevelId != null
+                ? query.Where(t => t.Subject != null && t.Subject.LevelId == queryParams.LevelId)
+                : query;
+
+        //apply the subject filter
+        query =
+            queryParams.SubjectId != null
+                ? query.Where(t => t.SubjectId == queryParams.SubjectId)
+                : query;
+
+        //sort the items
+        query = queryParams.SortBy switch
+        {
+            TopicSortOption.Name => query.OrderByDescending(t => t.Name),
+            _ => query.OrderByDescending(t => t.CreatedAt),
+        };
 
         List<TopicDto> items = await query
             .Skip((page - 1) * pageSize)

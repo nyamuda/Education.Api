@@ -7,7 +7,7 @@ public interface ITopicService
 {
     Task<TopicDto> GetByIdAsync(int id);
 
-    Task<PageInfo<TopicDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<TopicDto>> GetAsync(TopicQueryParams queryParams);
 
     Task<TopicDto> AddAsync(AddTopicDto dto);
 
