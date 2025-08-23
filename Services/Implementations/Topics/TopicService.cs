@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Education.Api.Data;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
@@ -18,6 +19,9 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<TopicService> _logger = logger;
+
+    private readonly JsonSerializerOptions _jsonOptions =
+        new() { PropertyNameCaseInsensitive = true };
 
     //Gets a topic with a given ID
     public async Task<TopicDto> GetByIdAsync(int id)
@@ -277,6 +281,18 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     }
 
     /// <summary>
+    /// Adds topics in bulk for a given subject. These topics will be mostly be the deserialized topics from a JSON file
+    /// </summary>
+    /// <param name="topics"></param>
+    /// <returns></returns>
+    public async Task AddBulkAsync(int subjectId, List<Topic> topics) { 
+    
+    var subject = await _context.Subjects.FirstOrDefaultAsync(s => s.Id==subjectId) 
+    ?? throw new PublicKeyNotFoundException($"Subj")
+    
+    }
+
+    /// <summary>
     /// Updates an existing topic with a given ID.
     /// </summary>
     /// <param name="id">The ID of the topic to update.</param>
@@ -347,5 +363,26 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully deleted topic: {TopicId}", id);
+    }
+
+    /// <summary>
+    /// Deserializes topics from a JSON a file.
+    /// </summary>
+    /// <exception cref="Exception">
+    /// Thrown when the JSON content cannot be deserialized into the expected list of topics.
+    /// </exception>
+    public List<Topic> DeserializeTopicsFromFileAsync(TopicsUpload upload)
+    {
+        //read the json file
+        using Stream stream = upload.File.OpenReadStream();
+
+        //finally, deserialize the JSON
+        var topics =
+            JsonSerializer.Deserialize<List<Topic>>(stream, _jsonOptions)
+            ?? throw new Exception(
+                $"Topics deserialization failed: unable to deserialize the '{upload.File.Name}' file."
+            );
+
+        return topics;
     }
 }

@@ -1,5 +1,6 @@
 using Education.Api.Dtos.Topics;
 using Education.Api.Models;
+using Education.Api.Models.Topics;
 
 namespace Education.Api.Services.Abstractions.Topics;
 
@@ -11,7 +12,11 @@ public interface ITopicService
 
     Task<TopicDto> AddAsync(AddTopicDto dto);
 
+    Task AddBulkAsync(List<Topic> topics);
+
     Task UpdateAsync(int id, UpdateTopicDto dto);
 
     Task DeleteAsync(int id);
+
+    List<Topic> DeserializeTopicsFromFileAsync(int subjectId, TopicsUpload upload);
 }
