@@ -281,15 +281,34 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     }
 
     /// <summary>
-    /// Adds topics in bulk for a given subject. These topics will be mostly be the deserialized topics from a JSON file
+    /// Adds topics in bulk to a given subject. These topics will be mostly be the deserialized topics from a JSON file
     /// </summary>
     /// <param name="topics"></param>
     /// <returns></returns>
-    public async Task AddBulkAsync(int subjectId, List<Topic> topics) { 
-    
-    var subject = await _context.Subjects.FirstOrDefaultAsync(s => s.Id==subjectId) 
-    ?? throw new PublicKeyNotFoundException($"Subj")
-    
+    public async Task AddBulkAsync(int subjectId, List<Topic> topics)
+    {
+        var subject =
+            await _context
+                .Subjects
+                .Include(s => s.Topics)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(s => s.Id == subjectId)
+            ?? throw new KeyNotFoundException($"Subject with ID '{subjectId}' not found.");
+
+        //check if there is already a topic with the given name
+        foreach (Topic topic in topics)
+        {
+            bool alreadyExists = subject
+                .Topics
+                .Any(t => t.Name.Equals(topic.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (alreadyExists)
+                continue;
+
+            subject.Topics.Add(topic);
+        }
+
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
