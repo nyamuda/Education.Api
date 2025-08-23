@@ -1,4 +1,8 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
+using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Topics;
 using Education.Api.Enums.Topics;
 using Education.Api.Exceptions;
@@ -89,8 +93,9 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
         };
 
         List<TopicDto> items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
+            .AsSplitQuery()
             .AsNoTracking()
             .Select(
                 t =>
@@ -98,6 +103,30 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
                     {
                         Id = t.Id,
                         Name = t.Name,
+                        SubjectId=t.SubjectId,
+                        Subject=t.Subject!=null? new SubjectDto 
+                        {
+                            Id=t.Subject.Id,
+                            Name=t.Subject.Name,
+                            LevelId=t.Subject.LevelId,
+                            Level=t.Subject.Level!=null? new LevelDto 
+                            {
+                                Id=t.Subject.Level.Id,
+                                Name=t.Subject.Level.Name,
+                                ExamBoardId=t.Subject.Level.ExamBoardId,
+                                ExamBoard=t.Subject.Level.ExamBoard!=null? new ExamBoardDto 
+                                {
+                                    Id=t.Subject.Level.ExamBoard.Id,
+                                    Name=t.Subject.Level.ExamBoard.Name,
+                                    CurriculumId=t.Subject.Level.ExamBoard.CurriculumId,
+                                    Curriculum=t.Subject.Level.ExamBoard.Curriculum!=null? new CurriculumDto 
+                                    {
+                                        Id=t.Subject.Level.ExamBoard.Curriculum.Id,
+                                        Name=t.Subject.Level.ExamBoard.Curriculum.Name
+                                    }:null
+                                }:null
+                            }:null
+                        },
                         CreatedAt = t.CreatedAt
                     }
             )
@@ -105,12 +134,13 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
 
         //pagination info
         int totalItems = await query.CountAsync();
-        bool hasMore = totalItems > page * pageSize;
+        bool hasMore = totalItems > queryParams.Page * queryParams.PageSize;
 
         return new PageInfo<TopicDto>
         {
-            Page = page,
-            PageSize = pageSize,
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize,
+            TotalItems=totalItems,
             HasMore = hasMore,
             Items = items
         };
