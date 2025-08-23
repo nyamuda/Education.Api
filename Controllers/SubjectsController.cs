@@ -1,9 +1,12 @@
 using Azure;
 using Education.Api.Dtos.Subjects;
+using Education.Api.Dtos.Topics;
 using Education.Api.Enums.Subjects;
 using Education.Api.Exceptions;
 using Education.Api.Models;
+using Education.Api.Models.Topics;
 using Education.Api.Services.Abstractions.Subjects;
+using Education.Api.Services.Abstractions.Topics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +14,11 @@ namespace Education.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class SubjectsController(ISubjectService subjectService) : ControllerBase
+public class SubjectsController(ISubjectService subjectService, ITopicService topicService)
+    : ControllerBase
 {
     private readonly ISubjectService _subjectService = subjectService;
+    private readonly ITopicService _topicService = topicService;
 
     //Gets a subject with a given ID
     [HttpGet("{id}", Name = "GetSubjectById")]
@@ -131,6 +136,35 @@ public class SubjectsController(ISubjectService subjectService) : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Adds topics in bulk to a subject with a given ID
+    [HttpPost("{id}/topics")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddTopics(int id, TopicsUpload upload)
+    {
+        try
+        {
+            //first deserialize the topics from the JSON file
+            List<Topic> topics = _topicService.DeserializeTopicsFromFile(upload);
+
+            //add the deserialized topics to the specified subject
+            await _topicService.AddBulkAsync(subjectId: id, topics);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {

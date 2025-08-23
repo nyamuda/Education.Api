@@ -390,7 +390,7 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// <exception cref="Exception">
     /// Thrown when the JSON content cannot be deserialized into the expected list of topics.
     /// </exception>
-    public List<Topic> DeserializeTopicsFromFileAsync(TopicsUpload upload)
+    public List<Topic> DeserializeTopicsFromFile(TopicsUpload upload)
     {
         //read the json file
         using Stream stream = upload.File.OpenReadStream();
