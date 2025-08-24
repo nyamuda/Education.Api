@@ -88,6 +88,7 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
                                                 : null
                                     }
                                     : null,
+                            Subto
                             CreatedAt = t.CreatedAt
                         }
                 )
@@ -253,9 +254,7 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
         bool alreadyExists = await _context
             .Topics
             .AnyAsync(
-                t =>
-                    t.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
-                    && t.SubjectId == dto.SubjectId
+                t => t.Name.ToLower().Equals(dto.Name.ToLower()) && t.SubjectId == dto.SubjectId
             );
 
         if (alreadyExists)
@@ -281,11 +280,13 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     }
 
     /// <summary>
-    /// Adds topics in bulk to a given subject. These topics will be mostly be the deserialized topics from a JSON file
+    /// Adds multiple topics to the specified subject in bulk.
+    /// Existing topics with the same name (case-insensitive) are skipped to avoid duplicates.
+    /// Typically used when importing topics from a deserialized JSON file.
     /// </summary>
-    /// <param name="topics"></param>
-    /// <returns></returns>
-    public async Task AddBulkAsync(int subjectId, List<Topic> topics)
+    /// <param name="subjectId">The ID of the subject to which the topics will be added.</param>
+    /// <param name="topics">The list of topics to add.</param>
+    public async Task AddTopicsToSubjectAsync(int subjectId, List<Topic> topics)
     {
         var subject =
             await _context
@@ -344,7 +345,7 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
             .Topics
             .AnyAsync(
                 t =>
-                    t.Name.Equals(dto.Name, StringComparison.OrdinalIgnoreCase)
+                    t.Name.ToLower().Equals(dto.Name.ToLower())
                     && t.SubjectId == dto.SubjectId
                     && t.Id != id
             );
@@ -387,17 +388,28 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
     /// <summary>
     /// Deserializes topics from a JSON a file.
     /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the file size exceeds the maximum allowed size.
+    /// </exception>
     /// <exception cref="Exception">
     /// Thrown when the JSON content cannot be deserialized into the expected list of topics.
     /// </exception>
-    public List<Topic> DeserializeTopicsFromFile(TopicsUpload upload)
+    public async Task<List<Topic>> DeserializeTopicsFromFileAsync(TopicsUpload upload)
     {
+        double maxFileSize = 5 * 1024 * 1024; //max size is (5MB)
+
+        if (upload.File.Length > maxFileSize)
+        {
+            throw new InvalidOperationException(
+                "Failed to add topics: file size cannot exceed 5MB."
+            );
+        }
         //read the json file
         using Stream stream = upload.File.OpenReadStream();
 
         //finally, deserialize the JSON
         var topics =
-            JsonSerializer.Deserialize<List<Topic>>(stream, _jsonOptions)
+            await JsonSerializer.DeserializeAsync<List<Topic>>(stream, _jsonOptions)
             ?? throw new Exception(
                 $"Topics deserialization failed: unable to deserialize the '{upload.File.Name}' file."
             );

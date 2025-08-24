@@ -12,11 +12,11 @@ public interface ITopicService
 
     Task<TopicDto> AddAsync(AddTopicDto dto);
 
-    Task AddBulkAsync(int subjectId, List<Topic> topics);
+    Task AddTopicsToSubjectAsync(int subjectId, List<Topic> topics);
 
     Task UpdateAsync(int id, UpdateTopicDto dto);
 
     Task DeleteAsync(int id);
 
-    List<Topic> DeserializeTopicsFromFile(TopicsUpload upload);
+    Task<List<Topic>> DeserializeTopicsFromFileAsync(TopicsUpload upload);
 }

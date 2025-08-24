@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Subjects;
+using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Models.Topics;
 
 namespace Education.Api.Dtos.Topics;
@@ -11,6 +12,8 @@ public class TopicDto
 
     public required int SubjectId { get; set; }
     public SubjectDto? Subject { get; set; }
+
+    public List<SubtopicDto> Subtopics { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 
     public static TopicDto MapFrom(Topic topic)

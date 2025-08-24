@@ -143,18 +143,20 @@ public class SubjectsController(ISubjectService subjectService, ITopicService to
         }
     }
 
-    //Adds topics in bulk to a subject with a given ID
-    [HttpPost("{id}/topics")]
+    /// <summary>
+    /// Uploads a JSON file containing topics and adds them in bulk to the specified subject.
+    /// </summary>
+    [HttpPost("{id}/upload-topics")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddTopics(int id, TopicsUpload upload)
+    public async Task<IActionResult> AddTopicsToSubject(int id, TopicsUpload upload)
     {
         try
         {
             //first deserialize the topics from the JSON file
-            List<Topic> topics = _topicService.DeserializeTopicsFromFile(upload);
+            List<Topic> topics = await _topicService.DeserializeTopicsFromFileAsync(upload);
 
             //add the deserialized topics to the specified subject
-            await _topicService.AddBulkAsync(subjectId: id, topics);
+            await _topicService.AddTopicsToSubjectAsync(subjectId: id, topics);
 
             return NoContent();
         }
