@@ -5,6 +5,7 @@ using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Topics;
+using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Enums.Topics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -88,7 +89,17 @@ public class TopicService(ApplicationDbContext context, ILogger<TopicService> lo
                                                 : null
                                     }
                                     : null,
-                            Subto
+                            Subtopics = t.Subtopics
+                                .Select(
+                                    st =>
+                                        new SubtopicDto
+                                        {
+                                            Id = st.Id,
+                                            Name = st.Name,
+                                            TopicId = st.TopicId
+                                        }
+                                )
+                                .ToList(),
                             CreatedAt = t.CreatedAt
                         }
                 )
