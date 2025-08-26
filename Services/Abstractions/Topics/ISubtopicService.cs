@@ -7,7 +7,7 @@ public interface ISubtopicService
 {
     Task<SubtopicDto> GetByIdAsync(int id);
 
-    Task<PageInfo<SubtopicDto>> GetAsync(SubjectQueryParams queryParams);
+    Task<PageInfo<SubtopicDto>> GetAsync(SubtopicQueryParams queryParams);
 
     Task<SubtopicDto> AddAsync(AddSubtopicDto dto);
 

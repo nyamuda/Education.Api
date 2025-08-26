@@ -5,6 +5,7 @@ using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
 using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
+using Education.Api.Enums.Subtopics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Models.Topics;
@@ -179,13 +180,14 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
         //sort the items
         query = queryParams.SortBy switch
         {
-            TopicSortOption.Name => query.OrderByDescending(t => t.Name),
+            SubtopicSortOption.Name => query.OrderByDescending(t => t.Name),
             _ => query.OrderByDescending(t => t.CreatedAt),
         };
 
         List<SubtopicDto> items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
+            .AsSplitQuery()
             .AsNoTracking()
             .Select(
                 st =>
@@ -275,13 +277,14 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
 
         //pagination info
         int totalItems = await query.CountAsync();
-        bool hasMore = totalItems > page * pageSize;
+        bool hasMore = totalItems > queryParams.Page * queryParams.PageSize;
 
         return new PageInfo<SubtopicDto>
         {
-            Page = page,
-            PageSize = pageSize,
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize,
             HasMore = hasMore,
+            TotalItems = totalItems,
             Items = items
         };
     }
