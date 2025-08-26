@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Levels;
+using Education.Api.Dtos.Topics;
 using Education.Api.Models;
 
 namespace Education.Api.Dtos.Subjects;
@@ -11,6 +12,8 @@ public class SubjectDto
 
     public required int LevelId { get; set; }
     public LevelDto? Level { get; set; }
+
+    public List<TopicDto> Topics { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

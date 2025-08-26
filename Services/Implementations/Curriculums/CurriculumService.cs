@@ -125,6 +125,7 @@ public class CurriculumService(
                                                                         Id = s.Id,
                                                                         Name = s.Name,
                                                                         LevelId = s.LevelId
+                                                                        Top
                                                                     }
                                                             )
                                                             .ToList()
