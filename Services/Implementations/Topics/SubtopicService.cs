@@ -146,10 +146,11 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
         query =
             queryParams.ExamBoardId != null
                 ? query.Where(
-                    t =>
-                        t.Subject != null
-                        && t.Subject.Level != null
-                        && t.Subject.Level.ExamBoardId == queryParams.ExamBoardId
+                    st =>
+                        st.Topic != null
+                        && st.Topic.Subject != null
+                        && st.Topic.Subject.Level != null
+                        && st.Topic.Subject.Level.ExamBoardId == queryParams.ExamBoardId
                 )
                 : query;
         //apply the level filter
