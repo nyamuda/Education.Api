@@ -169,6 +169,13 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
             queryParams.SubjectId != null
                 ? query.Where(st => st.Topic != null && st.Topic.SubjectId == queryParams.SubjectId)
                 : query;
+
+        //apply the topic filter
+        query =
+            queryParams.TopicId != null
+                ? query.Where(st => st.TopicId == queryParams.TopicId)
+                : query;
+
         //sort the items
         query = queryParams.SortBy switch
         {
