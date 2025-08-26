@@ -4,6 +4,8 @@ using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
+using Education.Api.Dtos.Topics;
+using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Enums.Curriculums;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -124,8 +126,35 @@ public class CurriculumService(
                                                                     {
                                                                         Id = s.Id,
                                                                         Name = s.Name,
-                                                                        LevelId = s.LevelId
-                                                                        Top
+                                                                        LevelId = s.LevelId,
+                                                                        Topics = s.Topics
+                                                                            .Select(
+                                                                                t =>
+                                                                                    new TopicDto
+                                                                                    {
+                                                                                        Id = t.Id,
+                                                                                        Name =
+                                                                                            t.Name,
+                                                                                        SubjectId =
+                                                                                            t.SubjectId,
+                                                                                        Subtopics =
+                                                                                            t.Subtopics
+                                                                                                .Select(
+                                                                                                    st =>
+                                                                                                        new SubtopicDto
+                                                                                                        {
+                                                                                                            Id =
+                                                                                                                st.Id,
+                                                                                                            Name =
+                                                                                                                st.Name,
+                                                                                                            TopicId =
+                                                                                                                st.TopicId,
+                                                                                                        }
+                                                                                                )
+                                                                                                .ToList()
+                                                                                    }
+                                                                            )
+                                                                            .ToList()
                                                                     }
                                                             )
                                                             .ToList()
