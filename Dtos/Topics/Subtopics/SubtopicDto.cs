@@ -10,6 +10,8 @@ public class SubtopicDto
 
     public required int TopicId { get; set; }
 
+    public TopicDto? Topic { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public static SubtopicDto MapFrom(Subtopic subtopic)

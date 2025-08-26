@@ -1,4 +1,9 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Curriculums;
+using Education.Api.Dtos.ExamBoards;
+using Education.Api.Dtos.Levels;
+using Education.Api.Dtos.Subjects;
+using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -27,11 +32,88 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
                             Id = st.Id,
                             Name = st.Name,
                             TopicId = st.TopicId,
+                            Topic =
+                                st.Topic != null
+                                    ? new TopicDto
+                                    {
+                                        Id = st.Topic.Id,
+                                        Name = st.Topic.Name,
+                                        SubjectId = st.Topic.SubjectId,
+                                        Subject =
+                                            st.Topic.Subject != null
+                                                ? new SubjectDto
+                                                {
+                                                    Id = st.Topic.Subject.Id,
+                                                    Name = st.Topic.Subject.Name,
+                                                    LevelId = st.Topic.Subject.LevelId,
+                                                    Level =
+                                                        st.Topic.Subject.Level != null
+                                                            ? new LevelDto
+                                                            {
+                                                                Id = st.Topic.Subject.Level.Id,
+                                                                Name = st.Topic.Subject.Level.Name,
+                                                                ExamBoardId = st.Topic
+                                                                    .Subject
+                                                                    .Level
+                                                                    .ExamBoardId,
+                                                                ExamBoard =
+                                                                    st.Topic.Subject.Level.ExamBoard
+                                                                    != null
+                                                                        ? new ExamBoardDto
+                                                                        {
+                                                                            Id = st.Topic
+                                                                                .Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Id,
+                                                                            Name = st.Topic
+                                                                                .Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Name,
+                                                                            CurriculumId = st.Topic
+                                                                                .Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .CurriculumId,
+                                                                            Curriculum =
+                                                                                st.Topic
+                                                                                    .Subject
+                                                                                    .Level
+                                                                                    .ExamBoard
+                                                                                    .Curriculum
+                                                                                != null
+                                                                                    ? new CurriculumDto
+                                                                                    {
+                                                                                        Id =
+                                                                                            st.Topic
+                                                                                                .Subject
+                                                                                                .Level
+                                                                                                .ExamBoard
+                                                                                                .Curriculum!
+                                                                                                .Id,
+                                                                                        Name =
+                                                                                            st.Topic
+                                                                                                .Subject
+                                                                                                .Level
+                                                                                                .ExamBoard
+                                                                                                .Curriculum!
+                                                                                                .Name
+                                                                                    }
+                                                                                    : null
+                                                                        }
+                                                                        : null
+                                                            }
+                                                            : null,
+                                                }
+                                                : null,
+                                    }
+                                    : null,
                             CreatedAt = st.CreatedAt
                         }
                 )
                 .FirstOrDefaultAsync(st => st.Id == id)
-            ?? throw new KeyNotFoundException($"Subtopic with ID '{id}' does not exist");
+            ?? throw new KeyNotFoundException($"Subtopic with ID '{id}' does not exist.");
     }
 
     /// <summary>
@@ -58,6 +140,80 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
                         Id = st.Id,
                         Name = st.Name,
                         TopicId = st.TopicId,
+                        Topic =
+                            st.Topic != null
+                                ? new TopicDto
+                                {
+                                    Id = st.Topic.Id,
+                                    Name = st.Topic.Name,
+                                    SubjectId = st.Topic.SubjectId,
+                                    Subject =
+                                        st.Topic.Subject != null
+                                            ? new SubjectDto
+                                            {
+                                                Id = st.Topic.Subject.Id,
+                                                Name = st.Topic.Subject.Name,
+                                                LevelId = st.Topic.Subject.LevelId,
+                                                Level =
+                                                    st.Topic.Subject.Level != null
+                                                        ? new LevelDto
+                                                        {
+                                                            Id = st.Topic.Subject.Level.Id,
+                                                            Name = st.Topic.Subject.Level.Name,
+                                                            ExamBoardId = st.Topic
+                                                                .Subject
+                                                                .Level
+                                                                .ExamBoardId,
+                                                            ExamBoard =
+                                                                st.Topic.Subject.Level.ExamBoard
+                                                                != null
+                                                                    ? new ExamBoardDto
+                                                                    {
+                                                                        Id = st.Topic
+                                                                            .Subject
+                                                                            .Level
+                                                                            .ExamBoard
+                                                                            .Id,
+                                                                        Name = st.Topic
+                                                                            .Subject
+                                                                            .Level
+                                                                            .ExamBoard
+                                                                            .Name,
+                                                                        CurriculumId = st.Topic
+                                                                            .Subject
+                                                                            .Level
+                                                                            .ExamBoard
+                                                                            .CurriculumId,
+                                                                        Curriculum =
+                                                                            st.Topic
+                                                                                .Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Curriculum != null
+                                                                                ? new CurriculumDto
+                                                                                {
+                                                                                    Id = st.Topic
+                                                                                        .Subject
+                                                                                        .Level
+                                                                                        .ExamBoard
+                                                                                        .Curriculum!
+                                                                                        .Id,
+                                                                                    Name = st.Topic
+                                                                                        .Subject
+                                                                                        .Level
+                                                                                        .ExamBoard
+                                                                                        .Curriculum!
+                                                                                        .Name
+                                                                                }
+                                                                                : null
+                                                                    }
+                                                                    : null
+                                                        }
+                                                        : null,
+                                            }
+                                            : null,
+                                }
+                                : null,
                         CreatedAt = st.CreatedAt
                     }
             )
