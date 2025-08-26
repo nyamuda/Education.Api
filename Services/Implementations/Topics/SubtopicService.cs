@@ -156,7 +156,12 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
         //apply the level filter
         query =
             queryParams.LevelId != null
-                ? query.Where(t => t.Subject != null && t.Subject.LevelId == queryParams.LevelId)
+                ? query.Where(
+                    st =>
+                        st.Topic != null
+                        && st.Topic.Subject != null
+                        && st.Topic.Subject.LevelId == queryParams.LevelId
+                )
                 : query;
 
         //apply the subject filter
