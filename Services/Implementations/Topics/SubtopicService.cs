@@ -333,7 +333,9 @@ public class SubtopicService(ApplicationDbContext context, ILogger<SubtopicServi
         //add the new subtopic to the database
         Subtopic subtopic = new() { Name = dto.Name, TopicId = dto.TopicId };
 
-        await _context.Subtopics.AddAsync(subtopic);
+        _context.Subtopics.Add(subtopic);
+
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Subtopic created successfully: {SubtopicName}", dto.Name);
 

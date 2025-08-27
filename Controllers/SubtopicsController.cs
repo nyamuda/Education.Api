@@ -1,4 +1,5 @@
 using Education.Api.Dtos.Topics.Subtopics;
+using Education.Api.Enums.Subtopics;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Topics;
@@ -34,11 +35,32 @@ public class SubtopicsController(ISubtopicService subtopicService) : ControllerB
 
     //Gets a paginated list of subtopics
     [HttpGet]
-    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int? curriculumId,
+        int? examBoardId,
+        int? levelId,
+        int? subjectId,
+        int? topicId,
+        int page = 1,
+        int pageSize = 10,
+        SubtopicSortOption sortBy = SubtopicSortOption.DateCreated
+    )
     {
         try
         {
-            var subtopics = await _subtopicService.GetAsync(page: page, pageSize: pageSize);
+            SubtopicQueryParams queryParams =
+                new()
+                {
+                    CurriculumId = curriculumId,
+                    ExamBoardId = examBoardId,
+                    LevelId = levelId,
+                    SubjectId = subjectId,
+                    TopicId = topicId,
+                    Page = page,
+                    PageSize = pageSize,
+                    SortBy = sortBy
+                };
+            var subtopics = await _subtopicService.GetAsync(queryParams);
             return Ok(subtopics);
         }
         catch (Exception ex)

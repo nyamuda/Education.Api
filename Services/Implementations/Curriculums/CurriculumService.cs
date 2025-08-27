@@ -119,45 +119,6 @@ public class CurriculumService(
                                                         Id = l.Id,
                                                         Name = l.Name,
                                                         ExamBoardId = l.ExamBoardId,
-                                                        Subjects = l.Subjects
-                                                            .Select(
-                                                                s =>
-                                                                    new SubjectDto
-                                                                    {
-                                                                        Id = s.Id,
-                                                                        Name = s.Name,
-                                                                        LevelId = s.LevelId,
-                                                                        Topics = s.Topics
-                                                                            .Select(
-                                                                                t =>
-                                                                                    new TopicDto
-                                                                                    {
-                                                                                        Id = t.Id,
-                                                                                        Name =
-                                                                                            t.Name,
-                                                                                        SubjectId =
-                                                                                            t.SubjectId,
-                                                                                        Subtopics =
-                                                                                            t.Subtopics
-                                                                                                .Select(
-                                                                                                    st =>
-                                                                                                        new SubtopicDto
-                                                                                                        {
-                                                                                                            Id =
-                                                                                                                st.Id,
-                                                                                                            Name =
-                                                                                                                st.Name,
-                                                                                                            TopicId =
-                                                                                                                st.TopicId,
-                                                                                                        }
-                                                                                                )
-                                                                                                .ToList()
-                                                                                    }
-                                                                            )
-                                                                            .ToList()
-                                                                    }
-                                                            )
-                                                            .ToList()
                                                     }
                                             )
                                             .ToList()
