@@ -80,6 +80,9 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
     /// A <see cref="PageInfo{SubjectDto}"/> containing the list of subjects for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
+    /// <remarks>
+    /// Each subject includes its level, exam board, and curriculum through manual projection.
+    /// </remarks>
     public async Task<PageInfo<SubjectDto>> GetAsync(SubjectQueryParams queryParams)
     {
         var query = _context.Subjects.AsQueryable();
@@ -171,8 +174,20 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
         };
     }
 
-    //Gets subjects for a particular educational
-    // The method projects down the hierarchy by including the topic and subtopics of the subjects
+    /// <summary>
+    /// Retrieves a paginated list of subjects for a given educational level.
+    /// </summary>
+    /// <param name="queryParams">
+    /// The query parameters specifying the level, sorting option, page number, and page size.
+    /// </param>
+    /// <returns>
+    /// A <see cref="PageInfo{SubjectDto}"/> containing the list of subjects for the specified
+    /// page, along with pagination metadata such as page number, page size, and whether more
+    /// items are available.
+    /// </returns>
+    /// <remarks>
+    /// Each subject includes its topics and subtopics through manual projection.
+    /// </remarks>
     public async Task<PageInfo<SubjectDto>> GetForLevelAsync(SubjectQueryParams queryParams)
     {
         var query = _context.Subjects.Where(s => s.LevelId == queryParams.LevelId).AsQueryable();
