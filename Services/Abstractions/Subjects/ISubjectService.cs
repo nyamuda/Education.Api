@@ -9,6 +9,8 @@ public interface ISubjectService
 
     Task<PageInfo<SubjectDto>> GetAsync(SubjectQueryParams queryParams);
 
+    Task<PageInfo<SubjectDto>> GetForLevelAsync(SubjectQueryParams queryParams);
+
     Task<SubjectDto> AddAsync(AddSubjectDto dto);
 
     Task UpdateAsync(int id, UpdateSubjectDto dto);

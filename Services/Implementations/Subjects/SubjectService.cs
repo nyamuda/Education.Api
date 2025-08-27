@@ -3,6 +3,8 @@ using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
 using Education.Api.Dtos.Subjects;
+using Education.Api.Dtos.Topics;
+using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Enums.Subjects;
 using Education.Api.Exceptions;
 using Education.Api.Models;
@@ -150,6 +152,72 @@ public class SubjectService(ApplicationDbContext context) : ISubjectService
                                             : null,
                                 }
                                 : null,
+                        CreatedAt = s.CreatedAt
+                    }
+            )
+            .ToListAsync();
+
+        //pagination info
+        int totalItems = await query.CountAsync();
+        bool hasMore = totalItems > queryParams.Page * queryParams.PageSize;
+
+        return new PageInfo<SubjectDto>
+        {
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize,
+            TotalItems = totalItems,
+            HasMore = hasMore,
+            Items = items
+        };
+    }
+
+    //Gets subjects for a particular educational
+    // The method projects down the hierarchy by including the topic and subtopics of the subjects
+    public async Task<PageInfo<SubjectDto>> GetForLevelAsync(SubjectQueryParams queryParams)
+    {
+        var query = _context.Subjects.Where(s => s.LevelId == queryParams.LevelId).AsQueryable();
+
+        //sort the items
+        query = queryParams.SortBy switch
+        {
+            SubjectSortOption.Name => query.OrderByDescending(s => s.Name),
+            _ => query.OrderByDescending(s => s.CreatedAt),
+        };
+
+        List<SubjectDto> items = await query
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Select(
+                s =>
+                    new SubjectDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        LevelId = s.LevelId,
+                        Topics = s.Topics
+                            .Select(
+                                t =>
+                                    new TopicDto
+                                    {
+                                        Id = t.Id,
+                                        Name = t.Name,
+                                        SubjectId = t.SubjectId,
+                                        Subtopics = t.Subtopics
+                                            .Select(
+                                                st =>
+                                                    new SubtopicDto
+                                                    {
+                                                        Id = st.Id,
+                                                        Name = st.Name,
+                                                        TopicId = st.TopicId,
+                                                    }
+                                            )
+                                            .ToList(),
+                                    }
+                            )
+                            .ToList(),
                         CreatedAt = s.CreatedAt
                     }
             )
