@@ -1,4 +1,5 @@
 using Education.Api.Enums;
+using Education.Api.Enums.Questions;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
@@ -30,7 +31,7 @@ public class Question
     public required int UserId { get; set; }
     public User? User { get; set; }
 
-    public  List<Tag> Tags { get; set; } = [];
+    public List<Tag> Tags { get; set; } = [];
 
     public List<Upvote> Upvotes { get; set; } = [];
 
@@ -39,6 +40,8 @@ public class Question
     public List<Comment> Comments { get; set; } = [];
 
     public List<Answer> Answers { get; set; } = [];
+
+    public QuestionStatus Status { get; set; } = QuestionStatus.Draft;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

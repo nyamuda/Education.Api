@@ -39,7 +39,7 @@ public class QuestionDto
 
     public List<TagDto> Tags { get; set; } = [];
 
-    public required List<UpvoteDto> Upvotes { get; set; }
+    public List<UpvoteDto> Upvotes { get; set; } = [];
 
     public List<CommentDto> Comments { get; set; } = [];
 
@@ -56,20 +56,6 @@ public class QuestionDto
             SubjectId = question.SubjectId,
             TopicId = question.TopicId,
             UserId = question.UserId,
-            Upvotes =
-            [
-                .. question
-                .Upvotes
-                .Select(
-                    upv =>
-                        new UpvoteDto
-                        {
-                            Id = upv.Id,
-                            UserId = upv.UserId,
-                            QuestionId = upv.QuestionId,
-                        }
-                )
-            ],
             CreatedAt = question.CreatedAt,
             UpdatedAt = question.UpdatedAt
         };
