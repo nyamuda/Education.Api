@@ -170,15 +170,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         //Hence, there is a many-to-many relationship between Question and Tag
         modelBuilder.Entity<Question>().HasMany(q => q.Tags).WithMany(t => t.Questions);
 
-        //A Level can have multiple Questions while a Question can only belong to one Level.
-        //Hence, there is a one-to-many relationship between Level and Question.
-        modelBuilder
-            .Entity<Question>()
-            .HasOne(q => q.Level)
-            .WithMany(l => l.Questions)
-            .HasForeignKey(q => q.LevelId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Level -> delete Questions for that level
-
         //A Subject can have multiple Questions while a Question can only belong to one Subject.
         //Hence, there is a one-to-many relationship between Subject and Question.
         modelBuilder
@@ -198,14 +189,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         //A Question can have multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic
+        // modelBuilder
+        //     .Entity<Question>()
+        //     .HasMany(q => q.Subtopics)
+        //     .WithMany(s => s.Questions)
+        //     .UsingEntity<QuestionSubtopic>(
+        //         r => r.HasOne<Subtopic>().WithMany().OnDelete(DeleteBehavior.NoAction),
+        //         l => l.HasOne<Question>().WithMany().OnDelete(DeleteBehavior.NoAction)
+        //     );
+
+        //A Question can only be under one Subtopic and a Subtopic have multiple Questions.
+        //Hence, there is a many-to-one relationship between Question and Subtopic
         modelBuilder
             .Entity<Question>()
-            .HasMany(q => q.Subtopics)
+            .HasOne(q => q.Subtopic)
             .WithMany(s => s.Questions)
-            .UsingEntity<QuestionSubtopic>(
-                r => r.HasOne<Subtopic>().WithMany().OnDelete(DeleteBehavior.NoAction),
-                l => l.HasOne<Question>().WithMany().OnDelete(DeleteBehavior.NoAction)
-            );
+            .HasForeignKey(q => q.SubtopicId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Subtopic -> delete Questions under that subtopic
 
         //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Upvote
