@@ -1,4 +1,5 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Curriculums;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
@@ -10,6 +11,7 @@ using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
 using Education.Api.Models;
+using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Questions;
 using Education.Api.Services.Abstractions.Tags;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +21,14 @@ namespace Education.Api.Services.Implementations.Questions;
 public class QuestionService(
     ApplicationDbContext context,
     ILogger<QuestionService> logger,
-    ITagService tagService
+    ITagService tagService,
+    IAnswerService answerService
 ) : IQuestionService
 {
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<QuestionService> _logger = logger;
     private readonly ITagService _tagService = tagService;
+    private readonly IAnswerService _answerService = answerService;
 
     //Gets a question with a given ID
     public async Task<QuestionDto> GetByIdAsync(int id)
@@ -275,6 +279,15 @@ public class QuestionService(
         _context.Questions.Add(question);
 
         await _context.SaveChangesAsync();
+
+        // STEP 6: If the answer was provided, save it as well
+        if (dto.AnswerText != null && dto.AnswerHtml != null)
+        {
+            AddAnswerDto answerDto =
+                new() { ContentHtml = dto.AnswerHtml, ContentText = dto.AnswerText };
+
+            await _answerService.AddAsync(userId: userId, questionId: question.Id, answerDto);
+        }
 
         _logger.LogInformation(
             "Successfully created new question by user with ID {UserId}.",
