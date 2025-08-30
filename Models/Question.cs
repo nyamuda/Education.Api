@@ -9,7 +9,12 @@ public class Question
 {
     public int Id { get; set; }
     public required string Title { get; set; }
-    public required string Content { get; set; }
+
+    // Rich text (for rendering in the frontend with formatting)
+    public string? ContentHtml { get; set; }
+
+    // Plain text (for searching, indexing, and quick filtering)
+    public required string ContentText { get; set; }
 
     public int? Marks { get; set; }
 

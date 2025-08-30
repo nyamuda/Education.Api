@@ -7,7 +7,11 @@ public class Answer
 {
     public int Id { get; set; }
 
-    public required string Content { get; set; }
+    // Rich text (for rendering in the frontend with formatting)
+    public required string ContentHtml { get; set; }
+
+    // Plain text (for searching, indexing, and quick filtering)
+    public required string ContentText { get; set; }
 
     public required int QuestionId { get; set; }
 
