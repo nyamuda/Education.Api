@@ -5,5 +5,8 @@ namespace Education.Api.Dtos.Answers;
 public class AddAnswerDto
 {
     [Required]
-    public required string Content { get; set; }
+    public required string ContentHtml { get; set; }
+
+    [Required]
+    public required string ContentText { get; set; }
 }

@@ -21,12 +21,13 @@ public class TagService(ApplicationDbContext context, ILogger<TagService> logger
         var tag = await _context
             .Tags
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefaultAsync(t => t.Name.ToLower().Equals(name.ToLower()));
 
         if (tag is null)
         {
             tag = new Tag { Name = name };
-            await _context.Tags.AddAsync(tag);
+            _context.Tags.Add(tag);
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation(
                 "No existing tag found. Created new tag with name: {TagName}",

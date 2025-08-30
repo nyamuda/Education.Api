@@ -37,41 +37,9 @@ public class QuestionService(
                         new QuestionDto
                         {
                             Id = q.Id,
-                            Content = q.Content,
+                            ContentText = q.ContentText,
+                            ContentHtml = q.ContentHtml,
                             Marks = q.Marks,
-                            LevelId = q.LevelId,
-                            Level =
-                                q.Level != null
-                                    ? new LevelDto
-                                    {
-                                        Id = q.Level.Id,
-                                        Name = q.Level.Name,
-                                        ExamBoardId = q.Level.ExamBoardId,
-                                        ExamBoard =
-                                            q.Level.ExamBoard != null
-                                                ? new ExamBoardDto
-                                                {
-                                                    Id = q.Level.ExamBoard.Id,
-                                                    Name = q.Level.ExamBoard.Name,
-                                                    CurriculumId = q.Level.ExamBoard.CurriculumId,
-                                                    Curriculum =
-                                                        q.Level.ExamBoard.Curriculum != null
-                                                            ? new CurriculumDto
-                                                            {
-                                                                Id = q.Level
-                                                                    .ExamBoard
-                                                                    .Curriculum
-                                                                    .Id,
-                                                                Name = q.Level
-                                                                    .ExamBoard
-                                                                    .Curriculum
-                                                                    .Name
-                                                            }
-                                                            : null,
-                                                }
-                                                : null
-                                    }
-                                    : null,
                             SubjectId = q.SubjectId,
                             Subject =
                                 q.Subject != null
@@ -92,17 +60,15 @@ public class QuestionService(
                                         SubjectId = q.Topic.SubjectId
                                     }
                                     : null,
-                            Subtopics = q.Subtopics
-                                .Select(
-                                    st =>
-                                        new SubtopicDto
-                                        {
-                                            Id = st.Id,
-                                            Name = st.Name,
-                                            TopicId = st.TopicId
-                                        }
-                                )
-                                .ToList(),
+                            Subtopic =
+                                q.Subtopic != null
+                                    ? new SubtopicDto
+                                    {
+                                        Id = q.Subtopic.Id,
+                                        Name = q.Subtopic.Name,
+                                        TopicId = q.Subtopic.TopicId
+                                    }
+                                    : null,
                             UserId = q.UserId,
                             User =
                                 q.User != null
@@ -151,35 +117,9 @@ public class QuestionService(
                     new QuestionDto
                     {
                         Id = q.Id,
-                        Content = q.Content,
+                        ContentText = q.ContentText,
+                        ContentHtml = q.ContentHtml,
                         Marks = q.Marks,
-                        LevelId = q.LevelId,
-                        Level =
-                            q.Level != null
-                                ? new LevelDto
-                                {
-                                    Id = q.Level.Id,
-                                    Name = q.Level.Name,
-                                    ExamBoardId = q.Level.ExamBoardId,
-                                    ExamBoard =
-                                        q.Level.ExamBoard != null
-                                            ? new ExamBoardDto
-                                            {
-                                                Id = q.Level.ExamBoard.Id,
-                                                Name = q.Level.ExamBoard.Name,
-                                                CurriculumId = q.Level.ExamBoard.CurriculumId,
-                                                Curriculum =
-                                                    q.Level.ExamBoard.Curriculum != null
-                                                        ? new CurriculumDto
-                                                        {
-                                                            Id = q.Level.ExamBoard.Curriculum.Id,
-                                                            Name = q.Level.ExamBoard.Curriculum.Name
-                                                        }
-                                                        : null,
-                                            }
-                                            : null
-                                }
-                                : null,
                         SubjectId = q.SubjectId,
                         Subject =
                             q.Subject != null
@@ -200,17 +140,15 @@ public class QuestionService(
                                     SubjectId = q.Topic.SubjectId
                                 }
                                 : null,
-                        Subtopics = q.Subtopics
-                            .Select(
-                                st =>
-                                    new SubtopicDto
-                                    {
-                                        Id = st.Id,
-                                        Name = st.Name,
-                                        TopicId = st.TopicId
-                                    }
-                            )
-                            .ToList(),
+                        Subtopic =
+                            q.Subtopic != null
+                                ? new SubtopicDto
+                                {
+                                    Id = q.Subtopic.Id,
+                                    Name = q.Subtopic.Name,
+                                    TopicId = q.Subtopic.TopicId
+                                }
+                                : null,
                         UserId = q.UserId,
                         User =
                             q.User != null
@@ -263,55 +201,69 @@ public class QuestionService(
     /// </exception>
     public async Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto)
     {
-        //STEP 1: Check if a topic with the given ID exists
+        //STEP 1: Check if a topic with the given ID exists under the selected subject.
         var topic = await _context
             .Topics
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId));
+            .Include(t => t.Subtopics)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(
+                t => t.Id.Equals(dto.TopicId) && t.SubjectId.Equals(dto.SubjectId)
+            );
 
         if (topic is null)
         {
             _logger.LogWarning(
-                "Failed to add question: topic with ID {TopicId} not found.",
-                dto.TopicId
+                "Failed to add question: selected topic {topicId} does not belong to the given subject {subjectId}.",
+                dto.TopicId,
+                dto.SubtopicId
             );
 
             throw new KeyNotFoundException(
-                $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist."
+                $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist under the selected subject."
             );
+        }
+
+        //STEP 2: Check if the selected subtopic belongs the selected topic
+        if (dto.SubtopicId != null)
+        {
+            var _ =
+                topic.Subtopics.FirstOrDefault(st => st.Id.Equals(dto.SubtopicId))
+                ?? throw new KeyNotFoundException(
+                    "Unable to add question: selected subtopic does not belong to the selected topic."
+                );
         }
 
         //STEP 2: Get the selected subtopics and make sure they belong to the specified topic
-        var selectedSubtopics = await _context
-            .Subtopics
-            .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
-            .ToListAsync();
-        if (selectedSubtopics.Count != dto.SubtopicIds.Count)
-        {
-            _logger.LogWarning(
-                "Failed to add question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
-                dto.TopicId
-            );
+        // var selectedSubtopics = await _context
+        //     .Subtopics
+        //     .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
+        //     .ToListAsync();
+        // if (selectedSubtopics.Count != dto.SubtopicIds.Count)
+        // {
+        //     _logger.LogWarning(
+        //         "Failed to add question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
+        //         dto.TopicId
+        //     );
 
-            throw new InvalidOperationException(
-                $"Unable to add question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
-            );
-        }
+        //     throw new InvalidOperationException(
+        //         $"Unable to add question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
+        //     );
+        // }
 
         //STEP 3: Initialize the question entity with provided details
         Question question =
             new()
             {
-                Content = dto.Content,
+                Title = dto.Title,
+                ContentText = dto.QuestionText,
                 SubjectId = topic.SubjectId,
                 TopicId = dto.TopicId,
+                SubtopicId = dto.SubtopicId,
                 UserId = userId,
                 Marks = dto.Marks,
             };
-        question.Subtopics.AddRange(selectedSubtopics);
 
         //STEP 4: Find each tag by name, or create it if it doesn't exist, then add it to the question.
-        // Go through each tag name provided in the request.
         // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
         {
@@ -379,50 +331,68 @@ public class QuestionService(
             );
         }
 
-        //STEP 3: Check if a topic with the given ID exists
+        //STEP 3: Check if a topic with the given ID exists under the selected subject.
         var topic = await _context
             .Topics
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id.Equals(dto.TopicId));
+            .Include(t => t.Subtopics)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(
+                t => t.Id.Equals(dto.TopicId) && t.SubjectId.Equals(dto.SubjectId)
+            );
 
         if (topic is null)
         {
             _logger.LogWarning(
-                "Failed to update question: topic with ID {TopicId} not found.",
-                dto.TopicId
+                "Failed to add question: selected topic {topicId} does not belong to the given subject {subjectId}.",
+                dto.TopicId,
+                dto.SubtopicId
             );
 
             throw new KeyNotFoundException(
-                $"Unable to update question. Topic with ID '{dto.TopicId}' does not exist."
+                $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist under the selected subject."
             );
         }
 
         //STEP 4: Get the selected subtopics and make sure they belong to the specified topic
-        var selectedSubtopics = await _context
-            .Subtopics
-            .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
-            .ToListAsync();
-        if (selectedSubtopics.Count != dto.SubtopicIds.Count)
-        {
-            _logger.LogWarning(
-                "Failed to update question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
-                dto.TopicId
-            );
+        // var selectedSubtopics = await _context
+        //     .Subtopics
+        //     .Where(st => dto.SubtopicIds.Contains(st.Id) && st.TopicId == dto.TopicId)
+        //     .ToListAsync();
+        // if (selectedSubtopics.Count != dto.SubtopicIds.Count)
+        // {
+        //     _logger.LogWarning(
+        //         "Failed to update question: one or more selected subtopics do not exist under a topic with ID {TopicId}",
+        //         dto.TopicId
+        //     );
 
-            throw new InvalidOperationException(
-                $"Unable to update question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
-            );
+        //     throw new InvalidOperationException(
+        //         $"Unable to update question: one or more selected subtopics do not exist under a topic with ID {dto.TopicId}"
+        //     );
+        // }
+
+        //STEP 4: Check if the selected subtopic belongs the selected topic
+        if (dto.SubtopicId != null)
+        {
+            var _ =
+                topic.Subtopics.FirstOrDefault(st => st.Id.Equals(dto.SubtopicId))
+                ?? throw new KeyNotFoundException(
+                    "Unable to add question: selected subtopic does not belong to the selected topic."
+                );
         }
+
         //STEP 5: Update the existing question entity with provided details
-        existingQuestion.Content = dto.Content;
+        existingQuestion.Title = dto.Title;
+        existingQuestion.ContentText = dto.QuestionText;
+        existingQuestion.ContentHtml = dto.QuestionHtml;
         existingQuestion.TopicId = dto.TopicId;
         existingQuestion.SubjectId = topic.SubjectId;
+        existingQuestion.SubtopicId = dto.SubtopicId;
         existingQuestion.Marks = dto.Marks;
 
         //clear subtopics before adding new one
-        existingQuestion.Subtopics.Clear();
-        //add new subtopics
-        existingQuestion.Subtopics.AddRange(selectedSubtopics);
+        // existingQuestion.Subtopics.Clear();
+        // //add new subtopics
+        // existingQuestion.Subtopics.AddRange(selectedSubtopics);
 
         //clear tags before adding new ones
         existingQuestion.Tags.Clear();

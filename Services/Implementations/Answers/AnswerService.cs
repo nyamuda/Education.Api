@@ -25,7 +25,8 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                         new AnswerDto
                         {
                             Id = a.Id,
-                            Content = a.Content,
+                            ContentText = a.ContentText,
+                            ContentHtml = a.ContentHtml,
                             QuestionId = a.QuestionId,
                             UserId = a.UserId,
                             User =
@@ -78,7 +79,8 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                     new AnswerDto
                     {
                         Id = a.Id,
-                        Content = a.Content,
+                        ContentText = a.ContentText,
+                        ContentHtml = a.ContentHtml,
                         QuestionId = a.QuestionId,
                         UserId = a.UserId,
                         User =
@@ -165,12 +167,14 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
         Answer answer =
             new()
             {
-                Content = dto.Content,
+                ContentText = dto.ContentText,
+                ContentHtml = dto.ContentHtml,
                 QuestionId = questionId,
                 UserId = userId
             };
 
-        await _context.Answers.AddAsync(answer);
+        _context.Answers.Add(answer);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully added a new answer by user: {UserId}.", userId);
 
@@ -210,11 +214,12 @@ public class AnswerService(ApplicationDbContext context, ILogger<AnswerService> 
                 "Cannot update answer. Answer does not belong to specified user: {UserId}",
                 userId
             );
-            throw new UnauthorizedAccessException("You're not authorized to update this answer");
+            throw new UnauthorizedAccessException("You're not authorized to update this answer.");
         }
 
         //Persist the changes to the database
-        answer.Content = dto.Content;
+        answer.ContentText = dto.ContentText;
+        answer.ContentHtml = dto.ContentHtml;
 
         await _context.SaveChangesAsync();
 

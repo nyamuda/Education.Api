@@ -9,7 +9,8 @@ public class AnswerDto
 {
     public required int Id { get; set; }
 
-    public required string Content { get; set; }
+    public required string ContentText { get; set; }
+    public required string ContentHtml { get; set; }
 
     public required int QuestionId { get; set; }
 
@@ -28,7 +29,8 @@ public class AnswerDto
         return new AnswerDto
         {
             Id = answer.Id,
-            Content = answer.Content,
+            ContentText = answer.ContentText,
+            ContentHtml = answer.ContentHtml,
             QuestionId = answer.QuestionId,
             UserId = answer.UserId,
             User =

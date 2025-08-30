@@ -30,7 +30,7 @@ public class Question
     public required int UserId { get; set; }
     public User? User { get; set; }
 
-    public List<Tag> Tags { get; set; } = [];
+    public  List<Tag> Tags { get; set; } = [];
 
     public List<Upvote> Upvotes { get; set; } = [];
 

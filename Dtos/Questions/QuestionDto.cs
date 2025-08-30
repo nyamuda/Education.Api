@@ -14,20 +14,18 @@ namespace Education.Api.Dtos.Questions;
 public class QuestionDto
 {
     public required int Id { get; set; }
-    public required string Content { get; set; }
-
+    public required string ContentText { get; set; }
+    public string? ContentHtml { get; set; }
     public int? Marks { get; set; }
-
-    public required int LevelId { get; set; }
-    public LevelDto? Level { get; set; }
 
     public required int SubjectId { get; set; }
     public SubjectDto? Subject { get; set; }
 
-    public required int TopicId { get; set; }
+    public int? TopicId { get; set; }
     public TopicDto? Topic { get; set; }
 
-    public List<SubtopicDto> Subtopics { get; set; } = [];
+    public int? SubtopicId { get; set; }
+    public SubtopicDto? Subtopic { get; set; }
 
     public required int UserId { get; set; }
     public UserDto? User { get; set; }
@@ -46,12 +44,14 @@ public class QuestionDto
         return new QuestionDto
         {
             Id = question.Id,
-            Content = question.Content,
-            LevelId = question.LevelId,
+            ContentText = question.ContentText,
+            ContentHtml = question.ContentHtml,
             SubjectId = question.SubjectId,
             TopicId = question.TopicId,
             UserId = question.UserId,
-            Upvotes = question
+            Upvotes =
+            [
+                .. question
                 .Upvotes
                 .Select(
                     upv =>
@@ -62,7 +62,7 @@ public class QuestionDto
                             QuestionId = upv.QuestionId,
                         }
                 )
-                .ToList(),
+            ],
             CreatedAt = question.CreatedAt,
             UpdatedAt = question.UpdatedAt
         };
