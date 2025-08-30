@@ -78,6 +78,20 @@ public class QuestionService(
                                 q.User != null
                                     ? new UserDto { Id = q.User.Id, Username = q.User.Username }
                                     : null,
+                            AuthorAnswer = q.Answers
+                                .Where(a => a.UserId == q.UserId)
+                                .Select(
+                                    a =>
+                                        new AnswerDto
+                                        {
+                                            Id = a.Id,
+                                            UserId = a.UserId,
+                                            ContentHtml = a.ContentHtml,
+                                            ContentText = a.ContentText,
+                                            QuestionId = a.QuestionId
+                                        }
+                                )
+                                .FirstOrDefault(),
                             Tags = q.Tags
                                 .Select(t => new TagDto { Id = t.Id, Name = t.Name, })
                                 .ToList(),

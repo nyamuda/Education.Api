@@ -18,7 +18,7 @@ public class AnswerDto
 
     public UserDto? User { get; set; }
 
-    public required List<UpvoteDto> Upvotes { get; set; }
+    public List<UpvoteDto> Upvotes { get; set; } = [];
 
     public DateTime CreatedAt { get; set; }
 
