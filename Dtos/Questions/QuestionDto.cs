@@ -1,3 +1,4 @@
+using Education.Api.Dtos.Answers;
 using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.ExamBoards;
 using Education.Api.Dtos.Levels;
@@ -29,6 +30,12 @@ public class QuestionDto
 
     public required int UserId { get; set; }
     public UserDto? User { get; set; }
+
+    // <summary>
+    /// The answer provided by the author of the question, if they chose to answer their own question.
+    /// This is distinct from other user-submitted answers and may be null if the author did not provide one.
+    /// </summary>
+    public AnswerDto? AuthorAnswer { get; set; }
 
     public List<TagDto> Tags { get; set; } = [];
 
