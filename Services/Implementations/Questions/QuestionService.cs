@@ -206,46 +206,69 @@ public class QuestionService(
     }
 
     /// <summary>
-    /// Adds a new question to the database after validating the provided topic, subtopics, and tags.
+    /// Adds a new question to the database after validating the provided subject, topic, and subtopic.
     /// </summary>
     /// <param name="userId">The ID of the user creating the question.</param>
     /// <param name="dto">The question DTO containing question content, metadata, and tags.</param>
-    /// <returns>The newly created <see cref="QuestionDto"/>.</returns>
+    /// <returns>The newly created question.</returns>
     /// <exception cref="KeyNotFoundException">
-    /// Thrown when a referenced topic does not exist.
+    /// Thrown when a referenced subject, topic or subtopic does not exist.
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when one or more selected subtopics do not belong to the specified topic.
-    /// </exception>
+    /// <remarks>
+    /// This method performs several validation steps before saving the question.
+    /// It checks that the subject, topic, and subtopic provided in the request exist
+    /// and are correctly linked to each other. If any of these are invalid, the
+    /// request will fail.
+    /// </remarks>
     public async Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto)
     {
-        //STEP 1: Check if a topic with the given ID exists under the selected subject.
-        var topic = await _context
-            .Topics
-            .Include(t => t.Subtopics)
+        //STEP 1: Check if a subject with the given ID exists.
+        var subject = await _context
+            .Subjects
+            .Include(s => s.Topics)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(
-                t => t.Id.Equals(dto.TopicId) && t.SubjectId.Equals(dto.SubjectId)
-            );
+            .FirstOrDefaultAsync(s => s.Id.Equals(dto.SubjectId));
 
-        if (topic is null)
+        if (subject is null)
         {
             _logger.LogWarning(
-                "Failed to add question: selected topic {topicId} does not belong to the given subject {subjectId}.",
-                dto.TopicId,
-                dto.SubtopicId
+                "Failed to add question: selected subject {subjectId} not found.",
+                dto.SubjectId
             );
 
             throw new KeyNotFoundException(
-                $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist under the selected subject."
+                $"Unable to add question. Subject with ID '{dto.SubjectId}' does not exist."
             );
         }
 
-        //STEP 2: Check if the selected subtopic belongs the selected topic
-        if (dto.SubtopicId != null)
+        //STEP 2: Check if a topic with the given ID exists under the selected subject.
+        if (dto.TopicId is not null)
+        {
+            var topic = subject.Topics.FirstOrDefault(t => t.Id.Equals(dto.TopicId));
+
+            if (topic is null)
+            {
+                _logger.LogWarning(
+                    "Failed to add question: selected topic {topicId} does not belong to the given subject {subjectId}.",
+                    dto.TopicId,
+                    dto.SubtopicId
+                );
+
+                throw new KeyNotFoundException(
+                    $"Unable to add question. Topic with ID '{dto.TopicId}' does not exist under the selected subject."
+                );
+            }
+        }
+
+        //STEP 3: Check if the selected subtopic belongs the selected topic
+        if (dto.SubtopicId != null && dto.TopicId != null)
         {
             var _ =
-                topic.Subtopics.FirstOrDefault(st => st.Id.Equals(dto.SubtopicId))
+                await _context
+                    .Subtopics
+                    .FirstOrDefaultAsync(
+                        st => st.Id.Equals(dto.SubtopicId) && st.TopicId.Equals(dto.TopicId)
+                    )
                 ?? throw new KeyNotFoundException(
                     "Unable to add question: selected subtopic does not belong to the selected topic."
                 );
@@ -268,13 +291,13 @@ public class QuestionService(
         //     );
         // }
 
-        //STEP 3: Initialize the question entity with provided details
+        //STEP 4: Initialize the question entity with provided details
         Question question =
             new()
             {
                 Title = dto.Title,
                 ContentText = dto.QuestionText,
-                SubjectId = topic.SubjectId,
+                SubjectId = dto.SubjectId,
                 TopicId = dto.TopicId,
                 SubtopicId = dto.SubtopicId,
                 UserId = userId,

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Education.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250831035849_QuestionTitleMigration")]
+    [Migration("20250831040258_QuestionTitleMigration")]
     partial class QuestionTitleMigration
     {
         /// <inheritdoc />
@@ -735,7 +735,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Topics.Subtopic", "Subtopic")
                         .WithMany("Questions")
                         .HasForeignKey("SubtopicId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Education.Api.Models.Topics.Topic", "Topic")
                         .WithMany("Questions")

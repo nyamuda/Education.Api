@@ -732,7 +732,7 @@ namespace Education.Api.Migrations
                     b.HasOne("Education.Api.Models.Topics.Subtopic", "Subtopic")
                         .WithMany("Questions")
                         .HasForeignKey("SubtopicId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Education.Api.Models.Topics.Topic", "Topic")
                         .WithMany("Questions")
