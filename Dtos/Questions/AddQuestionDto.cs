@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Education.Api.Enums.Questions;
 
 namespace Education.Api.Dtos.Questions;
 
@@ -35,4 +36,6 @@ public class AddQuestionDto
         ErrorMessage = "Include at least one tag so others can easily find your question."
     )]
     public List<string> Tags { get; set; } = [];
+
+    public QuestionStatus Status { get; set; } = QuestionStatus.Draft;
 }

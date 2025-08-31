@@ -205,7 +205,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(q => q.Subtopic)
             .WithMany(s => s.Questions)
             .HasForeignKey(q => q.SubtopicId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Subtopic -> delete Questions under that subtopic
+            .OnDelete(DeleteBehavior.NoAction); //Delete Subtopic -> set foreign key to null
 
         //A Question can have multiple Upvotes while an Upvote can only belong to one Question.
         //Hence, there is a one-to-many relationship between Question and Upvote

@@ -8,6 +8,7 @@ using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
+using Education.Api.Enums.Questions;
 using Education.Api.Models;
 
 namespace Education.Api.Dtos.Questions;
@@ -43,6 +44,8 @@ public class QuestionDto
 
     public List<CommentDto> Comments { get; set; } = [];
 
+    public QuestionStatus? Status { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
@@ -53,6 +56,7 @@ public class QuestionDto
             Id = question.Id,
             ContentText = question.ContentText,
             ContentHtml = question.ContentHtml,
+            Status = question.Status,
             SubjectId = question.SubjectId,
             TopicId = question.TopicId,
             UserId = question.UserId,
