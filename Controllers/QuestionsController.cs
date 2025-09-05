@@ -3,6 +3,7 @@ using Education.Api.Dtos.Comments;
 using Education.Api.Dtos.Flags;
 using Education.Api.Dtos.Flags.Questions;
 using Education.Api.Dtos.Questions;
+using Education.Api.Enums.Questions;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
@@ -141,6 +142,42 @@ public class QuestionsController(
         catch (InvalidOperationException ex)
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Updates the status of a question with a given ID
+    [HttpPatch("{id}/status")]
+    [Authorize]
+    public async Task<IActionResult> UpdateStatus(int id, QuestionStatus status)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _questionService.UpdateStatusAsync(userId: userId, questionId: id, status);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {

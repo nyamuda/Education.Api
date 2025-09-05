@@ -30,7 +30,4 @@ public class UpdateQuestionDto
         ErrorMessage = "Include at least one tag so others can easily find your question."
     )]
     public List<string> Tags { get; set; } = [];
-
-    [Required]
-    public QuestionStatus Status { get; set; }
 }

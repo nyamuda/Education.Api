@@ -303,7 +303,6 @@ public class QuestionService(
                 SubtopicId = dto.SubtopicId,
                 UserId = userId,
                 Marks = dto.Marks,
-                Status = dto.Status
             };
 
         //STEP 4: Find each tag by name, or create it if it doesn't exist, then add it to the question.
@@ -440,7 +439,6 @@ public class QuestionService(
         existingQuestion.SubjectId = topic.SubjectId;
         existingQuestion.SubtopicId = dto.SubtopicId;
         existingQuestion.Marks = dto.Marks;
-        existingQuestion.Status = dto.Status;
 
         //clear subtopics before adding new one
         // existingQuestion.Subtopics.Clear();

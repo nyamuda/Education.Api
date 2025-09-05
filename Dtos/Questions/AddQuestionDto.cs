@@ -36,6 +36,4 @@ public class AddQuestionDto
         ErrorMessage = "Include at least one tag so others can easily find your question."
     )]
     public List<string> Tags { get; set; } = [];
-
-    public QuestionStatus Status { get; set; } = QuestionStatus.Draft;
 }
