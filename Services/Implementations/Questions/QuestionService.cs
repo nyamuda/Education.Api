@@ -52,7 +52,50 @@ public class QuestionService(
                                     {
                                         Id = q.Subject.Id,
                                         Name = q.Subject.Name,
-                                        LevelId = q.Subject.LevelId
+                                        LevelId = q.Subject.LevelId,
+                                        Level =
+                                            q.Subject.Level != null
+                                                ? new LevelDto
+                                                {
+                                                    Id = q.Subject.Level.Id,
+                                                    Name = q.Subject.Level.Name,
+                                                    ExamBoardId = q.Subject.Level.ExamBoardId,
+                                                    ExamBoard =
+                                                        q.Subject.Level.ExamBoard != null
+                                                            ? new ExamBoardDto
+                                                            {
+                                                                Id = q.Subject.Level.ExamBoard.Id,
+                                                                Name = q.Subject
+                                                                    .Level
+                                                                    .ExamBoard
+                                                                    .Name,
+                                                                CurriculumId = q.Subject
+                                                                    .Level
+                                                                    .ExamBoard
+                                                                    .CurriculumId,
+                                                                Curriculum =
+                                                                    q.Subject
+                                                                        .Level
+                                                                        .ExamBoard
+                                                                        .Curriculum != null
+                                                                        ? new CurriculumDto
+                                                                        {
+                                                                            Id = q.Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Curriculum
+                                                                                .Id,
+                                                                            Name = q.Subject
+                                                                                .Level
+                                                                                .ExamBoard
+                                                                                .Curriculum
+                                                                                .Name
+                                                                        }
+                                                                        : null
+                                                            }
+                                                            : null
+                                                }
+                                                : null
                                     }
                                     : null,
                             TopicId = q.TopicId,
