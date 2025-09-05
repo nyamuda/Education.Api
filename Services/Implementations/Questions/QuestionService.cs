@@ -10,6 +10,7 @@ using Education.Api.Dtos.Topics;
 using Education.Api.Dtos.Topics.Subtopics;
 using Education.Api.Dtos.Upvotes;
 using Education.Api.Dtos.Users;
+using Education.Api.Enums.Questions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Questions;
@@ -251,7 +252,7 @@ public class QuestionService(
                 _logger.LogWarning(
                     "Failed to add question: selected topic {topicId} does not belong to the given subject {subjectId}.",
                     dto.TopicId,
-                    dto.SubtopicId
+                    dto.SubjectId
                 );
 
                 throw new KeyNotFoundException(
@@ -463,6 +464,54 @@ public class QuestionService(
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully updated question with ID {QuestionId}.", questionId);
+    }
+
+    /// <summary>
+    /// Updates the status of an existing question.
+    /// </summary>
+    /// <param name="userId">The ID of the user attempting to update the question's status.</param>
+    /// <param name="questionId">The ID of the question to update.</param>
+    /// <param name="status">The status to update to.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown if the question is not found.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown if the question does not belong to the specified user.
+    /// </exception>
+    public async Task UpdateStatusAsync(int userId, int questionId, QuestionStatus status)
+    {
+        //STEP 1: Check if a question with a given ID exists
+        var existingQuestion = await _context
+            .Questions
+            .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
+        if (existingQuestion is null)
+        {
+            _logger.LogWarning(
+                "Status update failed: question with ID {QuestionId} not found.",
+                questionId
+            );
+
+            throw new KeyNotFoundException(
+                $"Status update failed: question with ID '{questionId}' does not exist."
+            );
+        }
+
+        //STEP 2: Verify that the question belongs to the given user. Prevent updates by other users.
+        if (existingQuestion.UserId != userId)
+        {
+            _logger.LogWarning(
+                "Status update failed: question with ID {QuestionId} doesn't belong to user with ID {UserId}",
+                questionId,
+                userId
+            );
+
+            throw new UnauthorizedAccessException(
+                $"You're not authorized to change the status of this question."
+            );
+        }
+        //STEP 3 Update the status
+        existingQuestion.Status = status;
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

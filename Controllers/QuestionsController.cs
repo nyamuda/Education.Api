@@ -92,11 +92,15 @@ public class QuestionsController(
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(ErrorResponse.Create(ex.Message));
+            var message =
+                "Something went wrong while saving your question. Double-check the details and try again.";
+            return NotFound(ErrorResponse.Create(message: message, details: ex.Message));
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ErrorResponse.Create(ex.Message));
+            var message =
+                "Something went wrong while saving your question. Double-check the details and try again.";
+            return BadRequest(ErrorResponse.Create(message: message, details: ex.Message));
         }
         catch (Exception ex)
         {
