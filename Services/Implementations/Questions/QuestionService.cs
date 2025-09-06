@@ -401,6 +401,7 @@ public class QuestionService(
         //STEP 1: Check if a question with a given ID exists
         var existingQuestion = await _context
             .Questions
+            .Include(q => q.Tags)
             .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
         if (existingQuestion is null)
         {
@@ -486,24 +487,17 @@ public class QuestionService(
         existingQuestion.SubtopicId = dto.SubtopicId;
         existingQuestion.Marks = dto.Marks;
 
-        //clear subtopics before adding new one
-        // existingQuestion.Subtopics.Clear();
-        // //add new subtopics
-        // existingQuestion.Subtopics.AddRange(selectedSubtopics);
+        // STEP 6: Update the question's tags
+        // Find each tag by name (or create it if it doesn't exist) and prepare a list for the question
+        List<Tag> newTags = [];
 
-        //clear tags before adding new ones
-        existingQuestion.Tags.Clear();
-        await _context.SaveChangesAsync();
-
-        //STEP 6: Find each tag by name, or create it if it doesn't exist, then add it to the question.
-        // Go through each tag name provided in the request.
-        // Remove duplicates, ignoring case differences (e.g., "math" and "Math" are treated as the same).
         foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             Tag tag = await _tagService.GetByNameAsync(tagName);
-
-            existingQuestion.Tags.Add(tag);
+            newTags.Add(tag);
         }
+        // Replace the existing tags with the new list
+        existingQuestion.Tags = newTags;
 
         //STEP 7: Finally persist the changes to the database
         await _context.SaveChangesAsync();
