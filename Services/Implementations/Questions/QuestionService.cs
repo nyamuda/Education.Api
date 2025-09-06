@@ -402,6 +402,7 @@ public class QuestionService(
         var existingQuestion = await _context
             .Questions
             .Include(q => q.Tags)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(q => q.Id.Equals(questionId));
         if (existingQuestion is null)
         {
@@ -497,6 +498,7 @@ public class QuestionService(
             newTags.Add(tag);
         }
         // Replace the existing tags with the new list
+        
         existingQuestion.Tags = newTags;
 
         //STEP 7: Finally persist the changes to the database
