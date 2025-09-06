@@ -16,7 +16,10 @@ namespace Education.Api.Dtos.Questions;
 public class QuestionDto
 {
     public required int Id { get; set; }
+
+    public required string Title { get; set; }
     public required string ContentText { get; set; }
+
     public string? ContentHtml { get; set; }
     public int? Marks { get; set; }
 
@@ -54,6 +57,7 @@ public class QuestionDto
         return new QuestionDto
         {
             Id = question.Id,
+            Title = question.Title,
             ContentText = question.ContentText,
             ContentHtml = question.ContentHtml,
             Status = question.Status,

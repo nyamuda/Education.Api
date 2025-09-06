@@ -42,6 +42,7 @@ public class QuestionService(
                         new QuestionDto
                         {
                             Id = q.Id,
+                            Title = q.Title,
                             ContentText = q.ContentText,
                             ContentHtml = q.ContentHtml,
                             Marks = q.Marks,
@@ -108,6 +109,7 @@ public class QuestionService(
                                         SubjectId = q.Topic.SubjectId
                                     }
                                     : null,
+                            SubtopicId = q.SubtopicId,
                             Subtopic =
                                 q.Subtopic != null
                                     ? new SubtopicDto
@@ -179,6 +181,7 @@ public class QuestionService(
                     new QuestionDto
                     {
                         Id = q.Id,
+                        Title = q.Title,
                         ContentText = q.ContentText,
                         ContentHtml = q.ContentHtml,
                         Marks = q.Marks,
@@ -490,6 +493,7 @@ public class QuestionService(
 
         //clear tags before adding new ones
         existingQuestion.Tags.Clear();
+        await _context.SaveChangesAsync();
 
         //STEP 6: Find each tag by name, or create it if it doesn't exist, then add it to the question.
         // Go through each tag name provided in the request.
