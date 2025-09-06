@@ -489,17 +489,7 @@ public class QuestionService(
         existingQuestion.Marks = dto.Marks;
 
         // STEP 6: Update the question's tags
-        // Find each tag by name (or create it if it doesn't exist) and prepare a list for the question
-        List<Tag> newTags = [];
-
-        foreach (string tagName in dto.Tags.Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            Tag tag = await _tagService.GetByNameAsync(tagName);
-            newTags.Add(tag);
-        }
-        // Replace the existing tags with the new list
-        
-        existingQuestion.Tags = newTags;
+        await _tagService.UpdateQuestionTagsAsync(questionId: questionId, newTagNames: dto.Tags);
 
         //STEP 7: Finally persist the changes to the database
         await _context.SaveChangesAsync();
