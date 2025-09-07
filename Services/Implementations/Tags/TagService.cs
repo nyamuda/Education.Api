@@ -20,7 +20,6 @@ public class TagService(ApplicationDbContext context, ILogger<TagService> logger
     {
         var tag = await _context
             .Tags
-            .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Name.ToLower().Equals(name.ToLower()));
 
         if (tag is null)

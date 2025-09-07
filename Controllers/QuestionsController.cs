@@ -105,7 +105,7 @@ public class QuestionsController(
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+            return StatusCode(500, ErrorResponse.Unexpected(ex.ToString()));
         }
     }
 
