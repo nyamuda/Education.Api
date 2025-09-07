@@ -14,7 +14,7 @@ public interface IQuestionService
 
     Task UpdateAsync(int userId, int questionId, UpdateQuestionDto dto);
 
-    Task UpdateStatusAsync(int userId, int questionId, QuestionStatus status);
+    Task UpdateStatusAsync(int userId, int questionId, UpdateQuestionStatusDto statusDto);
 
     Task DeleteAsync(int userId, int questionId);
 }

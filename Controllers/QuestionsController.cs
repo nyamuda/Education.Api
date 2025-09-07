@@ -152,7 +152,7 @@ public class QuestionsController(
     //Updates the status of a question with a given ID
     [HttpPatch("{id}/status")]
     [Authorize]
-    public async Task<IActionResult> UpdateStatus(int id, QuestionStatus status)
+    public async Task<IActionResult> UpdateStatus(int id, UpdateQuestionStatusDto statusDto)
     {
         try
         {
@@ -167,7 +167,7 @@ public class QuestionsController(
             //Validate the token and get the details of the user associated with it
             (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
 
-            await _questionService.UpdateStatusAsync(userId: userId, questionId: id, status);
+            await _questionService.UpdateStatusAsync(userId: userId, questionId: id, statusDto);
 
             return NoContent();
         }

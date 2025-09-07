@@ -152,6 +152,7 @@ public class QuestionService(
                                         }
                                 )
                                 .ToList(),
+                            Status = q.Status,
                             CreatedAt = q.CreatedAt,
                             UpdatedAt = q.UpdatedAt
                         }
@@ -487,6 +488,7 @@ public class QuestionService(
         existingQuestion.SubjectId = topic.SubjectId;
         existingQuestion.SubtopicId = dto.SubtopicId;
         existingQuestion.Marks = dto.Marks;
+        existingQuestion.UpdatedAt = DateTime.UtcNow;
 
         // STEP 6: Update the question's tags
         await _tagService.UpdateQuestionTagsAsync(questionId: questionId, newTagNames: dto.Tags);
@@ -509,7 +511,11 @@ public class QuestionService(
     /// <exception cref="UnauthorizedAccessException">
     /// Thrown if the question does not belong to the specified user.
     /// </exception>
-    public async Task UpdateStatusAsync(int userId, int questionId, QuestionStatus status)
+    public async Task UpdateStatusAsync(
+        int userId,
+        int questionId,
+        UpdateQuestionStatusDto statusDto
+    )
     {
         //STEP 1: Check if a question with a given ID exists
         var existingQuestion = await _context
@@ -541,7 +547,7 @@ public class QuestionService(
             );
         }
         //STEP 3 Update the status
-        existingQuestion.Status = status;
+        existingQuestion.Status = statusDto.Status;
         await _context.SaveChangesAsync();
     }
 
