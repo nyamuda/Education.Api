@@ -8,7 +8,7 @@ public interface IQuestionService
 {
     Task<QuestionDto> GetByIdAsync(int id);
 
-    Task<PageInfo<QuestionDto>> GetAsync(int page, int pageSize);
+    Task<PageInfo<QuestionDto>> GetAsync(QuestionQueryParams queryParams);
 
     Task<QuestionDto> AddAsync(int userId, AddQuestionDto dto);
 

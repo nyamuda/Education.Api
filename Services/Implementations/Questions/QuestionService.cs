@@ -164,19 +164,72 @@ public class QuestionService(
     /// <summary>
     /// Retrieves a paginated list of questions.
     /// </summary>
-    /// <param name="page">The current page number.</param>
-    /// <param name="pageSize">The number of items to include per page.</param>
+    /// <param name="queryParams">
+    /// An object containing query parameters to filter, sort, and paginate the questions.
+    /// </param>
     /// <returns>
     /// A <see cref="PageInfo{QuestionDto}"/> containing the list of question for the specified page,
     /// along with pagination metadata such as page number, page size, and whether more items are available.
     /// </returns>
-    public async Task<PageInfo<QuestionDto>> GetAsync(int page, int pageSize)
+    public async Task<PageInfo<QuestionDto>> GetAsync(QuestionQueryParams queryParams)
     {
         var query = _context.Questions.AsQueryable();
 
+        //apply the curriculum filter
+        query =
+            queryParams.CurriculumId != null
+                ? query.Where(
+                    q =>
+                        q.Topic != null
+                        && q.Topic.Subject != null
+                        && q.Topic.Subject.Level != null
+                        && q.Topic.Subject.Level.ExamBoard != null
+                        && q.Topic.Subject.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
+                )
+                : query;
+        //apply the exam board filter
+        query =
+            queryParams.ExamBoardId != null
+                ? query.Where(
+                    q =>
+                        q.Topic != null
+                        && q.Topic.Subject != null
+                        && q.Topic.Subject.Level != null
+                        && q.Topic.Subject.Level.ExamBoardId == queryParams.ExamBoardId
+                )
+                : query;
+        //apply the level filter
+        query =
+            queryParams.LevelId != null
+                ? query.Where(
+                    q =>
+                        q.Topic != null
+                        && q.Topic.Subject != null
+                        && q.Topic.Subject.LevelId == queryParams.LevelId
+                )
+                : query;
+
+        //apply the subject filter
+        query =
+            queryParams.SubjectId != null
+                ? query.Where(q => q.Topic != null && q.Topic.SubjectId == queryParams.SubjectId)
+                : query;
+
+        //apply the topic filter
+        query =
+            queryParams.TopicId != null
+                ? query.Where(q => q.TopicId == queryParams.TopicId)
+                : query;
+
+        //sort the items
+        query = queryParams.SortBy switch
+        {
+            _ => query.OrderByDescending(t => t.CreatedAt),
+        };
+
         List<QuestionDto> questions = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
             .Select(
                 q =>
                     new QuestionDto
@@ -270,12 +323,12 @@ public class QuestionService(
             .ToListAsync();
 
         int totalItems = await query.CountAsync();
-        bool hasMore = totalItems > page * pageSize;
+        bool hasMore = totalItems > queryParams.Page * queryParams.PageSize;
 
         return new PageInfo<QuestionDto>
         {
-            Page = page,
-            PageSize = pageSize,
+            Page = queryParams.Page,
+            PageSize = queryParams.PageSize,
             HasMore = hasMore,
             TotalItems = totalItems,
             Items = questions
