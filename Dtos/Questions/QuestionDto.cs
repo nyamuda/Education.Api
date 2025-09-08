@@ -41,9 +41,15 @@ public class QuestionDto
     /// </summary>
     public AnswerDto? AuthorAnswer { get; set; }
 
+    public List<AnswerDto> Answers { get; set; } = [];
+
+    public int? TotalAnswers { get; set; }
+
     public List<TagDto> Tags { get; set; } = [];
 
     public List<UpvoteDto> Upvotes { get; set; } = [];
+
+    public int? TotalUpvotes { get; set; }
 
     public List<CommentDto> Comments { get; set; } = [];
 
