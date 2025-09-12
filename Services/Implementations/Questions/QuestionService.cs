@@ -229,6 +229,7 @@ public class QuestionService(
             QuestionSortOption.MostAnswered => query.OrderByDescending(q => q.Answers.Count),
             QuestionSortOption.Unanswered
                 => query.Where(q => q.Answers.Count.Equals(0)).OrderByDescending(q => q.CreatedAt),
+            QuestionSortOption.HighestMarks => query.OrderByDescending(q => q.Marks),
             _ => query.OrderByDescending(q => q.CreatedAt),
         };
 
