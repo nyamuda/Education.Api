@@ -221,7 +221,13 @@ public class QuestionService(
                 ? query.Where(q => q.TopicId == queryParams.TopicId)
                 : query;
 
-        //sort the items
+        //apply the subtopic filter
+        query =
+            queryParams.SubtopicId != null
+                ? query.Where(q => q.SubtopicId == queryParams.SubtopicId)
+                : query;
+
+        //sort the questions
         query = queryParams.SortBy switch
         {
             QuestionSortOption.Oldest => query.OrderBy(q => q.CreatedAt),

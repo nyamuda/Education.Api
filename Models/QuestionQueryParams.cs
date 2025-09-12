@@ -16,5 +16,7 @@ public class QuestionQueryParams
 
     public int? TopicId { get; set; } = null;
 
-    public QuestionSortOption SortBy = QuestionSortOption.DateCreated;
+    public int? SubtopicId { get; set; } = null;
+
+    public QuestionSortOption? SortBy { get; set; }
 }
