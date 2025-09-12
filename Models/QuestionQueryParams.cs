@@ -19,4 +19,6 @@ public class QuestionQueryParams
     public int? SubtopicId { get; set; } = null;
 
     public QuestionSortOption? SortBy { get; set; }
+
+    public string? Search { get; set; }
 }

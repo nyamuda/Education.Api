@@ -3,9 +3,12 @@ using Education.Api.Enums.Questions;
 using Education.Api.Models.Flags;
 using Education.Api.Models.Topics;
 using Education.Api.Models.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Education.Api.Models;
 
+[Index(nameof(Title))]
+[Index(nameof(ContentText))]
 public class Question
 {
     public int Id { get; set; }

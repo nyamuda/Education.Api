@@ -227,6 +227,16 @@ public class QuestionService(
                 ? query.Where(q => q.SubtopicId == queryParams.SubtopicId)
                 : query;
 
+        //apply the search filter
+        string[] searchWords = string.IsNullOrWhiteSpace(queryParams.Search)
+            ? []
+            : queryParams.Search.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string word in searchWords)
+        {
+            query = query.Where(q => q.Title.Contains(word) || q.ContentText.Contains(word));
+        }
+
         //sort the questions
         query = queryParams.SortBy switch
         {

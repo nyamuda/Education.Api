@@ -62,9 +62,11 @@ public class QuestionsController(
         int? levelId,
         int? subjectId,
         int? topicId,
+        int? subtopicId,
+        string? search,
+        QuestionSortOption? sortBy,
         int page = 1,
-        int pageSize = 10,
-        QuestionSortOption sortBy = QuestionSortOption.DateCreated
+        int pageSize = 10
     )
     {
         try
@@ -76,10 +78,12 @@ public class QuestionsController(
                     ExamBoardId = examBoardId,
                     LevelId = levelId,
                     SubjectId = subjectId,
+                    SubtopicId = subtopicId,
                     TopicId = topicId,
                     Page = page,
                     PageSize = pageSize,
-                    SortBy = sortBy
+                    SortBy = sortBy,
+                    Search = search
                 };
             var questions = await _questionService.GetAsync(queryParams);
             return Ok(questions);
