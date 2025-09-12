@@ -224,7 +224,11 @@ public class QuestionService(
         //sort the items
         query = queryParams.SortBy switch
         {
-            _ => query.OrderByDescending(t => t.CreatedAt),
+        QuestionSortOption.Oldest => query.OrderBy(q => q.CreatedAt),
+        QuestionSortOption.MostUpvoted => query.OrderByDescending(q => q.Upvotes.Count),
+        QuestionSortOption.MostAnswered=>query.OrderByDescending(q =>q.Answers.Count),
+        QuestionSortOption.Unanswered =>qu
+            _ => query.OrderByDescending(q => q.CreatedAt),
         };
 
         List<QuestionDto> questions = await query
