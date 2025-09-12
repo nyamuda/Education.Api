@@ -56,11 +56,32 @@ public class QuestionsController(
 
     //Gets a paginated list of questions
     [HttpGet]
-    public async Task<IActionResult> Get(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Get(
+        int? curriculumId,
+        int? examBoardId,
+        int? levelId,
+        int? subjectId,
+        int? topicId,
+        int page = 1,
+        int pageSize = 10,
+        QuestionSortOption sortBy = QuestionSortOption.DateCreated
+    )
     {
         try
         {
-            var questions = await _questionService.GetAsync(page: page, pageSize: pageSize);
+            QuestionQueryParams queryParams =
+                new()
+                {
+                    CurriculumId = curriculumId,
+                    ExamBoardId = examBoardId,
+                    LevelId = levelId,
+                    SubjectId = subjectId,
+                    TopicId = topicId,
+                    Page = page,
+                    PageSize = pageSize,
+                    SortBy = sortBy
+                };
+            var questions = await _questionService.GetAsync(queryParams);
             return Ok(questions);
         }
         catch (Exception ex)

@@ -17,7 +17,7 @@ public class Question
     // Plain text (for searching, indexing, and quick filtering)
     public required string ContentText { get; set; }
 
-    public int? Marks { get; set; }
+    public int? Marks { get; set; } = null;
 
     public required int SubjectId { get; set; }
     public Subject? Subject { get; set; }
