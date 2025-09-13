@@ -18,7 +18,7 @@ public class QuestionQueryParams
 
     public int? SubtopicId { get; set; } = null;
 
-    public string[] Tags { get; set; } = [];
+    public List<string>? Tags { get; set; } = null;
 
     public QuestionSortOption? SortBy { get; set; }
 

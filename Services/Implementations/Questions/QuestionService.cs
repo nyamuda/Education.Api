@@ -228,7 +228,7 @@ public class QuestionService(
                 : query;
 
         // Apply the tags filter
-        if (queryParams.Tags.Length > 0)
+        if (queryParams.Tags?.Count > 0)
         {
             query = query.Where(q => q.Tags.Any(t => queryParams.Tags.Contains(t.Name)));
         }

@@ -65,13 +65,15 @@ public class QuestionsController(
         int? subtopicId,
         string? search,
         QuestionSortOption? sortBy,
-        string[] tags,
+        string? tags, // single comma-separated string of tags e.g tags=math,physics,chemistry
         int page = 1,
         int pageSize = 10
     )
     {
         try
         {
+            //convert the comma-separated string of tags into a List
+            var tagList = tags?.Split(",", StringSplitOptions.RemoveEmptyEntries).ToList();
             QuestionQueryParams queryParams =
                 new()
                 {
@@ -85,7 +87,7 @@ public class QuestionsController(
                     PageSize = pageSize,
                     SortBy = sortBy,
                     Search = search,
-                    Tags = tags
+                    Tags = tagList
                 };
             var questions = await _questionService.GetAsync(queryParams);
             return Ok(questions);
