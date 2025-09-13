@@ -18,6 +18,8 @@ public class QuestionQueryParams
 
     public int? SubtopicId { get; set; } = null;
 
+    public string[] Tags { get; set; } = [];
+
     public QuestionSortOption? SortBy { get; set; }
 
     public string? Search { get; set; }
