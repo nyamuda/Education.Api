@@ -65,6 +65,7 @@ public class QuestionsController(
         int? subtopicId,
         string? search,
         QuestionSortOption? sortBy,
+        string[] tags,
         int page = 1,
         int pageSize = 10
     )
@@ -83,7 +84,8 @@ public class QuestionsController(
                     Page = page,
                     PageSize = pageSize,
                     SortBy = sortBy,
-                    Search = search
+                    Search = search,
+                    Tags = tags
                 };
             var questions = await _questionService.GetAsync(queryParams);
             return Ok(questions);

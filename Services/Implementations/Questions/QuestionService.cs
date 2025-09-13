@@ -227,6 +227,12 @@ public class QuestionService(
                 ? query.Where(q => q.SubtopicId == queryParams.SubtopicId)
                 : query;
 
+        // Apply the tags filter
+        if (queryParams.Tags.Length > 0)
+        {
+            query = query.Where(q => q.Tags.Any(t => queryParams.Tags.Contains(t.Name)));
+        }
+
         //apply the search filter
         string[] searchWords = string.IsNullOrWhiteSpace(queryParams.Search)
             ? []
