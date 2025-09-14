@@ -180,11 +180,10 @@ public class QuestionService(
             queryParams.CurriculumId != null
                 ? query.Where(
                     q =>
-                        q.Topic != null
-                        && q.Topic.Subject != null
-                        && q.Topic.Subject.Level != null
-                        && q.Topic.Subject.Level.ExamBoard != null
-                        && q.Topic.Subject.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
+                        q.Subject != null
+                        && q.Subject.Level != null
+                        && q.Subject.Level.ExamBoard != null
+                        && q.Subject.Level.ExamBoard.CurriculumId == queryParams.CurriculumId
                 )
                 : query;
         //apply the exam board filter
