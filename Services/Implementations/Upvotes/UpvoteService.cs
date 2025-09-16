@@ -1,4 +1,5 @@
 using Education.Api.Data;
+using Education.Api.Dtos.Upvotes;
 using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Upvotes;
@@ -127,6 +128,28 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
             "Successfully removed an upvote for a question with ID {QuestionId}.",
             questionId
         );
+    }
+
+    /// <summary>
+    /// Retrieves upvotes for a specified question.
+    /// </summary>
+    /// <param name="questionId">The ID of the question to fetch the upvotes for.</param>
+    /// <returns>All the upvotes for the question with the given ID.</returns>
+    public async Task<List<UpvoteDto>> GetQuestionUpvotesAsync(int questionId)
+    {
+        return await _context
+            .Upvotes
+            .Where(upv => upv.QuestionId.Equals(questionId))
+            .Select(
+                x =>
+                    new UpvoteDto
+                    {
+                        Id = x.Id,
+                        UserId = x.UserId,
+                        QuestionId = x.QuestionId
+                    }
+            )
+            .ToListAsync();
     }
 
     /// <summary>

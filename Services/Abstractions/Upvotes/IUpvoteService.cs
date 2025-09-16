@@ -1,3 +1,5 @@
+using Education.Api.Dtos.Upvotes;
+
 namespace Education.Api.Services.Abstractions.Upvotes;
 
 /// <summary>
@@ -18,6 +20,13 @@ public interface IUpvoteService
     /// <param name="userId">The ID of the user removing their upvote.</param>
     /// <param name="questionId">The ID of the question to remove the upvote from.</param>
     Task RemoveQuestionUpvoteAsync(int userId, int questionId);
+
+    /// <summary>
+    /// Retrieves upvotes for a specified question.
+    /// </summary>
+    /// <param name="questionId">The ID of the question to fetch the upvotes for.</param>
+    /// <returns>All the upvotes for the question with the given ID.</returns>
+    Task<List<UpvoteDto>> GetQuestionUpvotesAsync(int questionId);
 
     /// <summary>
     /// Adds an upvote to the specified answer by the given user.
