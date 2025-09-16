@@ -414,6 +414,22 @@ public class QuestionsController(
         }
     }
 
+    //Gets all the upvotes for a question with a given ID
+    [HttpGet("{questionId}/upvotes")]
+    public async Task<IActionResult> GetQuestionUpvotes(int questionId)
+    {
+        try
+        {
+            var upvotes = await _upvoteService.GetQuestionUpvotesAsync(questionId: questionId);
+
+            return Ok(upvotes);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
     //Removes an upvote for a question with a given ID
     [HttpDelete("{questionId}/upvotes")]
     [Authorize]
