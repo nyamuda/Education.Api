@@ -255,11 +255,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete flags for that question
 
         //A Question can be bookmarked multiple times while a Bookmark can only only for one Question.
-        //Hence, there is many-to-one relationship between Bookmark and Question.
+        //Hence, there is one-to-many relationship between Question and Bookmark.
         modelBuilder
-            .Entity<QuestionBookmark>()
-            .HasOne(qb => qb.Question)
-            .WithMany()
+            .Entity<Question>()
+            .HasMany(q => q.Bookmarks)
+            .WithOne(qb => qb.Question)
             .HasForeignKey(qb => qb.QuestionId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Bookmarks for that question
 

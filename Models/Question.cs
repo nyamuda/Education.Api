@@ -38,6 +38,8 @@ public class Question
 
     public List<Upvote> Upvotes { get; set; } = [];
 
+    public List<QuestionBookmark> Bookmarks { get; set; } = [];
+
     public List<QuestionFlag> Flags { get; set; } = [];
 
     public List<Comment> Comments { get; set; } = [];
