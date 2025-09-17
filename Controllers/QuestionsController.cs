@@ -39,13 +39,44 @@ public class QuestionsController(
 
     private readonly IQuestionBookmarkService _bookmarkService = bookmarkService;
 
-    //Gets a question by ID
+    /// <summary>
+    /// Retrieves a question by ID. If a valid JWT token is provided, includes
+    /// user-specific data such as whether the question is bookmarked.
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
         try
         {
-            var question = await _questionService.GetByIdAsync(id);
+            int? userId = null;
+
+            // Attempt to get and validate JWT token if present
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+            // If a token exists, try to validate it
+            if (!string.IsNullOrEmpty(token))
+            {
+                try
+                {
+                    //Validate the token and get the details of the user associated with it
+                    (int validatedUserId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+                    userId = validatedUserId;
+                }
+                catch
+                {
+                    // If the token is invalid, just ignore it
+                    // The request will continue as an unauthenticated user}
+                }
+            }
+
+            // Get the question, passing the user ID if available.
+            // The userId can be used to determine if the
+            // logged in user has bookmarked this question.
+            var question = await _questionService.GetByIdAsync(questionId: id, userId: userId);
             return Ok(question);
         }
         catch (KeyNotFoundException ex)

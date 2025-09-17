@@ -154,6 +154,9 @@ public class QuestionService(
                                 .Select(t => new TagDto { Id = t.Id, Name = t.Name, })
                                 .ToList(),
                             Status = q.Status,
+                            IsBookmarked = q.Bookmarks.Any(
+                                b => userId != null && b.UserId.Equals(userId)
+                            ),
                             CreatedAt = q.CreatedAt,
                             UpdatedAt = q.UpdatedAt
                         }
