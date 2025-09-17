@@ -546,26 +546,10 @@ public class QuestionsController(
         }
     }
 
-    //Gets all the upvotes for a question with a given ID
-    [HttpGet("{questionId}/upvotes")]
-    public async Task<IActionResult> GetQuestionUpvotes(int questionId)
-    {
-        try
-        {
-            var upvotes = await _upvoteService.GetQuestionUpvotesAsync(questionId: questionId);
-
-            return Ok(upvotes);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
-        }
-    }
-
-    //Removes an upvote for a question with a given ID
-    [HttpDelete("{questionId}/upvotes")]
+    //Removes a bookmark for a question with a given ID
+    [HttpDelete("{questionId}/bookmarks")]
     [Authorize]
-    public async Task<IActionResult> RemoveUpvote(int questionId)
+    public async Task<IActionResult> RemoveBookmark(int questionId)
     {
         try
         {
@@ -580,7 +564,7 @@ public class QuestionsController(
             //Validate the token and get the details of the user associated with it
             (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
 
-            await _upvoteService.RemoveQuestionUpvoteAsync(userId: userId, questionId: questionId);
+            await _bookmarkService.DeleteAsync(userId: userId, questionId: questionId);
 
             return NoContent();
         }
