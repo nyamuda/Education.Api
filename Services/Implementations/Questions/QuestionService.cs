@@ -31,8 +31,20 @@ public class QuestionService(
     private readonly ITagService _tagService = tagService;
     private readonly IAnswerService _answerService = answerService;
 
-    //Gets a question with a given ID
-    public async Task<QuestionDto> GetByIdAsync(int id)
+    /// <summary>
+    /// Retrieves the details of a question with a given ID.
+    /// </summary>
+    /// <param name="questionId">The ID of the question to retrieve.</param>
+    /// <param name="userId">
+    /// (Optional) The ID of the currently logged-in user.
+    /// If provided, it is used to determine whether the user has bookmarked the question.
+    /// </param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no question exists with the specified <paramref name="questionId"/>.
+    /// </exception>
+
+
+    public async Task<QuestionDto> GetByIdAsync(int questionId, int? userId = null)
     {
         return await _context
                 .Questions
@@ -146,8 +158,8 @@ public class QuestionService(
                             UpdatedAt = q.UpdatedAt
                         }
                 )
-                .FirstOrDefaultAsync(q => q.Id.Equals(id))
-            ?? throw new KeyNotFoundException($"Question with ID '{id}' does not exist.");
+                .FirstOrDefaultAsync(q => q.Id.Equals(questionId))
+            ?? throw new KeyNotFoundException($"Question with ID '{questionId}' does not exist.");
     }
 
     /// <summary>

@@ -6,7 +6,7 @@ namespace Education.Api.Services.Abstractions.Questions;
 
 public interface IQuestionService
 {
-    Task<QuestionDto> GetByIdAsync(int id);
+    Task<QuestionDto> GetByIdAsync(int questionId, int? userId);
 
     Task<PageInfo<QuestionDto>> GetAsync(QuestionQueryParams queryParams);
 

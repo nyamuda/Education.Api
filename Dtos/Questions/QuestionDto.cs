@@ -55,6 +55,14 @@ public class QuestionDto
 
     public QuestionStatus? Status { get; set; }
 
+    /// <summary>
+    /// Indicates whether the current user has bookmarked this question.
+    /// </summary>
+    /// <remarks>
+    /// This property is typically set when the question is retrieved for a specific user.
+    /// </remarks>
+    public bool IsBookmarked { get; set; } = false;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
