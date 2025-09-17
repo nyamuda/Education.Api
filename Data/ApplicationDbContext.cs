@@ -189,15 +189,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(q => q.TopicId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Topic -> delete Questions for that topic
 
-        //A Question can be bookmarked multiple times while a Bookmark can only only for one Question.
-        //Hence, there is many-to-one relationship between Bookmark and Question.
-        modelBuilder
-            .Entity<QuestionBookmark>()
-            .HasOne(qb => qb.Question)
-            .WithMany()
-            .HasForeignKey(qb => qb.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Bookmarks for that question
-
         //A Question can have multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic
         // modelBuilder
@@ -262,6 +253,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne(qf => qf.Question)
             .HasForeignKey(qf => qf.QuestionId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete flags for that question
+
+        //A Question can be bookmarked multiple times while a Bookmark can only only for one Question.
+        //Hence, there is many-to-one relationship between Bookmark and Question.
+        modelBuilder
+            .Entity<QuestionBookmark>()
+            .HasOne(qb => qb.Question)
+            .WithMany()
+            .HasForeignKey(qb => qb.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Bookmarks for that question
 
         //An Answer can have multiple Upvotes while an Upvote can only belong to one Answer.
         //Hence, there is a one-to-many relationship between Answer and Upvote
@@ -344,8 +344,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(u => u.ExamBoardId)
             .OnDelete(DeleteBehavior.NoAction); //Delete ExamBoard -> set foreign key UserId to null
 
-        //A User can be enrolled in multiple educational Levels and an educational Level can be taken by multiple Users.
-        //Hence, there is a many-to-many relationship between User and Level
+        // A User can Bookmark multiple questions while a QuestionBookmark
+        // can only be for one User.
+        // Hence, there is a one-to-many relationship between User and QuestionBookmark
+        modelBuilder
+            .Entity<User>()
+            .HasMany(u => u.QuestionBookmarks)
+            .WithOne(qb => qb.User)
+            .HasForeignKey(qb => qb.UserId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete User -> delete question bookmarks for that User
+
+        // A User can be enrolled in multiple educational Levels and an
+        // educational Level can be taken by multiple Users.
+        // Hence, there is a many-to-many relationship between User and Level
         modelBuilder.Entity<User>().HasMany(u => u.Levels).WithMany();
     }
 }
