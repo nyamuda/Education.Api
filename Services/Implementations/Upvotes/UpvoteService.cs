@@ -85,7 +85,8 @@ public class UpvoteService(ApplicationDbContext context, ILogger<UpvoteService> 
         // upvote the question and the save the upvote to the database
         Upvote upvote = new() { UserId = userId, QuestionId = questionId };
 
-        await _context.Upvotes.AddAsync(upvote);
+        _context.Upvotes.Add(upvote);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Successfully upvoted question with ID {QuestionId}.", questionId);
     }

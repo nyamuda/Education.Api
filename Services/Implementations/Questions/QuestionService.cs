@@ -141,17 +141,6 @@ public class QuestionService(
                             Tags = q.Tags
                                 .Select(t => new TagDto { Id = t.Id, Name = t.Name, })
                                 .ToList(),
-                            Upvotes = q.Upvotes
-                                .Select(
-                                    upv =>
-                                        new UpvoteDto
-                                        {
-                                            Id = upv.Id,
-                                            UserId = upv.UserId,
-                                            QuestionId = upv.QuestionId,
-                                        }
-                                )
-                                .ToList(),
                             Status = q.Status,
                             CreatedAt = q.CreatedAt,
                             UpdatedAt = q.UpdatedAt
