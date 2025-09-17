@@ -1,4 +1,5 @@
 using Education.Api.Data;
+using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Bookmarks;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,8 @@ public class QuestionBookmarkService(
     ILogger<QuestionBookmarkService> logger
 ) : IQuestionBookmarkService
 {
-    public ApplicationDbContext _context = context;
-    public ILogger<QuestionBookmarkService> _logger = logger;
+    private readonly ApplicationDbContext _context = context;
+    private readonly ILogger<QuestionBookmarkService> _logger = logger;
 
     //Bookmarks a question for a user with a given ID.
     public async Task AddAsync(int userId, int questionId)
@@ -39,6 +40,23 @@ public class QuestionBookmarkService(
             );
             throw new KeyNotFoundException(
                 $"Failed to bookmark question. Question with ID {questionId} not found."
+            );
+        }
+        //check if there isn't already an existing bookmark for the same question by the same user
+        bool hasAlreadyBookmarked = await _context
+            .QuestionBookmarks
+            .Where(x => x.UserId.Equals(userId) && x.QuestionId.Equals(questionId))
+            .AnyAsync();
+
+        if (hasAlreadyBookmarked)
+        {
+            _logger.LogWarning(
+                "Bookmark ignored: User {UserId} has already bookmarked question {QuestionId}.",
+                userId,
+                questionId
+            );
+            throw new ConflictException(
+                $"Duplicate bookmark: User with ID '{userId}' has already bookmarked question with ID '{questionId}'."
             );
         }
 

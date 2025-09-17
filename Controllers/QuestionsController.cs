@@ -8,6 +8,7 @@ using Education.Api.Exceptions;
 using Education.Api.Models;
 using Education.Api.Services.Abstractions.Answers;
 using Education.Api.Services.Abstractions.Auth;
+using Education.Api.Services.Abstractions.Bookmarks;
 using Education.Api.Services.Abstractions.Comments;
 using Education.Api.Services.Abstractions.Flags;
 using Education.Api.Services.Abstractions.Questions;
@@ -25,7 +26,8 @@ public class QuestionsController(
     IQuestionCommentService commentService,
     IAnswerService answerService,
     IUpvoteService upvoteService,
-    IQuestionFlagService questionFlagService
+    IQuestionFlagService questionFlagService,
+    IQuestionBookmarkService bookmarkService
 ) : ControllerBase
 {
     private readonly IQuestionService _questionService = questionService;
@@ -34,6 +36,8 @@ public class QuestionsController(
     private readonly IAnswerService _answerService = answerService;
     private readonly IUpvoteService _upvoteService = upvoteService;
     private readonly IQuestionFlagService _questionFlagService = questionFlagService;
+
+    private readonly IQuestionBookmarkService _bookmarkService = bookmarkService;
 
     //Gets a question by ID
     [HttpGet("{id}")]
@@ -499,6 +503,90 @@ public class QuestionsController(
         catch (ConflictException ex)
         {
             return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Bookmarks a question with a given ID
+    [HttpPost("{questionId}/bookmarks")]
+    [Authorize]
+    public async Task<IActionResult> Bookmark(int questionId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _bookmarkService.AddAsync(userId: userId, questionId: questionId);
+
+            return StatusCode(201);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (ConflictException ex)
+        {
+            return StatusCode(409, ErrorResponse.Create(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Gets all the upvotes for a question with a given ID
+    [HttpGet("{questionId}/upvotes")]
+    public async Task<IActionResult> GetQuestionUpvotes(int questionId)
+    {
+        try
+        {
+            var upvotes = await _upvoteService.GetQuestionUpvotesAsync(questionId: questionId);
+
+            return Ok(upvotes);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
+        }
+    }
+
+    //Removes an upvote for a question with a given ID
+    [HttpDelete("{questionId}/upvotes")]
+    [Authorize]
+    public async Task<IActionResult> RemoveUpvote(int questionId)
+    {
+        try
+        {
+            //retrieve the access token
+            string token = HttpContext
+                .Request
+                .Headers
+                .Authorization
+                .ToString()
+                .Replace("Bearer ", "");
+
+            //Validate the token and get the details of the user associated with it
+            (int userId, _, _) = _jwtService.ValidateTokenAndExtractUser(token);
+
+            await _upvoteService.RemoveQuestionUpvoteAsync(userId: userId, questionId: questionId);
+
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
