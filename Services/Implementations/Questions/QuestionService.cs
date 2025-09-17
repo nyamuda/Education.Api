@@ -157,6 +157,11 @@ public class QuestionService(
                             IsBookmarked = q.Bookmarks.Any(
                                 b => userId != null && b.UserId.Equals(userId)
                             ),
+                            IsUpvoted = q.Upvotes.Any(
+                                upv => userId != null && upv.UserId.Equals(userId)
+                            ),
+                            TotalAnswers = q.Answers.Count,
+                            TotalUpvotes = q.Upvotes.Count,
                             CreatedAt = q.CreatedAt,
                             UpdatedAt = q.UpdatedAt
                         }

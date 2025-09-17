@@ -51,12 +51,20 @@ public class QuestionDto
 
     public int? TotalUpvotes { get; set; }
 
+    /// <summary>
+    /// Indicates whether the current logged-in user has upvoted this question.
+    /// </summary>
+    /// <remarks>
+    /// This property is typically set when the question is retrieved for a specific user.
+    /// </remarks>
+    public bool IsUpvoted { get; set; } = false;
+
     public List<CommentDto> Comments { get; set; } = [];
 
     public QuestionStatus? Status { get; set; }
 
     /// <summary>
-    /// Indicates whether the current user has bookmarked this question.
+    /// Indicates whether the current logged-n user has bookmarked this question.
     /// </summary>
     /// <remarks>
     /// This property is typically set when the question is retrieved for a specific user.

@@ -83,6 +83,14 @@ public class QuestionsController(
         {
             return NotFound(ErrorResponse.Create(ex.Message));
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
@@ -167,6 +175,10 @@ public class QuestionsController(
                 "Something went wrong while saving your question. Double-check the details and try again.";
             return BadRequest(ErrorResponse.Create(message: message, details: ex.Message));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.ToString()));
@@ -243,6 +255,10 @@ public class QuestionsController(
         {
             return Unauthorized(ErrorResponse.Create(ex.Message));
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
@@ -278,6 +294,10 @@ public class QuestionsController(
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
@@ -343,6 +363,10 @@ public class QuestionsController(
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
@@ -407,6 +431,10 @@ public class QuestionsController(
         {
             return BadRequest(ErrorResponse.Create(ex.Message));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
@@ -438,6 +466,14 @@ public class QuestionsController(
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
         }
         catch (ConflictException ex)
         {
@@ -491,6 +527,14 @@ public class QuestionsController(
         {
             return NotFound(ErrorResponse.Create(ex.Message));
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ErrorResponse.Unexpected(ex.Message));
@@ -531,6 +575,14 @@ public class QuestionsController(
         {
             return NotFound(ErrorResponse.Create(ex.Message));
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (ConflictException ex)
         {
             return StatusCode(409, ErrorResponse.Create(ex.Message));
@@ -567,6 +619,14 @@ public class QuestionsController(
         {
             return NotFound(ErrorResponse.Create(ex.Message));
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
+        }
         catch (ConflictException ex)
         {
             return StatusCode(409, ErrorResponse.Create(ex.Message));
@@ -602,6 +662,14 @@ public class QuestionsController(
         catch (KeyNotFoundException ex)
         {
             return NotFound(ErrorResponse.Create(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ErrorResponse.Create(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ErrorResponse.Create(ex.Message));
         }
         catch (Exception ex)
         {
