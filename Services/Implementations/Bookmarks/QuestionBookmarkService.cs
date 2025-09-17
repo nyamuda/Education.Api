@@ -14,7 +14,17 @@ public class QuestionBookmarkService(
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<QuestionBookmarkService> _logger = logger;
 
-    //Bookmarks a question for a user with a given ID.
+    /// <summary>
+    /// Bookmarks a question for a specified user.
+    /// </summary>
+    /// <param name="userId">The ID of the user who is bookmarking the question.</param>
+    /// <param name="questionId">The ID of the question to be bookmarked.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when the specified user or question could not be found.
+    /// </exception>
+    /// <exception cref="ConflictException">
+    /// Thrown when the user has already bookmarked the specified question.
+    /// </exception>
     public async Task AddAsync(int userId, int questionId)
     {
         //check if the user exists
@@ -74,7 +84,14 @@ public class QuestionBookmarkService(
         );
     }
 
-    //Removes a bookmarked question for a user with a given ID.
+    /// <summary>
+    /// Removes a bookmarked question for a specified user.
+    /// </summary>
+    /// <param name="userId">The ID of the user who created the bookmark.</param>
+    /// <param name="questionId">The ID of the question that was bookmarked.</param>
+    /// <exception cref="KeyNotFoundException">
+    /// Thrown when no bookmark exists for the specified user and question.
+    /// </exception>
     public async Task DeleteAsync(int userId, int questionId)
     {
         //check if the bookmark exists
@@ -98,5 +115,11 @@ public class QuestionBookmarkService(
         //remove bookmark
         _context.QuestionBookmarks.Remove(bookmark);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "User {userId} successfully removed bookmark for question {questionId}.",
+            userId,
+            questionId
+        );
     }
 }
