@@ -34,8 +34,7 @@ public class QuestionBookmarkService(
         if (question == null)
         {
             _logger.LogWarning(
-                "Unable to bookmark question {questionId}: question {questionId} not found.",
-                questionId,
+                "Unable to bookmark question: question {questionId} not found.",
                 questionId
             );
             throw new KeyNotFoundException(
@@ -57,5 +56,29 @@ public class QuestionBookmarkService(
         );
     }
 
-    Task DeleteAsync(int userId, int questionId);
+    //Removes a bookmarked question for a user with a given ID.
+    public async Task DeleteAsync(int userId, int questionId)
+    {
+        //check if the bookmark exists
+        var bookmark = await _context
+            .QuestionBookmarks
+            .FirstOrDefaultAsync(
+                qb => qb.UserId.Equals(userId) && qb.QuestionId.Equals(questionId)
+            );
+
+        if (bookmark is null)
+        {
+            _logger.LogWarning(
+                "Unable to remove bookmark: bookmark for user {userId} and question {questionId} not found.",
+                userId,
+                questionId
+            );
+            throw new KeyNotFoundException(
+                $"Failed to remove bookmark. Bookmark for user with ID {userId} and question with ID {questionId} does not exist."
+            );
+        }
+        //remove bookmark
+        _context.QuestionBookmarks.Remove(bookmark);
+        await _context.SaveChangesAsync();
+    }
 }
