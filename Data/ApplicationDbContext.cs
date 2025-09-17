@@ -18,6 +18,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ExamBoard> ExamBoards { get; set; }
     public DbSet<Level> Levels { get; set; }
     public DbSet<Question> Questions { get; set; }
+    public DbSet<QuestionBookmark> QuestionBookmarks { get; set; }
     public DbSet<QuestionFlag> QuestionFlags { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Subtopic> Subtopics { get; set; }
@@ -178,6 +179,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany(s => s.Questions)
             .HasForeignKey(q => q.SubjectId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Subject -> delete Questions for that subject
+
         //A Topic can have multiple Questions while a Question can only belong to one Topic.
         //Hence, there is a one-to-many relationship between Topic and Question.
         modelBuilder
@@ -186,6 +188,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany(t => t.Questions)
             .HasForeignKey(q => q.TopicId)
             .OnDelete(DeleteBehavior.Cascade); //Delete Topic -> delete Questions for that topic
+
+        //A Question can be bookmarked multiple times while a Bookmark can only only for one Question.
+        //Hence, there is many-to-one relationship between Bookmark and Question.
+        modelBuilder
+            .Entity<QuestionBookmark>()
+            .HasOne(qb => qb.Question)
+            .WithMany()
+            .HasForeignKey(qb => qb.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade); //Delete Question -> delete Bookmarks for that question
 
         //A Question can have multiple Subtopics and a Subtopic can exist in multiple Questions
         //Hence, there is a many-to-many relationship between Question and Subtopic

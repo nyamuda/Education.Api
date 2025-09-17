@@ -9,6 +9,5 @@ public class QuestionBookmark
     public required int QuestionId { get; set; }
     public Question? Question { get; set; }
     public required int UserId { get; set; }
-
     public User? User { get; set; }
 }
